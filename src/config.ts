@@ -17,20 +17,20 @@ export default {
     services: [
         {
             name: 'Nginx',
+            version: '1.19.5',
             url: 'https://nginx.org/download/nginx-{version}.zip',
-            ignoredFiles: ['conf/', 'html/', 'logs/'],
-            version: '1.19.5'
+            ignoredFiles: ['conf/', 'html/', 'logs/']
         },
         {
             name: 'MariaDB',
-            url: 'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip',
-            version: '10.5.8'
+            version: '10.5.8',
+            url: 'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip'
         },
         {
             name: 'PHP',
+            version: '8.0.0',
             url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
-            ignoredFiles: ['extras/'],
-            version: '8.0.0'
+            ignoredFiles: ['extras/']
         }
     ]
 }
