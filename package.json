@@ -1,0 +1,42 @@
+{
+  "name": "wemp",
+  "version": "0.0.1",
+  "description": "A simple menu for managing Nginx, MariaDB and PHP on Windows.",
+  "author": "ElectronFriends",
+  "main": "dist/main.js",
+  "scripts": {
+    "build": "tsc",
+    "deploy": "npm run build && electron-builder --publish always",
+    "package": "npm run build && electron-builder --publish never",
+    "start": "npm run build && electron ."
+  },
+  "license": "MIT",
+  "keywords": [
+    "mariadb",
+    "mysql",
+    "nginx",
+    "php",
+    "windows",
+    "xampp"
+  ],
+  "homepage": "https://github.com/electronfriends/wemp#readme",
+  "bugs": {
+    "url": "https://github.com/electronfriends/wemp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/electronfriends/wemp.git"
+  },
+  "dependencies": {
+    "electron-settings": "^4.0.2",
+    "electron-updater": "^4.3.5",
+    "request": "^2.88.2",
+    "unzipper": "^0.10.11"
+  },
+  "devDependencies": {
+    "@types/request": "^2.48.5",
+    "@types/unzipper": "^0.10.3",
+    "electron": "^11.0.3",
+    "electron-builder": "^22.9.1"
+  }
+}

@@ -1,0 +1,8 @@
+# Compiled code output
+dist/
+
+# Dependency directories
+node_modules/
+
+# Release directories
+release/
