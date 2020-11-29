@@ -38,7 +38,7 @@ export function checkServices() {
                 const servicePath = path.join(config.paths.services, service.name.toLowerCase())
                 const serviceVersion = settings.getSync(service.name.toLowerCase())
 
-                const isFirstDownload = (!fs.existsSync(servicePath) && !serviceVersion)
+                const isFirstDownload = !fs.existsSync(servicePath)
 
                 if (isFirstDownload || serviceVersion !== service.version) {
                     window.webContents.send('update-titles', {
