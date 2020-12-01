@@ -22,7 +22,7 @@ if (!gotTheLock) {
     })
 
     // Create window when ready
-    app.on('ready', () => createWindow())
+    app.whenReady().then(createWindow)
 
     // Set the correct Application User Model ID
     app.setAppUserModelId('com.electronfriends.wemp')

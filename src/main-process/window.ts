@@ -25,6 +25,8 @@ export function createWindow() {
         }
     })
 
+    window.loadFile(path.join(app.getAppPath(), 'public/index.html'))
+
     window.webContents.once('did-finish-load', async () => {
         try {
             await checkServices()
@@ -53,6 +55,4 @@ export function createWindow() {
             })
         }
     })
-
-    window.loadFile(path.join(app.getAppPath(), 'public/index.html'))
 }
