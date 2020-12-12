@@ -28,7 +28,7 @@
   "devDependencies": {
     "@types/request": "^2.48.5",
     "@types/unzipper": "^0.10.3",
-    "electron": "^11.0.3",
+    "electron": "^11.1.0",
     "electron-builder": "^22.9.1"
   }
 }
