@@ -4,7 +4,7 @@
 <a href="https://github.com/electronfriends/wemp/releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg" alt="Total Downloads"></a>
 <a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg" alt="Latest Stable Version"></a>
 <a href="https://github.com/electronfriends/wemp/blob/master/LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg" alt="License"></a>
-<a href="https://nginx.org" target="_blank"><img src="https://img.shields.io/badge/nginx-1.19.5-009639.svg"></a>
+<a href="https://nginx.org" target="_blank"><img src="https://img.shields.io/badge/nginx-1.19.6-009639.svg"></a>
 <a href="https://mariadb.org" target="_blank"><img src="https://img.shields.io/badge/mariadb-10.5.8-1f305f.svg"></a>
 <a href="https://www.php.net" target="_blank"><img src="https://img.shields.io/badge/php-8.0.0-8892bf.svg"></a>
 </p>
