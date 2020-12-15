@@ -15,7 +15,7 @@ export function createMenu() {
     menu = new Menu()
     menu.append(new MenuItem({
         icon: path.join(config.paths.icons, 'wemp.png'),
-        label: `Wemp ${app.getVersion()}`,
+        label: `Wemp v${app.getVersion()}`,
         enabled: false
     }))
     menu.append(new MenuItem({ type: 'separator' }))

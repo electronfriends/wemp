@@ -15,6 +15,8 @@ export function createWindow() {
     window = new BrowserWindow({
         width: 600,
         height: 400,
+        resizable: false,
+        fullscreenable: false,
         title: 'Wemp',
         icon: path.join(config.paths.icons, '../wemp.ico'),
         frame: false,

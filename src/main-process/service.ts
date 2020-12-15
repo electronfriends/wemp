@@ -19,7 +19,7 @@ export function checkServices() {
             // Check if services folder is set and exists
             if (!config.paths.services || !fs.existsSync(config.paths.services)) {
                 const filePaths = dialog.showOpenDialogSync(window, {
-                    title: 'Select a directory to store Wemp services',
+                    title: 'Tell us where to create the Wemp-folder for the services',
                     defaultPath: 'C:\\',
                     properties: ['openDirectory']
                 })
@@ -69,6 +69,7 @@ export function checkServices() {
  */
 export function startService(name: string) {
     const service = services[name]
+
     if (service && !service.started) {
         service.start()
         updateMenuStatus(name, true)

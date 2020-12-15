@@ -17,7 +17,7 @@ Wemp is a simple menu for managing [Nginx](https://nginx.org), [MariaDB](https:/
 
 * **Automatic updates** ensure that you are always using the latest version of everything.
 
-* **Fail-safe** thanks to notifications as soon as a service crashes. Clicking on the notification immediately restarts the service.
+* **Fail-safe** thanks to notifications as soon as a service crashes. The service is restarted immediately by clicking on the notification.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/69470382/100527138-c7805600-31cf-11eb-999c-0ce5f317041c.png"></p>
 
