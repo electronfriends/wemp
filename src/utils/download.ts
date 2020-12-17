@@ -32,7 +32,7 @@ export default function download(service: any, isUpdate: boolean = false) {
             }
 
             // Do not overwrite configuration files on update
-            if (isUpdate && (service.ignoredFiles && service.ignoredFiles.includes(fileName))) {
+            if (isUpdate && (service.ignoredFiles && service.ignoredFiles.some(str => fileName.includes(str)))) {
                 return
             }
 
