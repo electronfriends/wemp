@@ -6,7 +6,7 @@
 <a href="https://github.com/electronfriends/wemp/blob/master/LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg" alt="License"></a>
 <a href="https://nginx.org" target="_blank"><img src="https://img.shields.io/badge/nginx-1.19.6-009639.svg"></a>
 <a href="https://mariadb.org" target="_blank"><img src="https://img.shields.io/badge/mariadb-10.5.8-1f305f.svg"></a>
-<a href="https://www.php.net" target="_blank"><img src="https://img.shields.io/badge/php-8.0.0-8892bf.svg"></a>
+<a href="https://www.php.net" target="_blank"><img src="https://img.shields.io/badge/php-8.0.1-8892bf.svg"></a>
 </p>
 
 ## About Wemp
