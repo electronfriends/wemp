@@ -1,50 +1,60 @@
-<p align="center"><img src="https://user-images.githubusercontent.com/69470382/100293903-809f2000-2f85-11eb-8481-912fd686c487.png"></p>
-
 <p align="center">
-<a href="https://github.com/electronfriends/wemp/releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg" alt="Total Downloads"></a>
-<a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg" alt="Latest Stable Version"></a>
-<a href="https://github.com/electronfriends/wemp/blob/master/LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg" alt="License"></a>
-<a href="https://nginx.org" target="_blank"><img src="https://img.shields.io/badge/nginx-1.19.6-009639.svg"></a>
-<a href="https://mariadb.org" target="_blank"><img src="https://img.shields.io/badge/mariadb-10.5.8-1f305f.svg"></a>
-<a href="https://www.php.net" target="_blank"><img src="https://img.shields.io/badge/php-8.0.2-8892bf.svg"></a>
+    <img src="https://user-images.githubusercontent.com/69470382/100293903-809f2000-2f85-11eb-8481-912fd686c487.png">
 </p>
 
-## About Wemp
+<p align="center">
+    <a href="releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
+    <a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg?style=flat-square" alt="Latest Stable Version"></a>
+    <a href="issues"><img src="https://img.shields.io/github/issues/electronfriends/wemp.svg?style=flat-square" alt="GitHub Issues"></a>
+    <a href="LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg?style=flat-square" alt="License"></a>
+</p>
 
-Wemp is a simple menu for managing [Nginx](https://nginx.org), [MariaDB](https://mariadb.com) and [PHP](https://php.net) on Windows.
+## Introduction
 
-* **Nginx, MariaDB and PHP** form the basis for Wemp. With these pre-configured services, you can start developing your websites right away.
+Wemp is a simple menu in your system tray that you can use to manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.com) and [PHP](https://php.net) on Windows.
 
-* **Automatic updates** ensure that you are always using the latest version of everything.
+<p align="center"><img src="https://user-images.githubusercontent.com/69470382/107867896-51f75e00-6e7f-11eb-9f9a-a28af18fd5ea.png"></p>
 
-* **Fail-safe** thanks to notifications as soon as a service crashes. The service is restarted immediately by clicking on the notification.
+## Features
 
-<p align="center"><img src="https://user-images.githubusercontent.com/69470382/100527138-c7805600-31cf-11eb-999c-0ce5f317041c.png"></p>
+- **Easy to use** for both beginners and experienced developers.
+
+- **Regular updates** to always support the latest versions.
+
+- **Monitoring** to restart services automatically if the configuration has been changed.
+
+- **Notifications** to indicate when everything is ready, a new update is available or an error has occurred.
+
+<p align="center"><img src="https://user-images.githubusercontent.com/69470382/107867998-70aa2480-6e80-11eb-8d59-fd24a6d59f72.png"></p>
 
 ## Installation
 
-1. Download and run the latest Wemp installer from the [Releases](https://github.com/electronfriends/wemp/releases) page.
+1. Download and run the latest Wemp installer from the [Releases](releases/latest) page.
 
-2. Select a directory in which the services should be installed. We will create a Wemp-folder there, so you don't need to do this yourself (e.g. selecting the `C:` drive would be `C:\Wemp`).
+2. Choose an installation path for the services (Nginx, MariaDB and PHP).
 
-3. The services should now download. As soon as you see "Wemp is ready!", the services have started and you can access your website via `localhost`.
+3. As soon as everything has been downloaded and extracted, the services will start automatically.
 
-If you have a problem with the installation, please read the FAQs or [create an issue](https://github.com/electronfriends/wemp/issues).
+4. Go to [localhost](http://localhost) and get started.
+
+If you need help with anything, create a new [issue](issues/new) and we will be happy to help.
 
 ## FAQs
 
-### What does the "invalid signature" error mean?
+### Couldn't download service: invalid signature?
 
-This error occurs when the .zip file for a service no longer exists. This is often the case when a newer version is available, especially with PHP.
+If you get this error during the first installation, there is now a newer version of this service and the old version can no longer be downloaded.
 
-Please create an issue if you get this error message and we will update the versions.
+Please create a new [issue](issues/new) so that we can take care of updating the version as soon as possible.
+
+## Credits
+
+- Thanks to [Icons8.com](https://icons8.com) for the icons.
 
 ## Contributing
 
-Thank you for considering contributing to Wemp! This is our first Electron and GitHub project and we appreciate any support we can get.
-
-Feel free to create pull requests or issues if you found a bug.
+Thank you for your interest in contributing to Wemp. If you've found a bug or have a feature suggestion, please let us know by creating a new [issue](issues/new).
 
 ## License
 
-Wemp is open-source software licensed under the [MIT License](https://github.com/electronfriends/wemp/blob/master/LICENSE).
+Wemp is open-source software licensed under the [MIT License](LICENSE).

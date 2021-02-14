@@ -1,15 +1,17 @@
 import { exec } from 'child_process'
-import * as path from 'path'
+import path from 'path'
 
 import config from '../config'
-import { onServiceStopped } from '../utils/notification'
+import { updateMenuStatus } from '../main-process/menu'
+import * as logger from '../utils/logger'
+import { onServiceError } from '../utils/notification'
 
 const servicePath = path.join(config.paths.services, 'mariadb/bin')
 
 /**
  * Called when the service is first installed.
  */
-export async function install() {
+export function install() {
     return new Promise<void>((resolve, reject) => {
         exec('mysql_install_db.exe', { cwd: servicePath }, (error) => {
             if (error) return reject(error)
@@ -22,8 +24,9 @@ export async function install() {
  * Start the service.
  */
 export function start() {
-    exec('tasklist | find /i "mariadbd.exe" || mariadbd.exe', { cwd: servicePath }, (error) => {
-        if (error) onServiceStopped('MariaDB')
+    exec('tasklist | find /i "mariadbd.exe" || mariadbd.exe', { cwd: servicePath }, (error, stdout, stderr) => {
+        if (error) updateMenuStatus('MariaDB', false)
+        if (stderr) logger.write(stderr, () => onServiceError('MariaDB'))
     })
 }
 

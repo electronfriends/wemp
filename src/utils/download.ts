@@ -1,22 +1,25 @@
-import * as settings from 'electron-settings'
-import * as fs from 'fs'
-import * as path from 'path'
-import * as request from 'request'
-import * as unzipper from 'unzipper'
+import settings from 'electron-settings'
+import fs from 'fs'
+import path from 'path'
+import request from 'request'
+import unzipper from 'unzipper'
 
 import config from '../config'
 
 /**
- * Extract files to service folder.
+ * Download and extract service files.
  *
- * @param service Service name
- * @param isUpdate Whether it is an update or first installation
+ * @param service Service configuration
+ * @param isUpdate Whether it is an update or first download
  */
-export default function download(service: any, isUpdate: boolean = false) {
+export default function download(service, isUpdate) {
     return new Promise<void>((resolve, reject) => {
-        const servicePath = path.join(config.paths.services, service.name.toLowerCase())
+        const serviceName = service.name.toLowerCase()
+        const servicePath = path.join(config.paths.services, serviceName)
 
-        if (!fs.existsSync(servicePath)) fs.mkdirSync(servicePath)
+        if (!fs.existsSync(servicePath)) {
+            fs.mkdirSync(servicePath)
+        }
 
         request({
             url: service.url.replace(/{version}/g, service.version),
@@ -26,30 +29,31 @@ export default function download(service: any, isUpdate: boolean = false) {
         .on('entry', entry => {
             let fileName = entry.path
 
-            // Nginx and MariaDB put their files into a directory
+            // Nginx and MariaDB put their files in a directory
             if (service.name === 'Nginx' || service.name === 'MariaDB') {
                 fileName = fileName.substr(fileName.indexOf('/') + 1)
             }
 
-            // Do not overwrite configuration files on update
-            if (isUpdate && (service.ignoredFiles && service.ignoredFiles.some(str => fileName.includes(str)))) {
-                return
-            }
+            // Skip configuration file and directories
+            const shouldSkip = (fileName === service.config || 
+                isUpdate && (service.ignore && service.ignore.some(v => fileName.includes(v))))
 
-            let fileDestPath = path.join(servicePath, fileName)
+            if (!shouldSkip) {
+                let fileDestPath = path.join(servicePath, fileName)
 
-            if (entry.type === 'Directory') {
-                if (!fs.existsSync(fileDestPath)) {
-                    fs.mkdirSync(fileDestPath)
+                if (entry.type === 'Directory') {
+                    if (!fs.existsSync(fileDestPath)) {
+                        fs.mkdirSync(fileDestPath)
+                    }
+                } else {
+                    entry.pipe(fs.createWriteStream(fileDestPath))
                 }
-
-                entry.autodrain()
             } else {
-                entry.pipe(fs.createWriteStream(fileDestPath))
+                entry.autodrain()
             }
         })
         .on('finish', () => {
-            settings.set(service.name.toLowerCase(), service.version)
+            settings.set(serviceName, service.version)
             resolve()
         })
         .on('error', reject)

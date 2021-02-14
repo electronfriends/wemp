@@ -1,36 +1,38 @@
 import { app } from 'electron'
-import * as settings from 'electron-settings'
-import * as path from 'path'
+import settings from 'electron-settings'
+import path from 'path'
 
 /**
- * This is the configuration of Wemp.
+ * Configuration
  *
- * The services are defined here and their version must be updated regularly.
- * Download URLs are subject to change, especially from PHP.
+ * All paths and services are registered here.
  */
 export default {
     paths: {
-        icons: path.join(app.getAppPath(), 'public/images/icons'),
-        services: settings.getSync('path') ? settings.getSync('path').toString() : null,
+        icons: path.join(app.getAppPath(), 'images'),
+        services: settings.getSync('path')?.toString() || 'C:\\Wemp',
         stubs: path.join(app.getAppPath(), 'stubs')
     },
     services: [
         {
             name: 'Nginx',
             version: '1.19.6',
+            config: 'conf/nginx.conf',
             url: 'https://nginx.org/download/nginx-{version}.zip',
-            ignoredFiles: ['conf/', 'html/', 'logs/']
+            ignore: ['conf/', 'html/', 'logs/']
         },
         {
             name: 'MariaDB',
             version: '10.5.8',
+            config: 'data/my.ini',
             url: 'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip'
         },
         {
             name: 'PHP',
             version: '8.0.2',
+            config: 'php.ini',
             url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
-            ignoredFiles: ['extras/']
+            ignore: ['extras/']
         }
     ]
 }

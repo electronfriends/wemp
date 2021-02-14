@@ -3,19 +3,11 @@ appId: "com.electronfriends.wemp"
 
 files:
   - "dist/"
-  - "node_modules/"
-  - "public/"
+  - "images/"
   - "stubs/"
-  - "package.json"
-
-win:
-  icon: "public/images/wemp.ico"
 
 nsis:
   deleteAppDataOnUninstall: true
 
 directories:
   output: "release"
-
-publish:
-  provider: github

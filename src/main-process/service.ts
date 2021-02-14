@@ -1,64 +1,89 @@
 import { dialog } from 'electron'
-import * as settings from 'electron-settings'
-import * as fs from 'fs'
-import * as path from 'path'
+import settings from 'electron-settings'
+import fs from 'fs'
+import path from 'path'
 
 import config from '../config'
 import download from '../utils/download'
+import * as logger from '../utils/logger'
+import { onServiceDownload, onServiceDownloadError, onServicesReady } from '../utils/notification'
 import { updateMenuStatus } from './menu'
-import { window } from './window'
-
-export const services: Object = []
 
 /**
- * Check if services are installed or need an update.
+ * Store the service objects in an array.
+ */
+export const services: any = []
+
+/**
+ * Check if services should be installed or need an update.
  */
 export function checkServices() {
     return new Promise<void>(async (resolve, reject) => {
-        try {
-            // Check if services folder is set and exists
-            if (!config.paths.services || !fs.existsSync(config.paths.services)) {
-                const filePaths = dialog.showOpenDialogSync(window, {
-                    title: 'Tell us where to create the Wemp-folder for the services',
-                    defaultPath: 'C:\\',
-                    properties: ['openDirectory']
-                })
+        // Check whether the services directory exists
+        if (!fs.existsSync(config.paths.services)) {
+            fs.mkdirSync(config.paths.services)
 
-                const wempPath = path.join(filePaths ? filePaths[0] : 'C:\\', 'Wemp')
+            const result = await dialog.showOpenDialog({
+                title: 'Choose a directory for the services',
+                defaultPath: config.paths.services,
+                properties: ['openDirectory']
+            })
 
-                if (!fs.existsSync(wempPath)) fs.mkdirSync(wempPath)
+            const servicesPath = result.filePaths[0] || config.paths.services
 
-                config.paths.services = wempPath
-
-                settings.setSync('path', wempPath)
+            // Remove default service directory because another one is being used
+            if (servicesPath !== config.paths.services) {
+                fs.rmdirSync(config.paths.services)
             }
 
-            // Check if services should be installed or updated
-            for (let service of config.services) {
-                const servicePath = path.join(config.paths.services, service.name.toLowerCase())
-                const serviceVersion = settings.getSync(service.name.toLowerCase())
+            config.paths.services = servicesPath
 
-                const isFirstDownload = !fs.existsSync(servicePath)
+            settings.setSync({ path: servicesPath })
+        }
 
-                if (isFirstDownload || serviceVersion !== service.version) {
-                    window.webContents.send('update-titles', {
-                        title: isFirstDownload ? `Downloading ${service.name} ...` : `Updating ${service.name} to ${service.version} ...`,
-                        subtitle: 'This may take a while, please do not close the window.'
-                    })
+        // Check if a service needs to be installed or updated
+        for (const service of config.services) {
+            const servicePath = path.join(config.paths.services, service.name.toLowerCase())
+            const serviceVersion = settings.getSync(service.name.toLowerCase())
 
+            const isFirstDownload = !fs.existsSync(servicePath)
+
+            // Create service instance
+            services[service.name] = require(`../services/${service.name.toLowerCase()}`)
+
+            // Check whether it is the first download or an update
+            if (isFirstDownload || serviceVersion !== service.version) {
+                const notification = onServiceDownload(service, !isFirstDownload)
+
+                try {
                     await download(service, !isFirstDownload)
+
+                    // Run service installation on first download
+                    if (isFirstDownload) await services[service.name].install()
+                } catch (error) {
+                    logger.write(error, () => onServiceDownloadError(service.name))
                 }
 
-                // Instanciate service and store
-                services[service.name] = require(`../services/${service.name.toLowerCase()}`)
-
-                if (isFirstDownload) await services[service.name].install()
+                notification.close()
             }
 
-            resolve()
-        } catch(error) {
-            reject(error)
+            // Watch for configuration file changes
+            const serviceConfig = path.join(servicePath, service.config)
+
+            if (fs.existsSync(serviceConfig)) {
+                let debounce
+
+                fs.watch(serviceConfig, (event, filename) => {
+                    if (!filename || debounce) return
+
+                    debounce = setTimeout(() => { debounce = false }, 100)
+
+                    stopService(service.name, true)
+                })
+            }
         }
+
+        resolve()
     })
 }
 
@@ -74,7 +99,7 @@ export function startService(name: string) {
         service.start()
         updateMenuStatus(name, true)
     } else {
-        console.log(`Service '${name}' does not exist.`)
+        logger.writeSync(`Service '${name}' does not exist.`)
     }
 }
 
@@ -82,9 +107,11 @@ export function startService(name: string) {
  * Start all services.
  */
 export function startServices() {
-    for (let service of config.services) {
+    for (const service of config.services) {
         startService(service.name)
     }
+
+    onServicesReady()
 }
 
 /**
@@ -103,7 +130,7 @@ export function stopService(name: string, shouldRestart: boolean = false) {
             setTimeout(() => startService(name), 2000)
         }
     } else {
-        console.log(`Service '${name}' does not exist.`)
+        logger.writeSync(`Service '${name}' does not exist.`)
     }
 }
 
@@ -111,7 +138,7 @@ export function stopService(name: string, shouldRestart: boolean = false) {
  * Stop all services.
  */
 export function stopServices() {
-    for (let service of config.services) {
+    for (const service of config.services) {
         stopService(service.name)
     }
 }
