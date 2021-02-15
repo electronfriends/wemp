@@ -27,7 +27,7 @@ export function install() {
 export function start() {
     exec('tasklist | find /i "nginx.exe" || nginx.exe', { cwd: servicePath }, (error, stdout, stderr) => {
         if (error) updateMenuStatus('Nginx', false)
-        if (stderr) logger.write(stderr, () => onServiceError('Nginx'))
+        if (stderr) logger.write(stderr, onServiceError('Nginx'))
     })
 }
 

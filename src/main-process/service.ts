@@ -61,7 +61,7 @@ export function checkServices() {
                     // Run service installation on first download
                     if (isFirstDownload) await services[service.name].install()
                 } catch (error) {
-                    logger.write(error, () => onServiceDownloadError(service.name))
+                    logger.write(error, onServiceDownloadError(service.name))
                 }
 
                 notification.close()
@@ -99,7 +99,7 @@ export function startService(name: string) {
         service.start()
         updateMenuStatus(name, true)
     } else {
-        logger.writeSync(`Service '${name}' does not exist.`)
+        logger.write(`Service '${name}' does not exist.`)
     }
 }
 
@@ -130,7 +130,7 @@ export function stopService(name: string, shouldRestart: boolean = false) {
             setTimeout(() => startService(name), 2000)
         }
     } else {
-        logger.writeSync(`Service '${name}' does not exist.`)
+        logger.write(`Service '${name}' does not exist.`)
     }
 }
 

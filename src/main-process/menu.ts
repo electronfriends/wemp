@@ -15,7 +15,8 @@ export function createMenu() {
     menu.append(new MenuItem({
         icon: path.join(config.paths.icons, 'wemp.png'),
         label: `Wemp ${app.getVersion()}`,
-        sublabel: 'by ElectronFriends'
+        sublabel: 'by ElectronFriends',
+        click: () => shell.openPath(config.paths.logs)
     }))
 
     menu.append(new MenuItem({ type: 'separator' }))

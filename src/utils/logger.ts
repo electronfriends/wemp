@@ -1,29 +1,25 @@
 import { app } from 'electron'
 import fs from 'fs'
-import path from 'path'
 
 import config from '../config'
 
 /**
- * Path to the error log file.
+ * Create a write stream for the log file.
  */
-export const errorPath = path.join(app.getPath('userData'), 'error.log')
+const stream = fs.createWriteStream(config.paths.logs)
 
 /**
  * Write to the log file.
  *
- * @param message
- * @param callback
+ * @param message Message
+ * @param callback Optional callback
  */
-export function write(message, callback) {
-    fs.appendFile(errorPath, message + '\r\n', callback)
-}
+export function write(message, callback?) {
+    const msg = new Date().toISOString() + ' : ' + message + '\n'
 
-/**
- * Write synchronously to the log file.
- *
- * @param message
- */
-export async function writeSync(message) {
-    fs.appendFileSync(errorPath, message + '\r\n')
+    if (callback) {
+        stream.on('finish', callback)
+    }
+
+    stream.write(msg)
 }

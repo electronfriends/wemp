@@ -1,8 +1,8 @@
 import { app, Notification, shell } from 'electron'
 
+import config from '../config'
 import { updateMenuStatus } from '../main-process/menu'
 import { startService } from '../main-process/service'
-import { errorPath } from './logger'
 
 /**
  * Send notification when a service is being downloaded.
@@ -38,7 +38,7 @@ export function onServiceDownloadError(name) {
         timeoutType: 'never'
     })
 
-    notification.on('click', () => shell.openPath(errorPath))
+    notification.on('click', () => shell.openPath(config.paths.logs))
 
     notification.show()
 }
@@ -68,7 +68,7 @@ export function onServiceError(name) {
         timeoutType: 'never'
     })
 
-    notification.on('click', () => shell.openPath(errorPath))
+    notification.on('click', () => shell.openPath(config.paths.logs))
 
     notification.show()
 }

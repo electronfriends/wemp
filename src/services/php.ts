@@ -27,7 +27,7 @@ export function install() {
 export function start() {
     exec('tasklist | find /i "php-cgi.exe" || php-cgi.exe -b 127.0.0.1:9000', { cwd: servicePath }, (error, stdout, stderr) => {
         if (error) updateMenuStatus('PHP', false)
-        if (stderr) logger.write(stderr, () => onServiceError('PHP'))
+        if (stderr) logger.write(stderr, onServiceError('PHP'))
     })
 }
 
