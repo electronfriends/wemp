@@ -21,6 +21,8 @@ Wemp is a simple menu in your system tray that you can use to manage [Nginx](htt
 
 - **Regular updates** to always have the latest versions.
 
+- **Error logging** to make your life easier. You can open the error log by clicking on the notification or via the first menu item.
+
 - **Monitoring** to restart services automatically if the configuration has been changed.
 
 - **Notifications** to indicate when everything is ready, a new update is available or an error has occurred.
