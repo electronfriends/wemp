@@ -5,7 +5,7 @@
 <p align="center">
     <a href="releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
     <a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg?style=flat-square" alt="Latest Stable Version"></a>
-    <a href="issues"><img src="https://img.shields.io/github/issues/electronfriends/wemp.svg?style=flat-square" alt="GitHub Issues"></a>
+    <a href="https://github.com/electronfriends/wemp/issues"><img src="https://img.shields.io/github/issues/electronfriends/wemp.svg?style=flat-square" alt="GitHub Issues"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg?style=flat-square" alt="License"></a>
 </p>
 
@@ -19,7 +19,7 @@ Wemp is a simple menu in your system tray that you can use to manage [Nginx](htt
 
 - **Easy to use** for both beginners and experienced developers.
 
-- **Regular updates** to always support the latest versions.
+- **Regular updates** to always have the latest versions.
 
 - **Monitoring** to restart services automatically if the configuration has been changed.
 
@@ -29,7 +29,7 @@ Wemp is a simple menu in your system tray that you can use to manage [Nginx](htt
 
 ## Installation
 
-1. Download and run the latest Wemp installer from the [Releases](releases/latest) page.
+1. Download and run the latest Wemp installer from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
 
 2. Choose an installation path for the services (Nginx, MariaDB and PHP).
 
@@ -37,7 +37,7 @@ Wemp is a simple menu in your system tray that you can use to manage [Nginx](htt
 
 4. Go to [localhost](http://localhost) and get started.
 
-If you need help with anything, create a new [issue](issues/new) and we will be happy to help.
+If you need help with anything, create a new [issue](https://github.com/electronfriends/wemp/issues/new) and we will be happy to help.
 
 ## FAQs
 
@@ -45,7 +45,7 @@ If you need help with anything, create a new [issue](issues/new) and we will be 
 
 If you get this error during the first installation, there is now a newer version of this service and the old version can no longer be downloaded.
 
-Please create a new [issue](issues/new) so that we can take care of updating the version as soon as possible.
+Please create a new [issue](https://github.com/electronfriends/wemp/issues/new) so that we can take care of updating the version as soon as possible.
 
 ## Credits
 
@@ -53,7 +53,7 @@ Please create a new [issue](issues/new) so that we can take care of updating the
 
 ## Contributing
 
-Thank you for your interest in contributing to Wemp. If you've found a bug or have a feature suggestion, please let us know by creating a new [issue](issues/new).
+Thank you for your interest in contributing to Wemp. If you've found a bug or have a feature suggestion, please let us know by creating a new [issue](https://github.com/electronfriends/wemp/issues/new).
 
 ## License
 
