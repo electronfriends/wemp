@@ -11,7 +11,7 @@
 
 ## Introduction
 
-Wemp is a simple menu in your system tray that you can use to manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.com) and [PHP](https://php.net) on Windows.
+Wemp is a simple menu in your system tray that you can use to manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/69470382/107984444-3ba8e980-6fc8-11eb-8784-c714c8961ae4.png"></p>
 
