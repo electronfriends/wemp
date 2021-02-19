@@ -53,7 +53,7 @@ export default function download(service, isUpdate) {
             }
         })
         .on('finish', () => {
-            settings.set(serviceName, service.version)
+            settings.setSync(serviceName, service.version)
             resolve()
         })
         .on('error', reject)
