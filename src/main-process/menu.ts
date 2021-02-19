@@ -94,7 +94,7 @@ export function createMenu() {
  * @param service Name of the service
  * @param isStarted Whether the service is started
  */
-export function updateMenuStatus(service: string, isStarted: boolean) {
+export function updateMenuStatus(service, isStarted = true) {
     const startItem = menu.getMenuItemById(`${service}-start`)
     const stopItem = menu.getMenuItemById(`${service}-stop`)
     const restartItem = menu.getMenuItemById(`${service}-restart`)

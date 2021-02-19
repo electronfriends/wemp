@@ -92,12 +92,12 @@ export function checkServices() {
  *
  * @param name Name of the service
  */
-export function startService(name: string) {
+export function startService(name) {
     const service = services[name]
 
-    if (service && !service.started) {
+    if (service) {
         service.start()
-        updateMenuStatus(name, true)
+        updateMenuStatus(name)
     } else {
         logger.write(`Service '${name}' does not exist.`)
     }
@@ -120,14 +120,15 @@ export function startServices() {
  * @param name Name of the service
  * @param shouldRestart Whether the service should be restarted
  */
-export function stopService(name: string, shouldRestart: boolean = false) {
-    if (services[name]) {
-        services[name].stop()
+export function stopService(name, shouldRestart = false) {
+    const service = services[name]
 
+    if (service) {
+        service.stop()
         updateMenuStatus(name, false)
 
         if (shouldRestart) {
-            setTimeout(() => startService(name), 2000)
+            setTimeout(() => startService(name), 1000)
         }
     } else {
         logger.write(`Service '${name}' does not exist.`)
