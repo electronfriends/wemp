@@ -17,7 +17,7 @@ export default {
     services: [
         {
             name: 'Nginx',
-            version: '1.19.7',
+            version: '1.19.8',
             config: 'conf/nginx.conf',
             url: 'https://nginx.org/download/nginx-{version}.zip',
             ignore: ['conf/', 'html/', 'logs/']
@@ -30,7 +30,7 @@ export default {
         },
         {
             name: 'PHP',
-            version: '8.0.2',
+            version: '8.0.3',
             config: 'php.ini',
             url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
             ignore: ['extras/']
