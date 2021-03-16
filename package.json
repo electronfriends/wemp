@@ -1,6 +1,6 @@
 {
   "name": "wemp",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "Wemp is a menu for managing Nginx, MariaDB and PHP on Windows.",
   "author": "ElectronFriends",
   "main": "dist/bundle.js",
@@ -30,7 +30,7 @@
     "@types/request": "^2.48.5",
     "@types/unzipper": "^0.10.3",
     "electron": "^12.0.1",
-    "electron-builder": "^22.10.5",
+    "electron-builder": "^22.9.1",
     "ts-loader": "^8.0.17",
     "typescript": "^4.1.5",
     "webpack": "^5.24.0",
