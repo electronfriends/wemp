@@ -3,7 +3,7 @@ appId: "com.electronfriends.wemp"
 
 files:
   - "dist/"
-  - "images/"
+  - "icons/"
   - "stubs/"
 
 nsis:
