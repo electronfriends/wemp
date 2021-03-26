@@ -9,7 +9,7 @@ import path from 'path'
  */
 export default {
     paths: {
-        icons: path.join(app.getAppPath(), 'icons'),
+        icons: path.join(app.getAppPath(), 'images'),
         logs: path.join(app.getPath('userData'), 'wemp.log'),
         services: settings.getSync('path')?.toString() || 'C:\\Wemp',
         stubs: path.join(app.getAppPath(), 'stubs')
