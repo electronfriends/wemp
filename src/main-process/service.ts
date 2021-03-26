@@ -65,7 +65,11 @@ export function checkServices() {
                     if (fs.existsSync(stubPath)) {
                         await fs.readFile(path.join(stubPath, service.config), (error, contents) => {
                             if (error) reject(error)
-                            fs.writeFileSync(path.join(servicePath, service.config), contents)
+
+                            // Replace services path
+                            const content = contents.toString().replace('{servicesPath}', config.paths.services)
+
+                            fs.writeFileSync(path.join(servicePath, service.config), content)
                         })
                     }
 
