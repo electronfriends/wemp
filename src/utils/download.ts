@@ -29,8 +29,8 @@ export default function download(service, isUpdate) {
         .on('entry', entry => {
             let fileName = entry.path
 
-            // Nginx and MariaDB put their files in a directory
-            if (service.name === 'Nginx' || service.name === 'MariaDB') {
+            // We assume that only PHP puts the files inside a folder
+            if (service.name !== 'PHP') {
                 fileName = fileName.substr(fileName.indexOf('/') + 1)
             }
 

@@ -43,13 +43,14 @@ export function checkServices() {
 
         // Check if a service needs to be installed or updated
         for (const service of config.services) {
-            const servicePath = path.join(config.paths.services, service.name.toLowerCase())
-            const serviceVersion = settings.getSync(service.name.toLowerCase())
+            const serviceName = service.name.toLowerCase()
+            const servicePath = path.join(config.paths.services, serviceName)
+            const serviceVersion = settings.getSync(serviceName)
 
             const isFirstDownload = !fs.existsSync(servicePath)
 
             // Create service instance
-            services[service.name] = require(`../services/${service.name.toLowerCase()}`)
+            if (!service.interface) services[service.name] = require(`../services/${serviceName}`)
 
             // Check whether it is the first download or an update
             if (isFirstDownload || serviceVersion !== service.version) {
@@ -58,8 +59,18 @@ export function checkServices() {
                 try {
                     await download(service, !isFirstDownload)
 
-                    // Run service installation on first download
-                    if (isFirstDownload) await services[service.name].install()
+                    // Check if a stub exists for the service
+                    const stubPath = path.join(config.paths.stubs, serviceName)
+
+                    if (fs.existsSync(stubPath)) {
+                        await fs.readFile(path.join(stubPath, service.config), (error, contents) => {
+                            if (error) reject(error)
+                            fs.writeFileSync(path.join(servicePath, service.config), contents)
+                        })
+                    }
+
+                    // MariaDB needs to be installed the first time
+                    if (service.name === 'MariaDB' && isFirstDownload) await services[service.name].install()
                 } catch (error) {
                     logger.write(error, onServiceDownloadError(service.name))
                 }
@@ -68,18 +79,20 @@ export function checkServices() {
             }
 
             // Watch for configuration file changes
-            const serviceConfig = path.join(servicePath, service.config)
+            if (!service.interface) {
+                const serviceConfig = path.join(servicePath, service.config)
 
-            if (fs.existsSync(serviceConfig)) {
-                let debounce
+                if (fs.existsSync(serviceConfig)) {
+                    let debounce
 
-                fs.watch(serviceConfig, (event, filename) => {
-                    if (!filename || debounce) return
+                    fs.watch(serviceConfig, (event, filename) => {
+                        if (!filename || debounce) return
 
-                    debounce = setTimeout(() => { debounce = false }, 100)
+                        debounce = setTimeout(() => { debounce = false }, 100)
 
-                    stopService(service.name, true)
-                })
+                        stopService(service.name, true)
+                    })
+                }
             }
         }
 
@@ -108,7 +121,7 @@ export function startService(name) {
  */
 export function startServices() {
     for (const service of config.services) {
-        startService(service.name)
+        if (!service.interface) startService(service.name)
     }
 
     onServicesReady()

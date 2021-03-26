@@ -27,7 +27,7 @@ if (!gotTheLock) {
 
     // Create application when ready
     app.on('ready', async () => {
-        const window = new BrowserWindow({ show: false })
+        new BrowserWindow({ show: false })
 
         await checkServices()
         createMenu()

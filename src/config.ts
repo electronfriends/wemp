@@ -9,7 +9,7 @@ import path from 'path'
  */
 export default {
     paths: {
-        icons: path.join(app.getAppPath(), 'images'),
+        icons: path.join(app.getAppPath(), 'icons'),
         logs: path.join(app.getPath('userData'), 'wemp.log'),
         services: settings.getSync('path')?.toString() || 'C:\\Wemp',
         stubs: path.join(app.getAppPath(), 'stubs')
@@ -34,6 +34,13 @@ export default {
             config: 'php.ini',
             url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
             ignore: ['extras/']
+        },
+        {
+            name: 'phpMyAdmin',
+            interface: true,
+            version: '5.1.0',
+            config: 'config.inc.php',
+            url: 'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip'
         }
     ]
 }

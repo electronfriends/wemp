@@ -22,6 +22,8 @@ export function createMenu() {
     menu.append(new MenuItem({ type: 'separator' }))
 
     for (const service of config.services) {
+        if (service.interface) continue
+
         const serviceName = service.name.toLowerCase()
 
         menu.append(new MenuItem({
