@@ -21,7 +21,7 @@ Wemp is a simple menu in your system tray that you can use to manage [Nginx](htt
 
 - **Regular updates** to always have the latest versions.
 
-- **Built-in database management** powered by [phpMyAdmin](https://www.phpmyadmin.net/) (also updated automatically!).
+- **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net/) (also updated automatically!).
 
 - **Error logging** to make your life easier. You can open the error log by clicking on the first menu item.
 
