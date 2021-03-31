@@ -9,7 +9,7 @@ import path from 'path'
  */
 export default {
     paths: {
-        icons: path.join(app.getAppPath(), 'images'),
+        icons: path.join(app.getAppPath(), 'icons'),
         logs: path.join(app.getPath('userData'), 'wemp.log'),
         services: settings.getSync('path')?.toString() || 'C:\\Wemp',
         stubs: path.join(app.getAppPath(), 'stubs')
@@ -17,7 +17,7 @@ export default {
     services: [
         {
             name: 'Nginx',
-            version: '1.19.8',
+            version: '1.19.9',
             config: 'conf/nginx.conf',
             url: 'https://nginx.org/download/nginx-{version}.zip',
             ignore: ['conf/', 'html/', 'logs/']
