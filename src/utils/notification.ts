@@ -96,13 +96,8 @@ export function onUpdateAvailable(info) {
 export function onUpdateDownloaded(info) {
     const notification = new Notification({
         title: `Wemp ${info.version} has been downloaded!`,
-        body: 'The update will be applied the next time you launch Wemp. Click to relaunch Wemp now.',
+        body: 'The update will be applied the next time you launch Wemp.',
         silent: true
-    })
-
-    notification.on('click', () => {
-        app.relaunch()
-        app.quit()
     })
 
     notification.show()
