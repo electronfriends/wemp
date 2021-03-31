@@ -62,15 +62,17 @@ export function checkServices() {
                     // Check if a stub exists for the service
                     const stubPath = path.join(config.paths.stubs, serviceName)
 
-                    if (fs.existsSync(stubPath)) {
-                        await fs.readFile(path.join(stubPath, service.config), (error, contents) => {
-                            if (error) reject(error)
+                    if (isFirstDownload) {
+                        if (fs.existsSync(stubPath)) {
+                            await fs.readFile(path.join(stubPath, service.config), (error, contents) => {
+                                if (error) reject(error)
 
-                            // Replace services path
-                            const content = contents.toString().replace('{servicesPath}', config.paths.services)
+                                // Replace services path
+                                const content = contents.toString().replace('{servicesPath}', config.paths.services)
 
-                            fs.writeFileSync(path.join(servicePath, service.config), content)
-                        })
+                                fs.writeFileSync(path.join(servicePath, service.config), content)
+                            })
+                        }
                     }
 
                     // MariaDB needs to be installed the first time
