@@ -1,4 +1,3 @@
-import { app } from 'electron'
 import fs from 'fs'
 
 import config from '../config'
