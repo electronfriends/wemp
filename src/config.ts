@@ -17,7 +17,7 @@ export default {
     services: [
         {
             name: 'Nginx',
-            version: '1.19.9',
+            version: '1.19.10',
             config: 'conf/nginx.conf',
             url: 'https://nginx.org/download/nginx-{version}.zip',
             ignore: ['conf/', 'html/', 'logs/']
