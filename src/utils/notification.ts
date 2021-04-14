@@ -1,8 +1,6 @@
-import { app, Notification, shell } from 'electron'
+import { Notification, shell } from 'electron'
 
 import config from '../config'
-import { updateMenuStatus } from '../main-process/menu'
-import { startService } from '../main-process/service'
 
 /**
  * Send notification when a service is being downloaded.
@@ -50,7 +48,8 @@ export function onServicesReady() {
     const notification = new Notification({
         title: 'Welcome to Wemp!',
         body: 'All services have been started and can now be managed via the menu in the system tray.',
-        silent: true
+        silent: true,
+        timeoutType: 'never'
     })
 
     notification.show()
