@@ -94,7 +94,7 @@ export function checkServices() {
                     fs.watch(serviceConfig, (event, filename) => {
                         if (!filename || debounce) return
 
-                        debounce = setTimeout(() => { debounce = false }, 100)
+                        debounce = setTimeout(() => { debounce = false }, 1000)
 
                         stopService(service.name, true)
                     })
