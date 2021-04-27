@@ -24,8 +24,13 @@ export function install() {
  * Start the service.
  */
 export function start() {
-    exec('tasklist | find /i "mariadbd.exe" || mariadbd.exe', { cwd: servicePath }, (error, stdout, stderr) => {
-        if (error) updateMenuStatus('MariaDB', false)
+    exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', { cwd: servicePath }, (error, stdout, stderr) => {
+        if (error) {
+            updateMenuStatus('MariaDB', false)
+            return
+        }
+
+        if (stdout) logger.write(stdout)
         if (stderr && !stderr.includes('[Note]')) logger.write(stderr, onServiceError('MariaDB'))
     })
 }

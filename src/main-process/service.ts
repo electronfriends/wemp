@@ -116,6 +116,7 @@ export function startService(name) {
 
     if (service) {
         service.start()
+
         updateMenuStatus(name)
     } else {
         logger.write(`Service '${name}' does not exist.`)
@@ -139,15 +140,16 @@ export function startServices() {
  * @param name Name of the service
  * @param shouldRestart Whether the service should be restarted
  */
-export function stopService(name, shouldRestart = false) {
+export async function stopService(name, shouldRestart = false) {
     const service = services[name]
 
     if (service) {
         service.stop()
+
         updateMenuStatus(name, false)
 
         if (shouldRestart) {
-            setTimeout(() => startService(name), 1000)
+            setTimeout(() => startService(name), 3000)
         }
     } else {
         logger.write(`Service '${name}' does not exist.`)
@@ -159,6 +161,6 @@ export function stopService(name, shouldRestart = false) {
  */
 export function stopServices() {
     for (const service of config.services) {
-        stopService(service.name)
+        if (!service.interface) stopService(service.name)
     }
 }
