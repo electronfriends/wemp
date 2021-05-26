@@ -14,7 +14,7 @@ const servicePath = path.join(config.paths.services, 'nginx')
 export function start() {
     exec('tasklist | find /i "nginx.exe" > nul || nginx.exe', { cwd: servicePath }, (error, stdout, stderr) => {
         if (error) {
-            updateMenuStatus('Nginx', false)
+            logger.write(error, updateMenuStatus('Nginx', false))
             return
         }
 
