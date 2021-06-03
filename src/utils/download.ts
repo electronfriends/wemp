@@ -25,37 +25,37 @@ export default function download(service, isUpdate) {
             url: service.url.replace(/{version}/g, service.version),
             headers: { 'User-Agent': 'Mozilla/5.0' }
         })
-        .pipe(unzipper.Parse())
-        .on('entry', entry => {
-            let fileName = entry.path
+            .pipe(unzipper.Parse())
+            .on('entry', entry => {
+                let fileName = entry.path
 
-            // We assume that only PHP puts the files inside a folder
-            if (service.name !== 'PHP') {
-                fileName = fileName.substr(fileName.indexOf('/') + 1)
-            }
+                // We assume that only PHP doesn't put the files inside a directory
+                if (service.name !== 'PHP') {
+                    fileName = fileName.substr(fileName.indexOf('/') + 1)
+                }
 
-            // Skip configuration file and directories
-            const shouldSkip = (fileName === service.config || 
-                isUpdate && (service.ignore && service.ignore.some(v => fileName.includes(v))))
+                // Skip configuration file and ignored directories
+                const isConfig = fileName === service.config
+                const isIgnored = isUpdate && (service.ignore && service.ignore.some(v => fileName.includes(v)))
 
-            if (!shouldSkip) {
-                let fileDestPath = path.join(servicePath, fileName)
+                if (!isConfig && !isIgnored) {
+                    let fileDestPath = path.join(servicePath, fileName)
 
-                if (entry.type === 'Directory') {
-                    if (!fs.existsSync(fileDestPath)) {
-                        fs.mkdirSync(fileDestPath)
+                    if (entry.type === 'Directory') {
+                        if (!fs.existsSync(fileDestPath)) {
+                            fs.mkdirSync(fileDestPath)
+                        }
+                    } else {
+                        entry.pipe(fs.createWriteStream(fileDestPath))
                     }
                 } else {
-                    entry.pipe(fs.createWriteStream(fileDestPath))
+                    entry.autodrain()
                 }
-            } else {
-                entry.autodrain()
-            }
-        })
-        .on('finish', () => {
-            settings.setSync(serviceName, service.version)
-            resolve()
-        })
-        .on('error', reject)
+            })
+            .on('finish', () => {
+                settings.setSync(serviceName, service.version)
+                resolve()
+            })
+            .on('error', reject)
     })
 }
