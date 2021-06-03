@@ -19,8 +19,8 @@ export default {
             name: 'Nginx',
             version: '1.21.0',
             config: 'conf/nginx.conf',
-            url: 'https://nginx.org/download/nginx-{version}.zip',
-            ignore: ['conf/', 'html/', 'logs/']
+            ignore: ['conf/', 'html/', 'logs/'],
+            url: 'https://nginx.org/download/nginx-{version}.zip'
         },
         {
             name: 'MariaDB',
@@ -32,14 +32,14 @@ export default {
             name: 'PHP',
             version: '8.0.7',
             config: 'php.ini',
-            url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
-            ignore: ['extras/']
+            ignore: ['extras/'],
+            url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip'
         },
         {
             name: 'phpMyAdmin',
-            interface: true,
             version: '5.1.0',
             config: 'config.inc.php',
+            interface: true,
             url: 'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip'
         }
     ]
