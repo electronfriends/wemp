@@ -1,5 +1,5 @@
-productName: "Wemp"
 appId: "com.electronfriends.wemp"
+productName: "Wemp"
 
 files:
   - "dist/"
@@ -11,3 +11,6 @@ nsis:
 
 directories:
   output: "release"
+
+publish:
+  releaseType: release
