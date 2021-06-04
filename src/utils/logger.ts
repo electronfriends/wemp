@@ -14,9 +14,9 @@ const stream = fs.createWriteStream(config.paths.logs)
  * @param callback Optional callback
  */
 export function write(message, callback?) {
-    const msg = message + '\n'
+    const msg = new Date() + ' - ' + message + '\n'
 
-    if (callback) {
+    if (typeof callback === 'function') {
         stream.on('finish', callback)
     }
 
