@@ -3,7 +3,6 @@ import { autoUpdater } from 'electron-updater'
 
 import { createMenu, tray } from './main-process/menu'
 import { checkServices, startServices, stopServices } from './main-process/service'
-import { onUpdateAvailable, onUpdateDownloaded } from './utils/notification'
 
 const gotTheLock = app.requestSingleInstanceLock()
 
@@ -34,12 +33,10 @@ if (!gotTheLock) {
         startServices()
 
         if (app.isPackaged) {
-            autoUpdater.on('update-available', onUpdateAvailable)
-            autoUpdater.on('update-downloaded', onUpdateDownloaded)
-            autoUpdater.checkForUpdates()
+            autoUpdater.checkForUpdatesAndNotify()
 
             // Check for updates every 30 minutes
-            setInterval(() => autoUpdater.checkForUpdates(), 30 * 60 * 1000)
+            setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 30 * 60 * 1000)
         }
     })
 }

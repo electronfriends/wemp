@@ -5,7 +5,7 @@ import path from 'path'
 /**
  * Configuration
  *
- * All paths and services are registered here.
+ * The paths and services are registered here.
  */
 export default {
     paths: {

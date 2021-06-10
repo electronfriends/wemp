@@ -6,7 +6,7 @@ import config from '../config'
  * Send notification when a service is being downloaded.
  *
  * @param service Service configuration
- * @param isUpdate Whether it's an update or first installation
+ * @param isUpdate Whether it's an update or first download
  * @returns Notification
  */
 export function onServiceDownload(service, isUpdate) {
@@ -14,7 +14,7 @@ export function onServiceDownload(service, isUpdate) {
         title: isUpdate
             ? `Updating ${service.name} to ${service.version} ...`
             : `Downloading ${service.name} ${service.version} ...`,
-        body: 'This may take a moment, please wait and do not close the application.',
+        body: 'This may take a while, please wait and do not close the application.',
         silent: true,
         timeoutType: 'never'
     })
@@ -68,36 +68,6 @@ export function onServiceError(name) {
     })
 
     notification.on('click', () => shell.openPath(config.paths.logs))
-
-    notification.show()
-}
-
-/**
- * Send notification when a new update is available.
- *
- * @param info Update info
- */
-export function onUpdateAvailable(info) {
-    const notification = new Notification({
-        title: 'There is a new update available!',
-        body: `Wemp ${info.version} will now be downloaded, we'll let you know when it's ready.`,
-        silent: true
-    })
-
-    notification.show()
-}
-
-/**
- * Send notification when the update has been downloaded.
- *
- * @param info Update info
- */
-export function onUpdateDownloaded(info) {
-    const notification = new Notification({
-        title: `Wemp ${info.version} has been downloaded!`,
-        body: 'The update will be applied the next time you launch Wemp.',
-        silent: true
-    })
 
     notification.show()
 }

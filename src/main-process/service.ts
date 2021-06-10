@@ -59,10 +59,9 @@ export function checkServices() {
                 try {
                     await download(service, !isFirstDownload)
 
-                    // Check if a stub exists for the service
-                    const stubPath = path.join(config.paths.stubs, serviceName)
-
                     if (isFirstDownload) {
+                        const stubPath = path.join(config.paths.stubs, serviceName)
+
                         if (fs.existsSync(stubPath)) {
                             await fs.readFile(path.join(stubPath, service.config), (error, contents) => {
                                 if (error) reject(error)
@@ -75,10 +74,10 @@ export function checkServices() {
                         }
                     }
 
-                    // MariaDB needs to be installed the first time
-                    if (service.name === 'MariaDB' && isFirstDownload) await services[service.name].install()
-                } catch (error) {
-                    logger.write(error, onServiceDownloadError(service.name))
+                    // MariaDB needs to be installed on the first run
+                    if (isFirstDownload && service.name === 'MariaDB') await services[service.name].install()
+                } catch (err) {
+                    logger.write(err, onServiceDownloadError(service.name))
                 }
 
                 notification.close()

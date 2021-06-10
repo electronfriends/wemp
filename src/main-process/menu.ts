@@ -28,6 +28,7 @@ export function createMenu() {
 
         menu.append(new MenuItem({
             icon: path.join(config.paths.icons, serviceName + '.png'),
+            id: service.name,
             label: service.name,
             submenu: [
                 {
@@ -74,7 +75,7 @@ export function createMenu() {
     menu.append(new MenuItem({
         icon: path.join(config.paths.icons, 'updates.png'),
         label: 'Check for Updates',
-        click: () => autoUpdater.checkForUpdates()
+        click: () => autoUpdater.checkForUpdatesAndNotify()
     }))
 
     menu.append(new MenuItem({
@@ -97,12 +98,12 @@ export function createMenu() {
  * @param isStarted Whether the service is started
  */
 export function updateMenuStatus(service, isStarted = true) {
-    const startItem = menu.getMenuItemById(`${service}-start`)
-    const stopItem = menu.getMenuItemById(`${service}-stop`)
-    const restartItem = menu.getMenuItemById(`${service}-restart`)
+    if (menu.getMenuItemById(service)) {
+        const startItem = menu.getMenuItemById(`${service}-start`)
+        const stopItem = menu.getMenuItemById(`${service}-stop`)
+        const restartItem = menu.getMenuItemById(`${service}-restart`)
 
-    if (startItem && stopItem && restartItem) {
-        startItem.enabled = !isStarted
-        stopItem.enabled = restartItem.enabled = !startItem.enabled
+        if (startItem) startItem.enabled = !isStarted
+        if (stopItem && restartItem) stopItem.enabled = restartItem.enabled = !startItem?.enabled
     }
 }
