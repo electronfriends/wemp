@@ -47,7 +47,7 @@ export function onServiceDownloadError(name) {
 export function onServicesReady() {
     const notification = new Notification({
         title: 'Welcome to Wemp!',
-        body: 'All services have been started and can now be managed via the menu in the system tray.',
+        body: 'All services have started and can now be managed via the menu in the notification area.',
         silent: true,
         timeoutType: 'never'
     })
