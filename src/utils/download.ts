@@ -56,6 +56,17 @@ export default function download(service, isUpdate) {
                 settings.setSync(serviceName, service.version)
                 resolve()
             })
-            .on('error', reject)
+            .on('error', err => {
+                // Fallback to archives when PHP download failed
+                if (service.name === 'PHP' && err.message.includes('invalid signature')) {
+                    service.url = service.url.replace('releases/', 'releases/archives/')
+
+                    return download(service, isUpdate)
+                        .then(resolve)
+                        .catch(reject)
+                }
+
+                reject(err)
+            })
     })
 }
