@@ -43,12 +43,6 @@ If you need help with anything, create a new [issue](https://github.com/electron
 
 ## FAQs
 
-### Couldn't download service: invalid signature?
-
-If you get this error during the first installation, there is now a newer version of this service and the old version can no longer be downloaded.
-
-Please create a new [issue](https://github.com/electronfriends/wemp/issues/new) so that we can take care of updating the version as soon as possible.
-
 ### How can I have Wemp start automatically at startup?
 
 Press the Windows key and R, type `shell:startup` and press Enter. This will open the Explorer, where you'll need to create a shortcut of Wemp.
