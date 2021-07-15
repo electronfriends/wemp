@@ -1,9 +1,9 @@
 <p align="center">
-    <img src="https://user-images.githubusercontent.com/69470382/100293903-809f2000-2f85-11eb-8481-912fd686c487.png">
+    <img src="https://user-images.githubusercontent.com/69470382/125867402-6a8af134-1e03-4d98-b1df-c347a2849c4e.png">
 </p>
 
 <p align="center">
-    <a href="releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
+    <a href="https://github.com/electronfriends/wemp/releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
     <a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg?style=flat-square" alt="Latest Stable Version"></a>
     <a href="https://github.com/electronfriends/wemp/issues"><img src="https://img.shields.io/github/issues/electronfriends/wemp.svg?style=flat-square" alt="GitHub Issues"></a>
     <a href="LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg?style=flat-square" alt="License"></a>
@@ -11,9 +11,9 @@
 
 ## Introduction
 
-Wemp is a menu for managing [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
+Wemp is a menu to easily manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
 
-You can open the menu in the notification area and manage all services directly from there.
+Click on the icon in the notification area to open the menu and manage the services from there.
 
 <p align="center"><img src="https://user-images.githubusercontent.com/69470382/107984444-3ba8e980-6fc8-11eb-8784-c714c8961ae4.png"></p>
 
@@ -21,37 +21,37 @@ You can open the menu in the notification area and manage all services directly 
 
 - **Easy to use** for both beginners and experienced web developers.
 
-- **Regular updates** so that you always have the latest versions.
+- **Regular updates** to keep you up to date with the latest versions.
 
-- **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net/).
+- **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net).
 
-- **Error logging** to make your life easier.
+- **Error logging** in a separate log file to quickly determine the cause of errors.
 
-- **Monitoring** to restart services automatically if the configuration has been changed.
+- **Monitoring** of configuration files in order to restart services automatically.
 
 ## Installation
 
-1. Download and run the latest Wemp installer from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
+1. Download and run the latest Wemp setup from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
 
-2. Choose an installation path for the services (default is C:\Wemp).
+2. Choose an installation path for the services (default is `C:\Wemp`).
 
-3. As soon as everything has been downloaded and extracted, the services will start automatically.
+3. As soon as everything has been downloaded and extracted, the services will start automatically and a notification appears.
 
-4. Go to http://localhost/ or http://localhost/phpmyadmin/ and get started.
+4. You can now get started at http://localhost or manage your database at http://localhost/phpmyadmin.
 
-If you need help with anything, create a new [issue](https://github.com/electronfriends/wemp/issues/new) and we will be happy to help.
+If you need help with anything, [create a new issue](https://github.com/electronfriends/wemp/issues/new) and we will be happy to help.
 
 ## FAQs
 
 ### How can I have Wemp start automatically at startup?
 
-Press the Windows key and R, type `shell:startup` and press Enter. This will open the Explorer, where you'll need to create a shortcut of Wemp.
+Press the Windows key + R, type `shell:startup` and press the Enter key. This will open the Explorer, where you'll need to create a shortcut of Wemp.
 
 Once you have done that, Wemp will start automatically at startup.
 
 ### Will my stuff be deleted if I uninstall Wemp?
 
-No. Your stuff and the services are separate from Wemp and will never be touched.
+No, don't worry about that. The services are separate from Wemp and will never be removed.
 
 ## Credits
 
@@ -59,7 +59,7 @@ No. Your stuff and the services are separate from Wemp and will never be touched
 
 ## Contributing
 
-Thank you for your interest in contributing to Wemp. If you've found a bug or have a feature suggestion, please let us know by creating a new [issue](https://github.com/electronfriends/wemp/issues/new).
+Thank you for your interest in contributing to Wemp. If you've found a bug or have a feature suggestion, please let us know by [creating a new issue](https://github.com/electronfriends/wemp/issues/new).
 
 ## License
 
