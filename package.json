@@ -1,7 +1,16 @@
 {
   "name": "wemp",
   "version": "0.3.6",
-  "description": "Wemp is a menu for managing Nginx, MariaDB and PHP on Windows.",
+  "description": "Wemp is a menu to easily manage Nginx, MariaDB and PHP on Windows.",
+  "homepage": "https://github.com/electronfriends/wemp#readme",
+  "bugs": {
+    "url": "https://github.com/electronfriends/wemp/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/electronfriends/wemp.git"
+  },
+  "license": "MIT",
   "author": "ElectronFriends",
   "main": "dist/bundle.js",
   "scripts": {
@@ -10,15 +19,6 @@
     "deploy": "npm run build && electron-builder --publish always",
     "package": "npm run build:dev && electron-builder --publish never",
     "start": "npm run build:dev && electron ."
-  },
-  "license": "MIT",
-  "homepage": "https://github.com/electronfriends/wemp#readme",
-  "bugs": {
-    "url": "https://github.com/electronfriends/wemp/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/electronfriends/wemp.git"
   },
   "dependencies": {
     "electron-settings": "^4.0.2",
