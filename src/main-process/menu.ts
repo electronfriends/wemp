@@ -3,15 +3,17 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 
 import config from '../config'
-import { startService, stopService } from './service'
+import { startService, stopService } from './manager'
 
-export let menu: Menu = new Menu()
+export const menu: Menu = new Menu()
 export let tray: Tray
 
 /**
- * Create context menu for the system tray.
+ * Create the context menu for the notification area.
+ *
+ * @returns {void}
  */
-export function createMenu() {
+export function createMenu(): void {
     menu.append(new MenuItem({
         icon: path.join(config.paths.icons, 'wemp.png'),
         label: `Wemp ${app.getVersion()}`,
@@ -80,11 +82,11 @@ export function createMenu() {
 
     menu.append(new MenuItem({
         icon: path.join(config.paths.icons, 'stop.png'),
-        label: 'Shutdown',
+        label: 'Quit Wemp',
         click: () => app.quit()
     }))
 
-    // Create the tray
+    // Create the system tray
     tray = new Tray(path.join(config.paths.icons, 'wemp.png'))
     tray.setContextMenu(menu)
     tray.setToolTip('Click to manage Nginx, MariaDB and PHP')
@@ -94,16 +96,17 @@ export function createMenu() {
 /**
  * Update the status of a menu item.
  *
- * @param service Name of the service
- * @param isStarted Whether the service is started
+ * @param name The name of the service.
+ * @param isRunning Whether the service is running.
+ * @returns {void}
  */
-export function updateMenuStatus(service, isStarted = true) {
-    if (menu.getMenuItemById(service)) {
-        const startItem = menu.getMenuItemById(`${service}-start`)
-        const stopItem = menu.getMenuItemById(`${service}-stop`)
-        const restartItem = menu.getMenuItemById(`${service}-restart`)
+export function updateMenuStatus(name: string, isRunning: boolean): void {
+    if (menu.getMenuItemById(name)) {
+        const start = menu.getMenuItemById(`${name}-start`)
+        const restart = menu.getMenuItemById(`${name}-restart`)
+        const stop = menu.getMenuItemById(`${name}-stop`)
 
-        if (startItem) startItem.enabled = !isStarted
-        if (stopItem && restartItem) stopItem.enabled = restartItem.enabled = !startItem?.enabled
+        if (start) start.enabled = !isRunning
+        if (restart && stop) restart.enabled = stop.enabled = isRunning
     }
 }

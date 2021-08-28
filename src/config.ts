@@ -3,16 +3,15 @@ import settings from 'electron-settings'
 import path from 'path'
 
 /**
- * Configuration
- *
- * The paths and services are registered here.
+ * This is the configuration of Wemp that contains all paths and services.
+ * If a new version of a service is released, it must be updated here.
+ * @returns {Object}
  */
 export default {
     paths: {
         icons: path.join(app.getAppPath(), 'icons'),
         logs: path.join(app.getPath('userData'), 'wemp.log'),
-        services: settings.getSync('path')?.toString() || 'C:\\Wemp',
-        stubs: path.join(app.getAppPath(), 'stubs')
+        services: settings.getSync('path')?.toString() || 'C:\\Wemp'
     },
     services: [
         {

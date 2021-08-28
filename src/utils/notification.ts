@@ -3,13 +3,13 @@ import { Notification, shell } from 'electron'
 import config from '../config'
 
 /**
- * Send notification when a service is being downloaded.
+ * Show this notification when a service is being downloaded.
  *
- * @param service Service configuration
- * @param isUpdate Whether it's an update or first download
- * @returns Notification
+ * @param service Service configuration.
+ * @param isUpdate Whether it is an update or first installation.
+ * @returns {Notification}
  */
-export function onServiceDownload(service, isUpdate) {
+export function onServiceDownload(service: any, isUpdate: boolean): Notification {
     const notification = new Notification({
         title: isUpdate
             ? `Updating ${service.name} to ${service.version} ...`
@@ -25,11 +25,12 @@ export function onServiceDownload(service, isUpdate) {
 }
 
 /**
- * Send notification when a service could not be downloaded.
+ * Show this notification when a service could not be downloaded.
  *
- * @param name Service name
+ * @param name The name of the service.
+ * @returns {void}
  */
-export function onServiceDownloadError(name) {
+export function onServiceDownloadError(name: string): void {
     const notification = new Notification({
         title: `${name} could not be downloaded or installed!`,
         body: 'There was an error downloading or installing the service. Click to open the error logs.',
@@ -37,30 +38,16 @@ export function onServiceDownloadError(name) {
     })
 
     notification.on('click', () => shell.openPath(config.paths.logs))
-
     notification.show()
 }
 
 /**
- * Send notification when all services are ready.
- */
-export function onServicesReady() {
-    const notification = new Notification({
-        title: 'Welcome to Wemp!',
-        body: 'All services have started and can now be managed via the menu in the notification area.',
-        silent: true,
-        timeoutType: 'never'
-    })
-
-    notification.show()
-}
-
-/**
- * Send notification when a service has stopped working.
+ * Show this notification when a service has stopped working.
  *
- * @param name Service name
+ * @param name The name of the service.
+ * @returns {void}
  */
-export function onServiceError(name) {
+ export function onServiceError(name: string): void {
     const notification = new Notification({
         title: `${name} has stopped working!`,
         body: 'An unexpected error occurred while running the process. Click to open the error logs.',
@@ -68,6 +55,21 @@ export function onServiceError(name) {
     })
 
     notification.on('click', () => shell.openPath(config.paths.logs))
+    notification.show()
+}
+
+/**
+ * Show this notification when all services are ready.
+ *
+ * @returns {void}
+ */
+export function onServicesReady(): void {
+    const notification = new Notification({
+        title: 'All services have started!',
+        body: 'You can now manage them in the notification area by clicking the Wemp icon.',
+        silent: true,
+        timeoutType: 'never'
+    })
 
     notification.show()
 }

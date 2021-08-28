@@ -1,10 +1,9 @@
-appId: "com.electronfriends.wemp"
 productName: "Wemp"
+appId: "com.electronfriends.wemp"
 
 files:
   - "dist/"
   - "icons/"
-  - "stubs/"
 
 nsis:
   deleteAppDataOnUninstall: true

@@ -1,31 +1,43 @@
-import { exec } from 'child_process'
+import { ChildProcess, exec } from 'child_process'
 import path from 'path'
 
 import config from '../config'
-import { updateMenuStatus } from '../main-process/menu'
-import * as logger from '../utils/logger'
-import { onServiceError } from '../utils/notification'
 
-const servicePath = path.join(config.paths.services, 'nginx')
+/**
+ * The absolute path to the service.
+ */
+const servicePath: string = path.join(config.paths.services, 'nginx')
+
+/**
+ * The child process of the service.
+ */
+let process: ChildProcess
 
 /**
  * Start the service.
+ *
+ * @returns {Promise}
  */
-export function start() {
-    exec('tasklist | find /i "nginx.exe" > nul || nginx.exe', { cwd: servicePath }, (error, stdout, stderr) => {
-        if (error) {
-            logger.write(error, updateMenuStatus('Nginx', false))
-            return
-        }
-
-        if (stdout) logger.write(stdout)
-        if (stderr) logger.write(stderr, onServiceError('Nginx'))
+export function start(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        process = exec('nginx.exe', { cwd: servicePath }, error => {
+            if (error && !error.killed) return reject(error)
+            resolve()
+        })
     })
 }
 
 /**
  * Stop the service.
+ * @returns {Promise}
  */
-export function stop() {
-    exec('taskkill /IM "nginx.exe" /F')
+export function stop(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        process.kill()
+
+        exec('taskkill /IM "nginx.exe" /F', error => {
+            if (error) return reject(error)
+            resolve()
+        })
+    })
 }

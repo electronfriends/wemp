@@ -1,19 +1,26 @@
-import { exec } from 'child_process'
+import { ChildProcess, exec } from 'child_process'
 import path from 'path'
 
 import config from '../config'
-import { updateMenuStatus } from '../main-process/menu'
-import * as logger from '../utils/logger'
-import { onServiceError } from '../utils/notification'
-
-const servicePath = path.join(config.paths.services, 'mariadb/bin')
 
 /**
- * Called when the service is first installed.
+ * The absolute path to the service.
  */
-export function install() {
+const servicePath: string = path.join(config.paths.services, 'mariadb', 'bin')
+
+/**
+ * The child process of the service.
+ */
+let process: ChildProcess
+
+/**
+ * MariaDB needs to be installed before the first start.
+ *
+ * @returns {Promise}
+ */
+export function install(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        exec('mysql_install_db.exe', { cwd: servicePath }, (error) => {
+        exec('mysql_install_db.exe', { cwd: servicePath }, error => {
             if (error) return reject(error)
             resolve()
         })
@@ -22,22 +29,29 @@ export function install() {
 
 /**
  * Start the service.
+ *
+ * @returns {Promise}
  */
-export function start() {
-    exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', { cwd: servicePath }, (error, stdout, stderr) => {
-        if (error) {
-            logger.write(error, updateMenuStatus('MariaDB', false))
-            return
-        }
-
-        if (stdout) logger.write(stdout)
-        if (stderr && !stderr.includes('[Note]')) logger.write(stderr, onServiceError('MariaDB'))
+export function start(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        process = exec('mariadbd.exe', { cwd: servicePath }, error => {
+            if (error && !error.killed) return reject(error)
+            resolve()
+        })
     })
 }
 
 /**
  * Stop the service.
+ * @returns {Promise}
  */
-export function stop() {
-    exec('taskkill /IM "mariadbd.exe" /F')
+export function stop(): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+        process.kill()
+
+        exec('taskkill /IM "mariadbd.exe" /F', error => {
+            if (error) return reject(error)
+            resolve()
+        })
+    })
 }

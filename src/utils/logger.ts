@@ -8,13 +8,13 @@ import config from '../config'
 const stream = fs.createWriteStream(config.paths.logs)
 
 /**
- * Write to the log file.
+ * Write something to the log file.
  *
- * @param message Message
- * @param callback Optional callback
+ * @param message The message.
+ * @param callback An optional callback.
  */
-export function write(message, callback?) {
-    const msg = new Date() + ' - ' + message + '\n'
+export function write(message: any, callback?: any) {
+    const msg = new Date().toISOString() + '  ' + message + '\n'
 
     if (typeof callback === 'function') {
         stream.on('finish', callback)

@@ -1,6 +1,6 @@
 {
   "name": "wemp",
-  "version": "0.3.7",
+  "version": "0.4.0",
   "description": "Wemp is a menu to easily manage Nginx, MariaDB and PHP on Windows.",
   "homepage": "https://github.com/electronfriends/wemp#readme",
   "bugs": {
@@ -23,11 +23,12 @@
   "dependencies": {
     "electron-settings": "^4.0.2",
     "electron-updater": "^4.3.9",
-    "request": "^2.88.2",
+    "node-fetch": "^2.6.1",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "@types/request": "^2.48.7",
+    "@types/node": "^16.7.4",
+    "@types/node-fetch": "^2.5.12",
     "@types/unzipper": "^0.10.4",
     "electron": "^13.2.2",
     "electron-builder": "^22.11.7",

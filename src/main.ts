@@ -1,36 +1,34 @@
-import { app, BrowserWindow } from 'electron'
+import { app } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
+import { checkServices, startServices, stopServices } from './main-process/manager'
 import { createMenu, tray } from './main-process/menu'
-import { checkServices, startServices, stopServices } from './main-process/service'
+import { onServicesReady } from './utils/notification'
 
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
     app.quit()
 } else {
-    // Set Application User Model ID
+    // Set the Application User Model ID
     app.setAppUserModelId('com.electronfriends.wemp')
-
-    // Stop all running services before quitting
-    app.on('before-quit', event => {
-        event.preventDefault()
-        stopServices()
-        app.exit()
-    })
 
     // Someone tried to run a second instance, we should focus the tray
     app.on('second-instance', () => {
         if (tray) tray.focus()
     })
 
-    // Create application when ready
-    app.on('ready', async () => {
-        new BrowserWindow({ show: false })
+    // Stop all services before quitting
+    app.on('before-quit', async (event) => {
+        event.preventDefault()
+        await stopServices()
+        app.exit()
+    })
 
-        await checkServices()
-        createMenu()
-        startServices()
+    // Set everything up as soon as our application is ready
+    app.whenReady().then(async () => {
+        await checkServices().then(createMenu)
+        await startServices().then(onServicesReady)
 
         if (app.isPackaged) {
             autoUpdater.checkForUpdatesAndNotify()
