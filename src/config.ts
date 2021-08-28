@@ -29,7 +29,7 @@ export default {
         },
         {
             name: 'PHP',
-            version: '8.0.9',
+            version: '8.0.10',
             config: 'php.ini',
             ignore: ['extras/'],
             url: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip'
