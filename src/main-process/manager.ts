@@ -49,7 +49,7 @@ export async function checkServices(): Promise<void> {
                         await services[service.name].install()
                     } else {
                         // Download the stub configuration file from GitHub
-                        const response = await fetch(`https://github.com/electronfriends/wemp/raw/master/stubs/${serviceName}/${service.config}`)
+                        const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`)
                         const data = await response.text()
 
                         // Replace the placeholder for the services path
