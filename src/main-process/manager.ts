@@ -64,6 +64,21 @@ export async function checkServices(): Promise<void> {
 
             notification.close()
         }
+
+        // Watch for configuration file changes
+        if (!service.interface) {
+            const serviceConfig = path.join(servicePath, service.config)
+
+            if (fs.existsSync(serviceConfig)) {
+                let debounce: NodeJS.Timeout | null
+
+                fs.watch(serviceConfig, (event, filename) => {
+                    if (!filename || debounce) return
+                    debounce = setTimeout(() => debounce = null, 1000)
+                    stopService(service.name, true)
+                })
+            }
+        }
     }
 }
 
