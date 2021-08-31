@@ -13,7 +13,7 @@ import { updateMenuStatus } from './menu'
 /**
  * Store the service objects in an array.
  */
-export const services: any = []
+const services: any = []
 
 /**
  * Check if any of the services need to be installed or updated.
