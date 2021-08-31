@@ -13,7 +13,7 @@ import config from '../config'
  * @param isUpdate Whether it is an update or first installation.
  * @returns {Promise}
  */
-export default async function download(service: any, isUpdate: boolean): Promise<any> {
+export default async function download(service: any, isUpdate: boolean): Promise<void> {
     const serviceName = service.name.toLowerCase()
     const servicePath = path.join(config.paths.services, serviceName)
 
@@ -21,11 +21,12 @@ export default async function download(service: any, isUpdate: boolean): Promise
         fs.mkdirSync(servicePath)
     }
 
-    const url = service.url.replace(/{version}/g, service.version)
-    const response = await fetch(url)
+    const response = await fetch(service.url.replace(/{version}/g, service.version))
 
     await new Promise<void>((resolve, reject) => {
-        response.body.pipe(unzipper.Parse())
+        if (!response.ok) throw new Error(`Unexpected response: ${response.statusText}`)
+
+        response.body?.pipe(unzipper.Parse())
             .on('entry', entry => {
                 let fileName = entry.path
 

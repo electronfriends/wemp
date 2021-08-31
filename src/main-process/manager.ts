@@ -50,10 +50,10 @@ export async function checkServices(): Promise<void> {
                     } else {
                         // Download the stub configuration file from GitHub
                         const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`)
-                        const data = await response.text()
+                        const body = await response.text()
 
                         // Replace the placeholder for the services path
-                        const content = data.replace('{servicesPath}', config.paths.services)
+                        const content = body.replace('{servicesPath}', config.paths.services)
 
                         fs.writeFileSync(path.join(servicePath, service.config), content)
                     }
