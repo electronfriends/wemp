@@ -20,7 +20,7 @@ let process: ChildProcess
  */
 export function start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        process = exec('nginx.exe', { cwd: servicePath }, error => {
+        process = exec('tasklist | find /i "nginx.exe" > nul || nginx.exe', { cwd: servicePath }, error => {
             if (error && !error.killed) return reject(error)
             resolve()
         })
@@ -33,7 +33,7 @@ export function start(): Promise<void> {
  */
 export function stop(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        process.kill()
+        if (process) process.kill()
 
         exec('taskkill /IM "nginx.exe" /F', error => {
             if (error) return reject(error)

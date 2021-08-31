@@ -34,7 +34,7 @@ export function install(): Promise<void> {
  */
 export function start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        process = exec('mariadbd.exe', { cwd: servicePath }, error => {
+        process = exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', { cwd: servicePath }, error => {
             if (error && !error.killed) return reject(error)
             resolve()
         })
@@ -47,7 +47,7 @@ export function start(): Promise<void> {
  */
 export function stop(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        process.kill()
+        if (process) process.kill()
 
         exec('taskkill /IM "mariadbd.exe" /F', error => {
             if (error) return reject(error)
