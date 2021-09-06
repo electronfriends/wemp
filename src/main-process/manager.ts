@@ -121,8 +121,8 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         service.start()
             .then(updateMenuStatus(name, true))
-            .catch(e => {
-                logger.write(e, updateMenuStatus(name, false))
+            .catch(error => {
+                logger.write(error, updateMenuStatus(name, false))
                 onServiceError(name)
             })
     } else {
@@ -138,7 +138,7 @@ export async function startService(name: string): Promise<void> {
 export async function startServices(): Promise<void> {
     for (const service of config.services) {
         if (service.interface) continue
-        await startService(service.name)
+        startService(service.name)
     }
 }
 
@@ -173,6 +173,6 @@ export async function stopService(name: string, shouldRestart: boolean = false):
 export async function stopServices(): Promise<void> {
     for (const service of config.services) {
         if (service.interface) continue
-        await stopService(service.name)
+        stopService(service.name)
     }
 }
