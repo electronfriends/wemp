@@ -23,7 +23,7 @@ const services: any = []
 export async function checkServices(): Promise<void> {
     if (!fs.existsSync(config.paths.services)) {
         fs.mkdirSync(config.paths.services)
-        await setupServicesPath()
+        await setServicesPath()
     }
 
     for (const service of config.services) {
@@ -44,10 +44,7 @@ export async function checkServices(): Promise<void> {
                 await download(service, !isFirstDownload)
 
                 if (isFirstDownload) {
-                    // MariaDB doesn't need a stub, it just needs to be installed
-                    if (service.name === 'MariaDB') {
-                        await services[service.name].install()
-                    } else {
+                    if (service.name !== 'MariaDB') {
                         // Download the stub configuration file from GitHub
                         const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`)
                         const body = await response.text()
@@ -56,10 +53,13 @@ export async function checkServices(): Promise<void> {
                         const content = body.replace('{servicesPath}', config.paths.services)
 
                         fs.writeFileSync(path.join(servicePath, service.config), content)
+                    } else {
+                        // MariaDB doesn't need a stub, it just needs to be installed
+                        await services[service.name].install()
                     }
                 }
-            } catch (e) {
-                logger.write(e, onServiceDownloadError(service.name))
+            } catch (error) {
+                logger.write(error, onServiceDownloadError(service.name))
             }
 
             notification.close()
@@ -87,7 +87,7 @@ export async function checkServices(): Promise<void> {
  *
  * @returns {Promise}
  */
-export async function setupServicesPath(): Promise<void> {
+export async function setServicesPath(): Promise<void> {
     const result = await dialog.showOpenDialog({
         title: 'Choose a folder where the services will be installed',
         defaultPath: config.paths.services,
@@ -105,7 +105,7 @@ export async function setupServicesPath(): Promise<void> {
         }
     }
 
-    settings.setSync({ path: servicesPath })
+    settings.setSync('path', servicesPath)
     config.paths.services = servicesPath
 }
 
@@ -121,7 +121,7 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         service.start()
             .then(updateMenuStatus(name, true))
-            .catch(error => {
+            .catch((error) => {
                 logger.write(error, updateMenuStatus(name, false))
                 onServiceError(name)
             })
@@ -168,11 +168,12 @@ export async function stopService(name: string, shouldRestart: boolean = false):
 /**
  * Stop all services.
  *
+ * @param shouldRestart Whether the services should restart.
  * @returns {Promise}
  */
-export async function stopServices(): Promise<void> {
+export async function stopServices(shouldRestart: boolean = false): Promise<void> {
     for (const service of config.services) {
         if (service.interface) continue
-        stopService(service.name)
+        stopService(service.name, shouldRestart)
     }
 }

@@ -4,11 +4,6 @@ import path from 'path'
 import config from '../config'
 
 /**
- * The absolute path to the service.
- */
-const servicePath: string = path.join(config.paths.services, 'mariadb', 'bin')
-
-/**
  * The child process of the service.
  */
 let process: ChildProcess
@@ -20,7 +15,9 @@ let process: ChildProcess
  */
 export function install(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        exec('mysql_install_db.exe', { cwd: servicePath }, error => {
+        exec('mysql_install_db.exe', {
+            cwd: path.join(config.paths.services, 'mariadb', 'bin')
+        }, error => {
             if (error) return reject(error)
             resolve()
         })
@@ -34,7 +31,9 @@ export function install(): Promise<void> {
  */
 export function start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
-        process = exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', { cwd: servicePath }, error => {
+        process = exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', {
+            cwd: path.join(config.paths.services, 'mariadb', 'bin')
+        }, (error) => {
             if (error && !error.killed) return reject(error)
             resolve()
         })
@@ -49,7 +48,7 @@ export function stop(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         if (process) process.kill()
 
-        exec('taskkill /IM "mariadbd.exe" /F', error => {
+        exec('taskkill /IM "mariadbd.exe" /F', (error) => {
             if (error) return reject(error)
             resolve()
         })

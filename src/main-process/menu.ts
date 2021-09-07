@@ -3,7 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 
 import config from '../config'
-import { startService, stopService } from './manager'
+import { setServicesPath, startService, stopService, stopServices } from './manager'
 
 export const menu: Menu = new Menu()
 export let tray: Tray
@@ -18,7 +18,23 @@ export function createMenu(): void {
         icon: path.join(config.paths.icons, 'wemp.png'),
         label: `Wemp ${app.getVersion()}`,
         sublabel: 'by ElectronFriends',
-        click: () => shell.openPath(config.paths.logs)
+        submenu: [
+            {
+                icon: path.join(config.paths.icons, 'restart.png'),
+                label: 'Restart All Services',
+                click: () => stopServices(true)
+            },
+            {
+                icon: path.join(config.paths.icons, 'folder.png'),
+                label: 'Set Services Path',
+                click: () => setServicesPath().then(() => stopServices(true))
+            },
+            {
+                icon: path.join(config.paths.icons, 'event-log.png'),
+                label: 'View Logs',
+                click: () => shell.openPath(config.paths.logs)
+            }
+        ]
     }))
 
     menu.append(new MenuItem({ type: 'separator' }))
@@ -40,7 +56,7 @@ export function createMenu(): void {
                 },
                 { type: 'separator' },
                 {
-                    icon: path.join(config.paths.icons, 'start.png'),
+                    icon: path.join(config.paths.icons, 'circled-play.png'),
                     id: `${service.name}-start`,
                     label: 'Start',
                     click: () => startService(service.name)
@@ -52,19 +68,19 @@ export function createMenu(): void {
                     click: () => stopService(service.name, true)
                 },
                 {
-                    icon: path.join(config.paths.icons, 'stop.png'),
+                    icon: path.join(config.paths.icons, 'shutdown.png'),
                     id: `${service.name}-stop`,
                     label: 'Stop',
                     click: () => stopService(service.name)
                 },
                 { type: 'separator' },
                 {
-                    icon: path.join(config.paths.icons, 'file.png'),
+                    icon: path.join(config.paths.icons, 'gear.png'),
                     label: 'Open Configuration',
                     click: () => shell.openPath(path.join(config.paths.services, serviceName, service.config))
                 },
                 {
-                    icon: path.join(config.paths.icons, 'explorer.png'),
+                    icon: path.join(config.paths.icons, 'file-explorer.png'),
                     label: 'Open Directory',
                     click: () => shell.openPath(path.join(config.paths.services, serviceName))
                 }
@@ -75,13 +91,13 @@ export function createMenu(): void {
     menu.append(new MenuItem({ type: 'separator' }))
 
     menu.append(new MenuItem({
-        icon: path.join(config.paths.icons, 'updates.png'),
+        icon: path.join(config.paths.icons, 'update.png'),
         label: 'Check for Updates',
         click: () => autoUpdater.checkForUpdatesAndNotify()
     }))
 
     menu.append(new MenuItem({
-        icon: path.join(config.paths.icons, 'stop.png'),
+        icon: path.join(config.paths.icons, 'shutdown.png'),
         label: 'Quit Wemp',
         click: () => app.quit()
     }))

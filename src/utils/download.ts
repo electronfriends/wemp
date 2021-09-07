@@ -27,7 +27,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
         if (!response.ok) throw new Error(`Unexpected response: ${response.statusText}`)
 
         response.body?.pipe(unzipper.Parse())
-            .on('entry', entry => {
+            .on('entry', (entry) => {
                 let fileName = entry.path
 
                 // We assume that only PHP doesn't put the files inside a directory
@@ -51,9 +51,9 @@ export default async function download(service: any, isUpdate: boolean): Promise
                     entry.autodrain()
                 }
             })
-            .on('error', err => {
+            .on('error', (error) => {
                 // Fallback to archives if PHP has a newer version
-                if (service.name === 'PHP' && err.message.includes('invalid signature')) {
+                if (service.name === 'PHP' && error.message.includes('invalid signature')) {
                     service.url = service.url.replace('releases/', 'releases/archives/')
 
                     return download(service, isUpdate)
@@ -61,7 +61,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
                         .then(reject)
                 }
 
-                reject(err)
+                reject(error)
             })
             .on('finish', () => {
                 settings.setSync(serviceName, service.version)
