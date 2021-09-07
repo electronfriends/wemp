@@ -51,11 +51,17 @@ Once you have done that, Wemp will start automatically at startup.
 
 ### Will my stuff be deleted if I uninstall Wemp?
 
-No, don't worry about that. The services are separate from Wemp and will never be removed.
+No, definitely not. The services are separate from Wemp and will never be removed.
 
-## Credits
+## Thanks to
 
-- [Icons8.com](https://icons8.com) for the icons used in the menu.
+- [Electron](https://www.electronjs.org) for the possibility of creating a Windows application with JavaScript.
+
+- [Nginx](https://nginx.org), [MariaDB](https://mariadb.org), [PHP](https://php.net) and [phpMyAdmin](https://www.phpmyadmin.net) for everything.
+
+- [Icons8.com](https://icons8.com) for the free [Fluency](https://icons8.com/icon/set/logs/fluency) icons that we use in our menu.
+
+- And all the other dependencies we use to make Wemp great.
 
 ## Contributing
 
