@@ -26,6 +26,7 @@ export function start(): Promise<void> {
 
 /**
  * Stop the service.
+ *
  * @returns {Promise}
  */
 export function stop(): Promise<void> {

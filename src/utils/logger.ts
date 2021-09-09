@@ -11,9 +11,10 @@ const stream = fs.createWriteStream(config.paths.logs)
  * Write something to the log file.
  *
  * @param message The message.
- * @param callback An optional callback.
+ * @param callback Callback that should be executed after writing.
+ * @returns {void}
  */
-export function write(message: any, callback?: any) {
+export function write(message: any, callback?: any): void {
     const msg = new Date().toISOString() + '  ' + message + '\n'
 
     if (typeof callback === 'function') {

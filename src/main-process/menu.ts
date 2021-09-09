@@ -5,7 +5,14 @@ import path from 'path'
 import config from '../config'
 import { setServicesPath, startService, stopService, stopServices } from './manager'
 
+/**
+ * The context menu.
+ */
 export const menu: Menu = new Menu()
+
+/**
+ * The system tray to open the context menu.
+ */
 export let tray: Tray
 
 /**
