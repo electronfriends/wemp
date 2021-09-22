@@ -27,14 +27,14 @@
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "@types/node": "^16.9.0",
+    "@types/node": "^16.9.6",
     "@types/node-fetch": "^3.0.2",
     "@types/unzipper": "^0.10.4",
-    "electron": "^14.0.0",
+    "electron": "^15.0.0",
     "electron-builder": "^22.11.7",
-    "ts-loader": "^9.2.5",
-    "typescript": "^4.4.2",
-    "webpack": "^5.52.0",
+    "ts-loader": "^9.2.6",
+    "typescript": "^4.4.3",
+    "webpack": "^5.53.0",
     "webpack-cli": "^4.8.0"
   }
 }
