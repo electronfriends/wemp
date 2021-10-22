@@ -10,14 +10,12 @@ let process: ChildProcess
 
 /**
  * MariaDB needs to be installed before the first start.
- *
- * @returns {Promise}
  */
 export function install(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         exec('mysql_install_db.exe', {
             cwd: path.join(config.paths.services, 'mariadb', 'bin')
-        }, error => {
+        }, (error) => {
             if (error) return reject(error)
             resolve()
         })
@@ -26,15 +24,14 @@ export function install(): Promise<void> {
 
 /**
  * Start the service.
- *
- * @returns {Promise}
  */
 export function start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         process = exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', {
             cwd: path.join(config.paths.services, 'mariadb', 'bin')
-        }, (error) => {
+        }, (error, stdout, stderr) => {
             if (error && !error.killed) return reject(error)
+            if (stderr && !stderr.includes('[Notice]')) return reject(stderr)
             resolve()
         })
     })
@@ -42,8 +39,6 @@ export function start(): Promise<void> {
 
 /**
  * Stop the service.
- *
- * @returns {Promise}
  */
 export function stop(): Promise<void> {
     return new Promise<void>((resolve, reject) => {

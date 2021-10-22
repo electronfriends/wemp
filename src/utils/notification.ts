@@ -5,9 +5,8 @@ import config from '../config'
 /**
  * Show this notification when a service is being downloaded.
  *
- * @param service Service configuration.
- * @param isUpdate Whether it is an update or first installation.
- * @returns {Notification}
+ * @param service - The service configuration
+ * @param isUpdate - Whether it is an update or first installation
  */
 export function onServiceDownload(service: any, isUpdate: boolean): Notification {
     const notification = new Notification({
@@ -27,8 +26,7 @@ export function onServiceDownload(service: any, isUpdate: boolean): Notification
 /**
  * Show this notification when a service could not be downloaded.
  *
- * @param name The name of the service.
- * @returns {void}
+ * @param name - The name of the service
  */
 export function onServiceDownloadError(name: string): void {
     const notification = new Notification({
@@ -44,13 +42,12 @@ export function onServiceDownloadError(name: string): void {
 /**
  * Show this notification when a service has stopped working.
  *
- * @param name The name of the service.
- * @returns {void}
+ * @param name - The name of the service
  */
  export function onServiceError(name: string): void {
     const notification = new Notification({
         title: `${name} has stopped working!`,
-        body: 'An unexpected error occurred while running the process. Click to open the error logs.',
+        body: 'An unexpected error occurred while running the service. Click to open the error logs.',
         timeoutType: 'never'
     })
 
@@ -59,16 +56,13 @@ export function onServiceDownloadError(name: string): void {
 }
 
 /**
- * Show this notification when all services are ready.
- *
- * @returns {void}
+ * Show this notification when the services are ready.
  */
 export function onServicesReady(): void {
     const notification = new Notification({
-        title: 'All services have started!',
-        body: 'You can now manage them in the notification area by clicking the Wemp icon.',
-        silent: true,
-        timeoutType: 'never'
+        title: 'The services have been started!',
+        body: 'You can now manage them by clicking on the Wemp icon in the notification area.',
+        silent: true
     })
 
     notification.show()

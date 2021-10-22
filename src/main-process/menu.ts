@@ -3,6 +3,7 @@ import { autoUpdater } from 'electron-updater'
 import path from 'path'
 
 import config from '../config'
+import * as logger from '../utils/logger'
 import { setServicesPath, startService, stopService, stopServices } from './manager'
 
 /**
@@ -17,8 +18,6 @@ export let tray: Tray
 
 /**
  * Create the context menu for the notification area.
- *
- * @returns {void}
  */
 export function createMenu(): void {
     menu.append(new MenuItem({
@@ -119,9 +118,8 @@ export function createMenu(): void {
 /**
  * Update the status of a menu item.
  *
- * @param name The name of the service.
- * @param isRunning Whether the service is running.
- * @returns {void}
+ * @param name - The name of the service
+ * @param isRunning - Whether the service is running
  */
 export function updateMenuStatus(name: string, isRunning: boolean): void {
     if (menu.getMenuItemById(name)) {
@@ -129,7 +127,14 @@ export function updateMenuStatus(name: string, isRunning: boolean): void {
         const restart = menu.getMenuItemById(`${name}-restart`)
         const stop = menu.getMenuItemById(`${name}-stop`)
 
-        if (start) start.enabled = !isRunning
-        if (restart && stop) restart.enabled = stop.enabled = isRunning
+        if (start) {
+            start.enabled = !isRunning
+        }
+
+        if (restart && stop) {
+            restart.enabled = stop.enabled = isRunning
+        }
+    } else {
+        logger.write(`Menu for service '${name}' does not exist.`)
     }
 }

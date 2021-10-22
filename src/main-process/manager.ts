@@ -17,8 +17,6 @@ const services: any = []
 
 /**
  * Check if any of the services need to be installed or updated.
- *
- * @returns {Promise}
  */
 export async function checkServices(): Promise<void> {
     if (!fs.existsSync(config.paths.services)) {
@@ -58,8 +56,8 @@ export async function checkServices(): Promise<void> {
                         await services[service.name].install()
                     }
                 }
-            } catch (error) {
-                logger.write(error, onServiceDownloadError(service.name))
+            } catch (error: any) {
+                logger.write(error.message, () => onServiceDownloadError(service.name))
             }
 
             notification.close()
@@ -84,8 +82,6 @@ export async function checkServices(): Promise<void> {
 
 /**
  * Set the path to the services.
- *
- * @returns {Promise}
  */
 export async function setServicesPath(): Promise<void> {
     const result = await dialog.showOpenDialog({
@@ -106,14 +102,14 @@ export async function setServicesPath(): Promise<void> {
     }
 
     settings.setSync('path', servicesPath)
+
     config.paths.services = servicesPath
 }
 
 /**
  * Start a service.
  *
- * @param name The name of the service.
- * @returns {Promise}
+ * @param name - The name of the service
  */
 export async function startService(name: string): Promise<void> {
     const service = services[name]
@@ -121,8 +117,8 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         service.start()
             .then(updateMenuStatus(name, true))
-            .catch((error) => {
-                logger.write(error, updateMenuStatus(name, false))
+            .catch((error: string) => {
+                logger.write(error, () => updateMenuStatus(name, false))
                 onServiceError(name)
             })
     } else {
@@ -132,12 +128,13 @@ export async function startService(name: string): Promise<void> {
 
 /**
  * Start all services.
- *
- * @returns {Promise}
  */
 export async function startServices(): Promise<void> {
     for (const service of config.services) {
-        if (service.interface) continue
+        if (service.interface) {
+            continue
+        }
+
         startService(service.name)
     }
 }
@@ -145,9 +142,8 @@ export async function startServices(): Promise<void> {
 /**
  * Stop a service.
  *
- * @param name The name of the service.
- * @param shouldRestart Whether the service should restart.
- * @returns {Promise}
+ * @param name - The name of the service
+ * @param shouldRestart - Whether the service should restart
  */
 export async function stopService(name: string, shouldRestart: boolean = false): Promise<void> {
     const service = services[name]
@@ -168,12 +164,14 @@ export async function stopService(name: string, shouldRestart: boolean = false):
 /**
  * Stop all services.
  *
- * @param shouldRestart Whether the services should restart.
- * @returns {Promise}
+ * @param shouldRestart - Whether the services should restart
  */
 export async function stopServices(shouldRestart: boolean = false): Promise<void> {
     for (const service of config.services) {
-        if (service.interface) continue
+        if (service.interface) {
+            continue
+        }
+
         stopService(service.name, shouldRestart)
     }
 }

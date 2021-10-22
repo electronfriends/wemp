@@ -9,8 +9,8 @@ import config from '../config'
 /**
  * Download and extract the service files.
  *
- * @param service Service configuration.
- * @param isUpdate Whether it is an update or first installation.
+ * @param service - The service configuration
+ * @param isUpdate - Whether it is an update or first installation
  * @returns {Promise}
  */
 export default async function download(service: any, isUpdate: boolean): Promise<void> {
@@ -23,7 +23,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
 
     const response = await fetch(service.url.replace(/{version}/g, service.version))
 
-    await new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
         if (!response.ok) throw new Error(`Unexpected response: ${response.statusText}`)
 
         response.body?.pipe(unzipper.Parse())

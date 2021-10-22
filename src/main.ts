@@ -13,12 +13,12 @@ if (!gotTheLock) {
     // Set the Application User Model ID
     app.setAppUserModelId('com.electronfriends.wemp')
 
-    // Someone tried to run a second instance, we should focus the tray
+    // Someone tried to run a second instance, we should focus our tray
     app.on('second-instance', () => {
         if (tray) tray.focus()
     })
 
-    // Stop all services before quitting
+    // Stop the services before quitting
     app.on('before-quit', async (event) => {
         event.preventDefault()
         await stopServices()

@@ -10,15 +10,14 @@ let process: ChildProcess
 
 /**
  * Start the service.
- *
- * @returns {Promise}
  */
 export function start(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         process = exec('tasklist | find /i "php-cgi.exe" > nul || php-cgi.exe -b 127.0.0.1:9000', {
             cwd: path.join(config.paths.services, 'php')
-        }, (error) => {
+        }, (error, stdout, stderr) => {
             if (error && !error.killed) return reject(error)
+            if (stderr) return reject(stderr)
             resolve()
         })
     })
@@ -26,8 +25,6 @@ export function start(): Promise<void> {
 
 /**
  * Stop the service.
- *
- * @returns {Promise}
  */
 export function stop(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
