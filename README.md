@@ -11,7 +11,7 @@
 
 Wemp is a simple menu for managing [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
 
-The goal is to always provide the latest version of these services without having to update them manually all the time.
+The goal is to always provide the latest version of these services without having to update them manually.
 
 ## Features
 
