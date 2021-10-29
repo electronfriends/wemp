@@ -11,7 +11,6 @@ import config from '../config'
  *
  * @param service - The service configuration
  * @param isUpdate - Whether it is an update or first installation
- * @returns {Promise}
  */
 export default async function download(service: any, isUpdate: boolean): Promise<void> {
     const serviceName = service.name.toLowerCase()
@@ -43,13 +42,13 @@ export default async function download(service: any, isUpdate: boolean): Promise
                     const fileDestPath = path.join(servicePath, fileName)
 
                     if (entry.type === 'Directory' && !fs.existsSync(fileDestPath)) {
-                        fs.mkdirSync(fileDestPath)
-                    } else {
-                        entry.pipe(fs.createWriteStream(fileDestPath))
+                        return fs.mkdirSync(fileDestPath)
+                    } else if (entry.type === 'File') {
+                        return entry.pipe(fs.createWriteStream(fileDestPath))
                     }
-                } else {
-                    entry.autodrain()
                 }
+
+                entry.autodrain()
             })
             .on('error', (error) => {
                 // Fallback to archives if PHP has a newer version

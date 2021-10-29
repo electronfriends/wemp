@@ -62,7 +62,8 @@ export function onServicesReady(): void {
     const notification = new Notification({
         title: 'The services have been started!',
         body: 'You can now manage them by clicking on the Wemp icon in the notification area.',
-        silent: true
+        silent: true,
+        timeoutType: 'never'
     })
 
     notification.show()

@@ -1,12 +1,13 @@
-import { ChildProcess, exec } from 'child_process'
+import { exec } from 'child_process'
 import path from 'path'
 
 import config from '../config'
+import Process from '../utils/process'
 
 /**
- * The child process of the service.
+ * The process instance of the service.
  */
-let process: ChildProcess
+export let process: Process
 
 /**
  * MariaDB needs to be installed before the first start.
@@ -16,7 +17,10 @@ export function install(): Promise<void> {
         exec('mysql_install_db.exe', {
             cwd: path.join(config.paths.services, 'mariadb', 'bin')
         }, (error) => {
-            if (error) return reject(error)
+            if (error) {
+                return reject(error)
+            }
+
             resolve()
         })
     })
@@ -26,27 +30,16 @@ export function install(): Promise<void> {
  * Start the service.
  */
 export function start(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        process = exec('tasklist | find /i "mariadbd.exe" > nul || mariadbd.exe', {
-            cwd: path.join(config.paths.services, 'mariadb', 'bin')
-        }, (error, stdout, stderr) => {
-            if (error && !error.killed) return reject(error)
-            if (stderr && !stderr.includes('[Notice]')) return reject(stderr)
-            resolve()
-        })
+    process = new Process('mariadbd.exe', [], {
+        cwd: path.join(config.paths.services, 'mariadb', 'bin')
     })
+
+    return process.run()
 }
 
 /**
  * Stop the service.
  */
 export function stop(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
-        if (process) process.kill()
-
-        exec('taskkill /IM "mariadbd.exe" /F', (error) => {
-            if (error) return reject(error)
-            resolve()
-        })
-    })
+    return process?.kill()
 }

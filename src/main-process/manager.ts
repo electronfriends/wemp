@@ -115,11 +115,11 @@ export async function startService(name: string): Promise<void> {
     const service = services[name]
 
     if (service) {
-        service.start()
-            .then(updateMenuStatus(name, true))
-            .catch((error: string) => {
-                logger.write(error, () => updateMenuStatus(name, false))
-                onServiceError(name)
+        await service.start()
+            .then(() => updateMenuStatus(name, true))
+            .catch((error) => {
+                updateMenuStatus(name, false)
+                logger.write(error, () => onServiceError(name))
             })
     } else {
         logger.write(`Service '${name}' does not exist.`)
@@ -135,7 +135,7 @@ export async function startServices(): Promise<void> {
             continue
         }
 
-        startService(service.name)
+        await startService(service.name)
     }
 }
 
@@ -150,11 +150,11 @@ export async function stopService(name: string, shouldRestart: boolean = false):
 
     if (service) {
         await service.stop()
-            .then(updateMenuStatus(name, false))
+            .then(() => updateMenuStatus(name, false))
             .catch(logger.write)
 
         if (shouldRestart) {
-            startService(name)
+            await startService(name)
         }
     } else {
         logger.write(`Service '${name}' does not exist.`)
@@ -172,6 +172,6 @@ export async function stopServices(shouldRestart: boolean = false): Promise<void
             continue
         }
 
-        stopService(service.name, shouldRestart)
+        await stopService(service.name, shouldRestart)
     }
 }

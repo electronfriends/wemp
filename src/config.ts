@@ -3,10 +3,8 @@ import settings from 'electron-settings'
 import path from 'path'
 
 /**
- * This is the configuration of Wemp that contains all paths and services.
- * If a new version of a service is released, it must be updated here.
- *
- * @returns {Object}
+ * This is the configuration of Wemp, which includes all services and paths.
+ * When a new version of a service is released, it must be updated here.
  */
 export default {
     paths: {
