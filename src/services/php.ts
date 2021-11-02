@@ -16,7 +16,7 @@ export function start(): Promise<void> {
         cwd: path.join(config.paths.services, 'php')
     })
 
-    return process.run()
+    return process.run(true)
 }
 
 /**

@@ -1,8 +1,6 @@
 import { ChildProcess, exec, execFile, ExecFileOptions } from 'child_process'
 import { ObjectEncodingOptions } from 'fs'
 
-import * as logger from '../utils/logger'
-
 export default class Process {
     private child: ChildProcess | null = null
     private command: string
@@ -51,23 +49,34 @@ export default class Process {
 
     /**
      * Run the child process.
+     * @param restartOnExit - Whether the process should be restarted on exit
      */
-    run(): Promise<void> {
-        return new Promise<void>(async (resolve, reject) => {
-            const status = await this.isRunning()
+    async run(restartOnExit: boolean = false): Promise<void> {
+        const status = await this.isRunning()
 
-            if (status) {
-                await this.kill()
-            }
+        if (status) {
+            await this.kill()
+        }
 
-            this.child = execFile(this.command, this.args, this.options, (error, stdout, stderr) => {
-                if (error && !error.killed) {
+        return new Promise<void>((resolve, reject) => {
+            this.child = execFile(this.command, this.args, this.options, (error) => {
+                if (error) {
+                    // The process was terminated on purpose
+                    if (error.killed) {
+                        return
+                    }
+
+                    // The process has returned an unexpected error
                     return reject(error)
                 }
 
-                if (stderr) {
-                    logger.write(stderr.toString())
+                // The process should be restarted
+                if (restartOnExit) {
+                    return this.run(true)
                 }
+
+                // There is no error, but the process was terminated
+                return reject(`The process '${this.command}' was terminated without error message.`)
             })
 
             resolve()

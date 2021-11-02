@@ -117,7 +117,7 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         await service.start()
             .then(() => updateMenuStatus(name, true))
-            .catch((error) => {
+            .catch((error: string) => {
                 updateMenuStatus(name, false)
                 logger.write(error, () => onServiceError(name))
             })
