@@ -10,6 +10,7 @@ export default class Process {
     /**
      * @constructor
      * @param command - The command to run
+     * @param args - The arguments
      * @param options - The options
      */
     constructor(command: string, args: string[], options: (ObjectEncodingOptions & ExecFileOptions) | null | undefined) {
