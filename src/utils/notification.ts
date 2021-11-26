@@ -17,7 +17,8 @@ export function onServiceDownload(service: any, isUpdate: boolean): Notification
         silent: true,
         timeoutType: 'never'
     })
-
+    
+    notification.on('click', () => notification.close())
     notification.show()
 
     return notification
@@ -65,6 +66,7 @@ export function onServicesReady(): void {
         silent: true,
         timeoutType: 'never'
     })
-
+    
+    notification.on('click', () => notification.close())
     notification.show()
 }
