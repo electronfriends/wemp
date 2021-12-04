@@ -11,13 +11,13 @@ import config from '../config'
 export function onServiceDownload(service: any, isUpdate: boolean): Notification {
     const notification = new Notification({
         title: isUpdate
-            ? `Updating ${service.name} to ${service.version} ...`
-            : `Downloading ${service.name} ${service.version} ...`,
+            ? `Updating ${service.name} to ${service.version}...`
+            : `Downloading ${service.name} ${service.version}...`,
         body: 'This may take a while, please wait and do not close the application.',
         silent: true,
         timeoutType: 'never'
     })
-    
+
     notification.on('click', () => notification.close())
     notification.show()
 
@@ -66,7 +66,7 @@ export function onServicesReady(): void {
         silent: true,
         timeoutType: 'never'
     })
-    
+
     notification.on('click', () => notification.close())
     notification.show()
 }
