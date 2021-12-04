@@ -81,7 +81,7 @@ export function createMenu(): void {
                 },
                 { type: 'separator' },
                 {
-                    icon: path.join(config.paths.icons, 'gear.png'),
+                    icon: path.join(config.paths.icons, 'settings.png'),
                     label: 'Open Configuration',
                     click: () => shell.openPath(path.join(config.paths.services, serviceName, service.config))
                 },
