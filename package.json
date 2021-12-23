@@ -27,7 +27,7 @@
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "@types/node": "^17.0.0",
+    "@types/node": "^17.0.4",
     "@types/node-fetch": "^3.0.2",
     "@types/unzipper": "^0.10.4",
     "electron": "^16.0.5",
