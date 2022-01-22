@@ -11,7 +11,7 @@
 
 Wemp is a simple menu for managing [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
 
-The goal is to always provide the latest version of these services without having to update them manually.
+The aim is to always provide the latest version of these services without having to update them manually.
 
 ## Features
 
@@ -41,7 +41,7 @@ If you need help with something, [create a new issue](https://github.com/electro
 
 ### How can I have Wemp start automatically at startup?
 
-Press the Windows key + R, type `shell:startup` and press the Enter key. This will open the Explorer, where you'll need to create a shortcut of Wemp.
+Press <kbd>Win</kbd> + <kbd>R</kbd>, type `shell:startup` and press <kbd>Enter</kbd>. This will open the Explorer, where you'll need to create a shortcut of Wemp.
 
 Once you have done that, Wemp will start automatically at startup.
 
@@ -57,7 +57,7 @@ No. The services are installed independently of Wemp and remain untouched when W
 
 - [Icons8.com](https://icons8.com) for the free [Fluency](https://icons8.com/icon/set/logs/fluency) icons that we use in our menu.
 
-- and all other dependencies we use to make Wemp work.
+- all other dependencies we use to make Wemp work.
 
 ## Contributing
 
