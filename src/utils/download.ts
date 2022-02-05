@@ -57,7 +57,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
 
                     return download(service, isUpdate)
                         .then(resolve)
-                        .then(reject)
+                        .catch(reject)
                 }
 
                 reject(error)
