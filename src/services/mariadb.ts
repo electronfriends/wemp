@@ -30,7 +30,7 @@ export function install(): Promise<void> {
  * Start the service.
  */
 export function start(): Promise<void> {
-    process = new Process('mariadbd.exe', [], {
+    process = new Process('MariaDB', 'mariadbd.exe', [], {
         cwd: path.join(config.paths.services, 'mariadb', 'bin')
     })
 

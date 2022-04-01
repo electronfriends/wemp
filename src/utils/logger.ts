@@ -2,10 +2,12 @@ import fs from 'fs'
 
 import config from '../config'
 
-/**
- * Create a write stream for the log file.
- */
-const stream = fs.createWriteStream(config.paths.logs)
+// Clear the log file at each startup
+fs.truncate(config.paths.logs, (error) => {
+    if (error) {
+        throw new Error('Could not truncate the log file: ' + error.message)
+    }
+})
 
 /**
  * Write something to the log file.
@@ -14,11 +16,17 @@ const stream = fs.createWriteStream(config.paths.logs)
  * @param callback - An optional callback
  */
 export function write(message: string, callback?: Function): void {
-    const msg = new Date().toISOString() + ' - ' + message + '\n'
+    message = message.replace(/\r?\n|\r/g, '')
 
-    if (typeof callback === 'function') {
-        stream.on('finish', () => callback)
-    }
+    const content = new Date().toISOString() + ' > ' + message + '\n'
 
-    stream.write(msg)
+    fs.appendFile(config.paths.logs, content, { flag: 'a' }, (error) => {
+        if (error) {
+            throw error
+        }
+
+        if (typeof callback === 'function') {
+            callback()
+        }
+    })
 }

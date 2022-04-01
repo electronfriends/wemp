@@ -7,7 +7,7 @@ import path from 'path'
 import config from '../config'
 import download from '../utils/download'
 import * as logger from '../utils/logger'
-import { onServiceDownload, onServiceDownloadError, onServiceError } from '../utils/notification'
+import { onServiceDownload, onServiceDownloadError } from '../utils/notification'
 import { updateMenuStatus } from './menu'
 
 /**
@@ -117,10 +117,7 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         await service.start()
             .then(() => updateMenuStatus(name, true))
-            .catch((error: string) => {
-                updateMenuStatus(name, false)
-                logger.write(error, () => onServiceError(name))
-            })
+            .catch((error: string) => logger.write(error, () => onServiceDownloadError(name)))
     } else {
         logger.write(`Service '${name}' does not exist.`)
     }
@@ -151,7 +148,6 @@ export async function stopService(name: string, shouldRestart: boolean = false):
     if (service) {
         await service.stop()
             .then(() => updateMenuStatus(name, false))
-            .catch(logger.write)
 
         if (shouldRestart) {
             await startService(name)

@@ -1,19 +1,25 @@
-import { ChildProcess, exec, execFile, ExecFileOptions } from 'child_process'
-import { ObjectEncodingOptions } from 'fs'
+import { ChildProcess, exec, spawn, SpawnOptionsWithoutStdio } from 'child_process'
+import { updateMenuStatus } from '../main-process/menu'
+import * as logger from '../utils/logger'
+import { onServiceError } from './notification'
 
 export default class Process {
-    private child: ChildProcess | null = null
+    private child: ChildProcess | undefined
+    private name: string
     private command: string
     private args: string[]
-    private options: (ObjectEncodingOptions & ExecFileOptions) | null | undefined
+    private options: SpawnOptionsWithoutStdio | undefined
 
     /**
      * @constructor
+     *
+     * @param name - The service name
      * @param command - The command to run
      * @param args - The arguments
      * @param options - The options
      */
-    constructor(command: string, args: string[], options: (ObjectEncodingOptions & ExecFileOptions) | null | undefined) {
+    constructor(name: string, command: string, args: string[], options: SpawnOptionsWithoutStdio | undefined) {
+        this.name = name
         this.command = command
         this.args = args
         this.options = options
@@ -24,7 +30,7 @@ export default class Process {
      */
     isRunning(): Promise<boolean> {
         return new Promise<boolean>((resolve, reject) => {
-            exec('tasklist', (error, stdout, stderr) => {
+            exec('tasklist', (error, stdout) => {
                 if (error) {
                     return reject(error)
                 }
@@ -42,17 +48,16 @@ export default class Process {
             // Let the child process know that it was intentionally killed
             this.child?.kill()
 
-            exec(`taskkill /IM "${this.command}" /F`, () => {
-                resolve()
-            })
+            exec(`taskkill /IM "${this.command}" /F`, () => resolve())
         })
     }
 
     /**
      * Run the child process.
-     * @param restartOnExit - Whether the process should be restarted on exit
+     *
+     * @param restartOnClose - Whether the process should be restarted when closed
      */
-    async run(restartOnExit: boolean = false): Promise<void> {
+    async run(restartOnClose: boolean = false): Promise<void> {
         const status = await this.isRunning()
 
         if (status) {
@@ -60,27 +65,34 @@ export default class Process {
         }
 
         return new Promise<void>((resolve, reject) => {
-            this.child = execFile(this.command, this.args, this.options, (error) => {
-                if (error) {
-                    // The process was terminated on purpose
-                    if (error.killed) {
-                        return
-                    }
+            this.child = spawn(this.command, this.args, this.options)
 
-                    // The process has returned an unexpected error
-                    return reject(error)
+            this.child.stderr?.on('data', (data) => {
+                logger.write(`[${this.name}] ${data}`)
+            })
+
+            this.child.on('close', () => {
+                // The process was closed on purpose
+                if (this.child?.killed) {
+                    return
                 }
 
-                // The process should be restarted
-                if (restartOnExit) {
+                // The process should be restarted on close
+                if (restartOnClose) {
                     return this.run(true)
                 }
 
-                // There is no error, but the process was terminated
-                return reject(`The process '${this.command}' was terminated without error message.`)
+                updateMenuStatus(this.name, false)
+                onServiceError(this.name)
             })
 
-            resolve()
+            this.child.on('error', (error) => {
+                reject(error)
+            })
+
+            this.child.on('spawn', () => {
+                resolve()
+            })
         })
     }
 }

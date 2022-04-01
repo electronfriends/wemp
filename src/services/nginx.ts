@@ -12,7 +12,7 @@ export let process: Process
  * Start the service.
  */
 export function start(): Promise<void> {
-    process = new Process('nginx.exe', [], {
+    process = new Process('Nginx', 'nginx.exe', [], {
         cwd: path.join(config.paths.services, 'nginx')
     })
 

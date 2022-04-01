@@ -12,7 +12,7 @@ export let process: Process
  * Start the service.
  */
 export function start(): Promise<void> {
-    process = new Process('php-cgi.exe', ['-b', '127.0.0.1:9000'], {
+    process = new Process('PHP', 'php-cgi.exe', ['-b', '127.0.0.1:9000'], {
         cwd: path.join(config.paths.services, 'php')
     })
 
