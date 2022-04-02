@@ -55,7 +55,7 @@ export default class Process {
     /**
      * Run the child process.
      *
-     * @param restartOnClose - Whether the process should be restarted when closed
+     * @param restartOnClose - Whether the process should be restarted if it closes unexpectedly
      */
     async run(restartOnClose: boolean = false): Promise<void> {
         const status = await this.isRunning()
@@ -77,7 +77,7 @@ export default class Process {
                     return
                 }
 
-                // The process should be restarted on close
+                // The process should be restarted when closing unexpectedly
                 if (restartOnClose) {
                     return this.run(true)
                 }
