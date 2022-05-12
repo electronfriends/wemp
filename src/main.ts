@@ -25,7 +25,7 @@ if (!gotTheLock) {
         app.exit()
     })
 
-    // Set everything up as soon as our application is ready
+    // Set everything up when our application is ready
     app.whenReady().then(async () => {
         await checkServices().then(createMenu)
         await startServices().then(onServicesReady)
