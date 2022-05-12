@@ -5,16 +5,8 @@ files:
   - "dist/"
   - "icons/"
 
-nsis:
-  deleteAppDataOnUninstall: true
-
 directories:
   output: "release"
-
-win:
-  target:
-    - "nsis"
-    - "portable"
 
 nsis:
   deleteAppDataOnUninstall: true
