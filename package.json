@@ -28,7 +28,6 @@
   },
   "devDependencies": {
     "@types/node": "^17.0.32",
-    "@types/node-fetch": "^3.0.2",
     "@types/unzipper": "^0.10.5",
     "electron": "^18.2.3",
     "electron-builder": "^23.0.3",
