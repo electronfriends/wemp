@@ -17,7 +17,7 @@ The goal of this project is to keep these services always up to date without use
 
 ## Features
 
-- **Easy to use** for both beginners and experienced.
+- **Easy to use** for both beginners and experienced users.
 
 - **Regular updates** to always support the latest versions.
 
