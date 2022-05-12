@@ -35,7 +35,7 @@ export default {
         },
         {
             name: 'phpMyAdmin',
-            version: '5.1.3',
+            version: '5.2.0',
             config: 'config.inc.php',
             interface: true,
             url: 'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip'
