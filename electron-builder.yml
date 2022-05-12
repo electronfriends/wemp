@@ -1,5 +1,5 @@
-productName: "Wemp"
 appId: "com.electronfriends.wemp"
+productName: "Wemp"
 
 files:
   - "dist/"
@@ -11,6 +11,13 @@ nsis:
 directories:
   output: "release"
 
+win:
+  target:
+    - "nsis"
+    - "portable"
+
+nsis:
+  deleteAppDataOnUninstall: true
+
 publish:
   provider: github
-  releaseType: release

@@ -16,8 +16,8 @@
   "scripts": {
     "build": "webpack --mode=production",
     "build:dev": "webpack --mode=development",
-    "deploy": "npm run build && electron-builder --publish always",
     "package": "npm run build:dev && electron-builder --publish never",
+    "release": "npm run build && electron-builder --publish always",
     "start": "npm run build:dev && electron ."
   },
   "dependencies": {
