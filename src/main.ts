@@ -32,9 +32,6 @@ if (!gotTheLock) {
 
         if (app.isPackaged) {
             autoUpdater.checkForUpdatesAndNotify()
-
-            // Check for updates every 30 minutes
-            setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 30 * 60 * 1000)
         }
     })
 }
