@@ -17,7 +17,7 @@ export const menu: Menu = new Menu()
 export let tray: Tray
 
 /**
- * Create the context menu for the notification area.
+ * Create the menu template.
  */
 export function createMenu(): void {
     menu.append(new MenuItem({
