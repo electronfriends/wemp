@@ -30,7 +30,9 @@ export async function checkServices(): Promise<void> {
         const serviceVersion = settings.getSync(serviceName)
 
         // Create a service instance
-        if (!service.interface) services[service.name] = require(`../services/${serviceName}`)
+        if (!service.interface) {
+            services[service.name] = require(`../services/${serviceName}`)
+        }
 
         // Check whether it is an installation or an update
         const isFirstDownload = !fs.existsSync(servicePath)
