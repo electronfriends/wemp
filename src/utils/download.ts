@@ -23,9 +23,11 @@ export default async function download(service: any, isUpdate: boolean): Promise
     const response = await fetch(service.url.replace(/{version}/g, service.version))
 
     return new Promise<void>((resolve, reject) => {
-        if (!response.ok) throw new Error(`Unexpected response: ${response.statusText}`)
+        if (!response.body) {
+            return reject(response.statusText)
+        }
 
-        response.body?.pipe(unzipper.Parse())
+        response.body.pipe(unzipper.Parse())
             .on('entry', (entry) => {
                 let fileName = entry.path
 
