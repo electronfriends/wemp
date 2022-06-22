@@ -41,6 +41,14 @@ export async function checkServices(): Promise<void> {
             const notification = onServiceDownload(service, !isFirstDownload)
 
             try {
+                // MariaDB must be shut down properly before the update
+                // This will start MariaDB and shut it down properly via mysqladmin
+                if (service.name === 'MariaDB') {
+                    await services[service.name].shutdown()
+                        .then(() => services[service.name].needsUpgrade = true)
+                        .catch((error: Error) => { throw error })
+                }
+
                 await download(service, !isFirstDownload)
 
                 if (isFirstDownload) {
@@ -49,7 +57,7 @@ export async function checkServices(): Promise<void> {
                         const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`)
                         const body = await response.text()
 
-                        // Replace the placeholder for the services path
+                        // Set the services path
                         const content = body.replace('{servicesPath}', config.paths.services)
 
                         fs.writeFileSync(path.join(servicePath, service.config), content)
@@ -119,7 +127,13 @@ export async function startService(name: string): Promise<void> {
     if (service) {
         await service.start()
             .then(() => updateMenuStatus(name, true))
-            .catch((error: string) => logger.write(error, () => onServiceError(name)))
+            .catch((error: Error) => logger.write(error.message, () => onServiceError(name)))
+
+        if (service.needsUpgrade) {
+            await service.upgrade()
+                .then(() => service.needsUpgrade = false)
+                .catch((error: Error) => logger.write(error.message))
+        }
     } else {
         logger.write(`Service '${name}' does not exist.`)
     }
@@ -150,6 +164,7 @@ export async function stopService(name: string, shouldRestart: boolean = false):
     if (service) {
         await service.stop()
             .then(() => updateMenuStatus(name, false))
+            .catch((error: Error) => logger.write(error.message))
 
         if (shouldRestart) {
             await startService(name)
