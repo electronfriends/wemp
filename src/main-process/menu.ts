@@ -56,6 +56,7 @@ export function createMenu(): void {
             icon: path.join(config.paths.icons, serviceName + '.png'),
             id: service.name,
             label: service.name,
+            visible: false,
             submenu: [
                 {
                     icon: path.join(config.paths.icons, serviceName + '.png'),
@@ -124,17 +125,23 @@ export function createMenu(): void {
  * @param isRunning - Whether the service is running
  */
 export function updateMenuStatus(name: string, isRunning: boolean): void {
-    if (menu.getMenuItemById(name)) {
-        const start = menu.getMenuItemById(`${name}-start`)
-        const restart = menu.getMenuItemById(`${name}-restart`)
-        const stop = menu.getMenuItemById(`${name}-stop`)
+    const serviceItem = menu.getMenuItemById(name)
 
-        if (start) {
-            start.enabled = !isRunning
+    if (serviceItem) {
+        const startItem = menu.getMenuItemById(`${name}-start`)
+        const restartItem = menu.getMenuItemById(`${name}-restart`)
+        const stopItem = menu.getMenuItemById(`${name}-stop`)
+
+        if (startItem) {
+            startItem.enabled = !isRunning
         }
 
-        if (restart && stop) {
-            restart.enabled = stop.enabled = isRunning
+        if (restartItem && stopItem) {
+            restartItem.enabled = stopItem.enabled = isRunning
+        }
+
+        if (!serviceItem.visible) {
+            serviceItem.visible = true
         }
     } else {
         logger.write(`Menu for service '${name}' does not exist.`)
