@@ -1,19 +1,19 @@
 <p align="center"><img src="https://user-images.githubusercontent.com/69470382/125867402-6a8af134-1e03-4d98-b1df-c347a2849c4e.png"></p>
 
 <p align="center">
-<a href="https://github.com/electronfriends/wemp/releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
 <a href="https://github.com/electronfriends/wemp/releases/latest"><img src="https://img.shields.io/github/v/release/electronfriends/wemp.svg?style=flat-square" alt="Latest Stable Version"></a>
+<a href="https://github.com/electronfriends/wemp/releases"><img src="https://img.shields.io/github/downloads/electronfriends/wemp/total.svg?style=flat-square" alt="Total Downloads"></a>
 <a href="https://github.com/electronfriends/wemp/issues"><img src="https://img.shields.io/github/issues/electronfriends/wemp.svg?style=flat-square" alt="GitHub Issues"></a>
 <a href="LICENSE"><img src="https://img.shields.io/github/license/electronfriends/wemp.svg?style=flat-square" alt="License"></a>
 </p>
 
 ## Introduction
 
-Wemp is a simple context menu in the notification area that allows you to easily set up and manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
+Wemp is a simple menu in the notification area that allows you to easily set up and manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
 
-The goal of this project is to keep these services always up to date without users having to update them on their own.
+The goal of this project is to always offer the latest versions of the services.
 
-<p align="center"><img src="https://user-images.githubusercontent.com/69470382/161558288-f1f63f53-3713-47b3-86f6-a132e698c013.png" alt="Wemp preview"></p>
+<p align="center"><img src="https://user-images.githubusercontent.com/69470382/175114646-8e966bbb-7938-4895-bebd-db943cc5079b.png" alt="Wemp preview"></p>
 
 ## Features
 
@@ -59,13 +59,11 @@ No. The services are installed independently of Wemp and remain untouched when W
 
 - [Icons8.com](https://icons8.com) for the free [Fluency](https://icons8.com/icon/set/logs/fluency) icons that we use in our menu.
 
-- all other dependencies we use to make Wemp work.
-
 ## Contributing
 
-Thank you for your interest in contributing to Wemp. If you found a bug or have a suggestion, please let us know by [creating a new issue](https://github.com/electronfriends/wemp/issues/new).
+Thank you for your interest in contributing to Wemp.
 
-We also welcome pull requests.
+If you find a bug or have a suggestion for a new feature, either [create a new issue](https://github.com/electronfriends/wemp/issues/new) or make a pull request.
 
 ## License
 
