@@ -37,7 +37,7 @@ export function createMenu(): void {
             },
             {
                 icon: path.join(config.paths.icons, 'event-log.png'),
-                label: 'View Logs',
+                label: 'View Error Logs',
                 click: () => shell.openPath(config.paths.logs)
             }
         ]
