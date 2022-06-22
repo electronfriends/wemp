@@ -1,6 +1,4 @@
-import { Notification, shell } from 'electron'
-
-import config from '../config'
+import { Notification } from 'electron'
 
 /**
  * Show this notification when a service is being downloaded.
