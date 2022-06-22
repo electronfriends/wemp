@@ -1,6 +1,4 @@
-import { Notification, shell } from 'electron'
-
-import config from '../config'
+import { Notification } from 'electron'
 
 /**
  * Show this notification when a service is being downloaded.
@@ -32,11 +30,11 @@ export function onServiceDownload(service: any, isUpdate: boolean): Notification
 export function onServiceDownloadError(name: string): void {
     const notification = new Notification({
         title: `${name} could not be downloaded or installed!`,
-        body: 'There was an error downloading or installing the service. Click to open the error logs.',
+        body: 'There was an error downloading or installing the service. Please check the error logs.',
         timeoutType: 'never'
     })
 
-    notification.on('click', () => shell.openPath(config.paths.logs))
+    notification.on('click', () => notification.close())
     notification.show()
 }
 
@@ -48,11 +46,11 @@ export function onServiceDownloadError(name: string): void {
  export function onServiceError(name: string): void {
     const notification = new Notification({
         title: `${name} has stopped working!`,
-        body: 'An unexpected error occurred while running the service. Click to open the error logs.',
+        body: 'An unexpected error occurred while running the service. Please check the error logs.',
         timeoutType: 'never'
     })
 
-    notification.on('click', () => shell.openPath(config.paths.logs))
+    notification.on('click', () => notification.close())
     notification.show()
 }
 
