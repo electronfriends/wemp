@@ -43,7 +43,7 @@ export async function checkServices(): Promise<void> {
             try {
                 // MariaDB must be shut down properly before the update
                 // This will start MariaDB and shut it down properly via mysqladmin
-                if (service.name === 'MariaDB') {
+                if (service.name === 'MariaDB' && !isFirstDownload) {
                     await services[service.name].shutdown()
                         .then(() => services[service.name].needsUpgrade = true)
                         .catch((error: Error) => { throw error })
