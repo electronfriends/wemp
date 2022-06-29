@@ -39,6 +39,13 @@ export function createMenu(): void {
                 icon: path.join(config.paths.icons, 'event-log.png'),
                 label: 'View Error Logs',
                 click: () => shell.openPath(config.paths.logs)
+            },
+            { type: 'separator' },
+            {
+                type: 'checkbox',
+                label: 'Autostart Wemp',
+                checked: app.getLoginItemSettings().openAtLogin,
+                click: (menuItem) => app.setLoginItemSettings({ openAtLogin: menuItem.checked })
             }
         ]
     }))
