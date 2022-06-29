@@ -1,4 +1,5 @@
 import { ChildProcess, exec, spawn, SpawnOptionsWithoutStdio } from 'child_process'
+
 import { updateMenuStatus } from '../main-process/menu'
 import * as logger from '../utils/logger'
 import { onServiceError } from './notification'
