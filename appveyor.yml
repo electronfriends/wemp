@@ -12,9 +12,8 @@ init:
 
 install:
   - ps: Install-Product node 16 x64
-  - yarn
 
 build_script:
-  - yarn release
+  - npm run release
 
 test: off
