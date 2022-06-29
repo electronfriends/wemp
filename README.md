@@ -17,15 +17,17 @@ The goal of this project is to always offer the latest versions of the services.
 
 ## Features
 
-- **Easy to use** for both beginners and experienced users.
+- **Easy to use** for both experienced and inexperienced users.
 
-- **Regular updates** to always support the latest versions.
+- **Regular updates** to always offer the latest versions of all services.
 
-- **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net).
+- **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net), a popular web interface.
 
-- **Error logging** in a separate log file so you can quickly locate errors.
+- **Monitoring** of configuration files to automatically restart services when changes are made.
 
-- **Monitoring** of configuration files to restart the services automatically.
+- **Error logging** in a session-based log file so you can quickly track down errors.
+
+- **Autostart** to start Wemp directly at startup. Easy to configure.
 
 ## Installation
 
@@ -40,12 +42,6 @@ The goal of this project is to always offer the latest versions of the services.
 If you need help with something, [create a new issue](https://github.com/electronfriends/wemp/issues/new) and we'll be happy to help.
 
 ## FAQs
-
-### How can I have Wemp start automatically at startup?
-
-Press <kbd>Win</kbd> + <kbd>R</kbd>, type `shell:startup` and press <kbd>Enter</kbd>. This will open the Explorer, where you'll need to create a shortcut of Wemp.
-
-Once you have done that, Wemp will start automatically at startup.
 
 ### Will the services be deleted if I uninstall Wemp?
 
