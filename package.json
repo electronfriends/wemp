@@ -23,11 +23,11 @@
   "dependencies": {
     "electron-settings": "^4.0.2",
     "electron-updater": "^5.0.5",
-    "node-fetch": "^3.2.6",
+    "node-fetch": "^3.2.9",
     "unzipper": "^0.10.11"
   },
   "devDependencies": {
-    "@types/node": "^18.0.3",
+    "@types/node": "^18.0.6",
     "@types/unzipper": "^0.10.5",
     "electron": "^19.0.8",
     "electron-builder": "^23.1.0",
