@@ -36,13 +36,15 @@ export function shutdown(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         const process = spawn('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
 
-        process.on('error', (error: Error)=> {
-            reject(error)
-        })
-
-        process.on('spawn', () => {
+        // Here we wait for the startup message from the MariaDB server.
+        // This way we can make sure that the server is actually started.
+        process.stderr.on('data', () => {
             execSync('mysqladmin.exe shutdown -u root', { cwd: servicePath })
             resolve()
+        })
+
+        process.on('error', (error: Error)=> {
+            reject(error)
         })
     })
 }
