@@ -52,7 +52,10 @@ export async function checkServices(): Promise<void> {
                 await download(service, !isFirstDownload)
 
                 if (isFirstDownload) {
-                    if (service.name !== 'MariaDB') {
+                    if (service.name === 'MariaDB') {
+                        // MariaDB doesn't need a stub, it just needs to be installed
+                        await services[service.name].install()
+                    } else {
                         // Download the stub configuration file from GitHub
                         const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`)
                         const body = await response.text()
@@ -61,9 +64,6 @@ export async function checkServices(): Promise<void> {
                         const content = body.replace('{servicesPath}', config.paths.services)
 
                         fs.writeFileSync(path.join(servicePath, service.config), content)
-                    } else {
-                        // MariaDB doesn't need a stub, it just needs to be installed
-                        await services[service.name].install()
                     }
                 }
             } catch (error: any) {
