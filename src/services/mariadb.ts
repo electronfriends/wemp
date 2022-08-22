@@ -38,7 +38,7 @@ export function shutdown(): Promise<void> {
 
         // Here we wait for the startup message from the MariaDB server.
         // This way we can make sure that the server is actually started.
-        process.stderr.on('data', () => {
+        process.stderr.once('data', () => {
             execSync('mysqladmin.exe shutdown -u root', { cwd: servicePath })
             resolve()
         })
