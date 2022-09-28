@@ -30,20 +30,22 @@ export function install(): Promise<void> {
 }
 
 /**
- * Shut down the server properly before an update.
+ * Shut down the MariaDB server properly before an update.
  */
 export function shutdown(): Promise<void> {
     return new Promise<void>((resolve, reject) => {
         const process = spawn('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
 
-        // Here we wait for the startup message from the MariaDB server.
-        // This way we can make sure that the server is actually started.
-        process.stderr.once('data', () => {
-            execSync('mysqladmin.exe shutdown -u root', { cwd: servicePath })
-            resolve()
+        // Here we wait for the start message from the MariaDB server.
+        // This way we can make sure that the server has actually started.
+        process.stderr.on('data', (data) => {
+            if (data.toString().includes('starting')) {
+                execSync('mysqladmin.exe shutdown -u root', { cwd: servicePath })
+                resolve()
+            }
         })
 
-        process.on('error', (error: Error)=> {
+        process.on('error', (error: Error) => {
             reject(error)
         })
     })
