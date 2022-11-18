@@ -26,7 +26,7 @@ export async function checkServices(): Promise<void> {
 
     for (const service of config.services) {
         const serviceName = service.name.toLowerCase()
-        const servicePath = path.join(config.paths.services, service.name)
+        const servicePath = path.join(config.paths.services, serviceName)
         const serviceVersion = settings.getSync(serviceName)
 
         // Create a service instance
