@@ -46,7 +46,7 @@ export async function checkServices(): Promise<void> {
                 if (service.name === 'MariaDB' && !isFirstDownload) {
                     await services[service.name].shutdown()
                         .then(() => services[service.name].needsUpgrade = true)
-                        .catch((error: Error) => { throw error })
+                        .catch((error: Error) => logger.write(error.message, () => onServiceDownloadError(service.name)))
                 }
 
                 await download(service, !isFirstDownload)
