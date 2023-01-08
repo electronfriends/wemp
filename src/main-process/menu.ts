@@ -53,9 +53,7 @@ export function createMenu(): void {
   menu.append(new MenuItem({ type: 'separator' }))
 
   for (const service of config.services) {
-    if (service.interface) {
-      continue
-    }
+    if (service.interface) continue
 
     const serviceName = service.name.toLowerCase()
 

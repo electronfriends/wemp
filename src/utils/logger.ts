@@ -15,7 +15,7 @@ fs.truncate(config.paths.logs, (error) => {
  * @param message - The message
  * @param callback - An optional callback
  */
-export function write(message: string, callback?: Function): void {
+export function write(message: string, callback?: () => void): void {
   // Remove new lines from the message
   message = message.replace(/\r?\n|\r/g, '')
 

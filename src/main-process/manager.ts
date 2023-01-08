@@ -13,7 +13,7 @@ import { updateMenuStatus } from './menu'
 /**
  * Store the service objects in an array.
  */
-const services: any = []
+const services: { [key: string]: any } = []
 
 /**
  * Check if any of the services need to be installed or updated.
@@ -29,7 +29,7 @@ export async function checkServices(): Promise<void> {
     const servicePath = path.join(config.paths.services, serviceName)
     const serviceVersion = settings.getSync(serviceName)
 
-    // Create a service instance
+    // Create the service instance
     if (!service.interface) {
       services[service.name] = require(`../services/${serviceName}`)
     }
@@ -158,7 +158,7 @@ export async function startServices(): Promise<void> {
  * @param name - The name of the service
  * @param shouldRestart - Whether the service should restart
  */
-export async function stopService(name: string, shouldRestart: boolean = false): Promise<void> {
+export async function stopService(name: string, shouldRestart = false): Promise<void> {
   const service = services[name]
 
   if (service) {
@@ -179,7 +179,7 @@ export async function stopService(name: string, shouldRestart: boolean = false):
  *
  * @param shouldRestart - Whether the services should restart
  */
-export async function stopServices(shouldRestart: boolean = false): Promise<void> {
+export async function stopServices(shouldRestart = false): Promise<void> {
   for (const service of config.services) {
     if (service.interface) {
       continue
