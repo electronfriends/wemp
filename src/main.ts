@@ -8,35 +8,35 @@ import { onServicesReady } from './utils/notification'
 const gotTheLock = app.requestSingleInstanceLock()
 
 if (!gotTheLock) {
-    app.quit()
+  app.quit()
 } else {
-    // Set the Application User Model ID
-    app.setAppUserModelId('com.electronfriends.wemp')
+  // Set the Application User Model ID
+  app.setAppUserModelId('com.electronfriends.wemp')
 
-    // Someone tried to run a second instance, we should focus our tray
-    app.on('second-instance', () => {
-        if (tray) tray.focus()
-    })
+  // Someone tried to run a second instance, we should focus our tray
+  app.on('second-instance', () => {
+    if (tray) tray.focus()
+  })
 
-    // Stop the services before quitting
-    app.on('before-quit', async (event) => {
-        event.preventDefault()
-        await stopServices()
-        app.exit()
-    })
+  // Stop the services before quitting
+  app.on('before-quit', async (event) => {
+    event.preventDefault()
+    await stopServices()
+    app.exit()
+  })
 
-    // Set everything up when our application is ready
-    app.whenReady().then(async () => {
-        createMenu()
+  // Set everything up when our application is ready
+  app.whenReady().then(async () => {
+    createMenu()
 
-        await checkServices()
-        await startServices().then(() => onServicesReady())
+    await checkServices()
+    await startServices().then(() => onServicesReady())
 
-        if (app.isPackaged) {
-            autoUpdater.checkForUpdatesAndNotify()
+    if (app.isPackaged) {
+      autoUpdater.checkForUpdatesAndNotify()
 
-            // Check for updates every 60 minutes
-            setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 60 * 60 * 1000)
-        }
-    })
+      // Check for updates every 60 minutes
+      setInterval(() => autoUpdater.checkForUpdatesAndNotify(), 60 * 60 * 1000)
+    }
+  })
 }

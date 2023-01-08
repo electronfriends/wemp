@@ -13,60 +13,60 @@ import config from '../config'
  * @param isUpdate - Whether it is an update or first installation
  */
 export default async function download(service: any, isUpdate: boolean): Promise<void> {
-    const serviceName = service.name.toLowerCase()
-    const servicePath = path.join(config.paths.services, serviceName)
+  const serviceName = service.name.toLowerCase()
+  const servicePath = path.join(config.paths.services, serviceName)
 
-    if (!fs.existsSync(servicePath)) {
-        fs.mkdirSync(servicePath)
+  if (!fs.existsSync(servicePath)) {
+    fs.mkdirSync(servicePath)
+  }
+
+  const response = await fetch(service.url.replace(/{version}/g, service.version))
+
+  return new Promise<void>((resolve, reject) => {
+    if (!response.body) {
+      return reject(response.statusText)
     }
 
-    const response = await fetch(service.url.replace(/{version}/g, service.version))
+    response.body.pipe(unzipper.Parse())
+      .on('entry', (entry) => {
+        let fileName = entry.path
 
-    return new Promise<void>((resolve, reject) => {
-        if (!response.body) {
-            return reject(response.statusText)
+        // We assume that only PHP doesn't put the files inside a directory
+        if (service.name !== 'PHP') {
+          fileName = fileName.substr(fileName.indexOf('/') + 1)
         }
 
-        response.body.pipe(unzipper.Parse())
-            .on('entry', (entry) => {
-                let fileName = entry.path
+        // Skip configuration and ignored directories
+        const isConfigFile = (fileName === service.config)
+        const isIgnored = (isUpdate && (service.ignore && service.ignore.some(n => fileName.includes(n))))
 
-                // We assume that only PHP doesn't put the files inside a directory
-                if (service.name !== 'PHP') {
-                    fileName = fileName.substr(fileName.indexOf('/') + 1)
-                }
+        if (!isConfigFile && !isIgnored) {
+          const fileDestPath = path.join(servicePath, fileName)
 
-                // Skip configuration and ignored directories
-                const isConfigFile = (fileName === service.config)
-                const isIgnored = (isUpdate && (service.ignore && service.ignore.some(n => fileName.includes(n))))
+          if (entry.type === 'Directory' && !fs.existsSync(fileDestPath)) {
+            return fs.mkdirSync(fileDestPath)
+          } else if (entry.type === 'File') {
+            return entry.pipe(fs.createWriteStream(fileDestPath))
+          }
+        }
 
-                if (!isConfigFile && !isIgnored) {
-                    const fileDestPath = path.join(servicePath, fileName)
+        entry.autodrain()
+      })
+      .on('error', (error) => {
+        // Fallback to archives if PHP has a newer version
+        if (service.name === 'PHP' && error.message.includes('invalid signature')) {
+          service.url = service.url.replace('releases/', 'releases/archives/')
 
-                    if (entry.type === 'Directory' && !fs.existsSync(fileDestPath)) {
-                        return fs.mkdirSync(fileDestPath)
-                    } else if (entry.type === 'File') {
-                        return entry.pipe(fs.createWriteStream(fileDestPath))
-                    }
-                }
+          return download(service, isUpdate)
+            .then(resolve)
+            .catch(reject)
+        }
 
-                entry.autodrain()
-            })
-            .on('error', (error) => {
-                // Fallback to archives if PHP has a newer version
-                if (service.name === 'PHP' && error.message.includes('invalid signature')) {
-                    service.url = service.url.replace('releases/', 'releases/archives/')
-
-                    return download(service, isUpdate)
-                        .then(resolve)
-                        .catch(reject)
-                }
-
-                reject(error)
-            })
-            .on('finish', () => {
-                settings.setSync(serviceName, service.version)
-                resolve()
-            })
-    })
+        reject(error)
+      })
+      .on('finish', () => {
+        settings.setSync(serviceName, service.version)
+        resolve()
+      })
+  })
 }

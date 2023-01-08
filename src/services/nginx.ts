@@ -12,16 +12,16 @@ export let process: Process
  * Start the service.
  */
 export function start(): Promise<void> {
-    process = new Process('Nginx', 'nginx.exe', [], {
-        cwd: path.join(config.paths.services, 'nginx')
-    })
+  process = new Process('Nginx', 'nginx.exe', [], {
+    cwd: path.join(config.paths.services, 'nginx')
+  })
 
-    return process.run()
+  return process.run()
 }
 
 /**
  * Stop the service.
  */
 export function stop(): Promise<void> {
-    return process?.kill()
+  return process?.kill()
 }

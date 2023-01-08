@@ -7,19 +7,19 @@ import { Notification } from 'electron'
  * @param isUpdate - Whether it is an update or first installation
  */
 export function onServiceDownload(service: any, isUpdate: boolean): Notification {
-    const notification = new Notification({
-        title: isUpdate
-            ? `Updating ${service.name} to ${service.version}...`
-            : `Downloading ${service.name} ${service.version}...`,
-        body: 'This may take a while, please wait and do not close the application.',
-        silent: true,
-        timeoutType: 'never'
-    })
+  const notification = new Notification({
+    title: isUpdate
+      ? `Updating ${service.name} to ${service.version}...`
+      : `Downloading ${service.name} ${service.version}...`,
+    body: 'This may take a while, please wait and do not close the application.',
+    silent: true,
+    timeoutType: 'never'
+  })
 
-    notification.on('click', () => notification.close())
-    notification.show()
+  notification.on('click', () => notification.close())
+  notification.show()
 
-    return notification
+  return notification
 }
 
 /**
@@ -28,14 +28,14 @@ export function onServiceDownload(service: any, isUpdate: boolean): Notification
  * @param name - The name of the service
  */
 export function onServiceDownloadError(name: string): void {
-    const notification = new Notification({
-        title: `${name} could not be downloaded or installed!`,
-        body: 'There was an error downloading or installing the service. Please check the error logs.',
-        timeoutType: 'never'
-    })
+  const notification = new Notification({
+    title: `${name} could not be downloaded or installed!`,
+    body: 'There was an error downloading or installing the service. Please check the error logs.',
+    timeoutType: 'never'
+  })
 
-    notification.on('click', () => notification.close())
-    notification.show()
+  notification.on('click', () => notification.close())
+  notification.show()
 }
 
 /**
@@ -44,27 +44,27 @@ export function onServiceDownloadError(name: string): void {
  * @param name - The name of the service
  */
  export function onServiceError(name: string): void {
-    const notification = new Notification({
-        title: `${name} has stopped working!`,
-        body: 'An unexpected error occurred while running the service. Please check the error logs.',
-        timeoutType: 'never'
-    })
+  const notification = new Notification({
+    title: `${name} has stopped working!`,
+    body: 'An unexpected error occurred while running the service. Please check the error logs.',
+    timeoutType: 'never'
+  })
 
-    notification.on('click', () => notification.close())
-    notification.show()
+  notification.on('click', () => notification.close())
+  notification.show()
 }
 
 /**
  * Show this notification when the services are ready.
  */
 export function onServicesReady(): void {
-    const notification = new Notification({
-        title: 'The services have been started!',
-        body: 'You can now manage them by clicking on the Wemp icon in the notification area.',
-        silent: true,
-        timeoutType: 'never'
-    })
+  const notification = new Notification({
+    title: 'The services have been started!',
+    body: 'You can now manage them by clicking on the Wemp icon in the notification area.',
+    silent: true,
+    timeoutType: 'never'
+  })
 
-    notification.on('click', () => notification.close())
-    notification.show()
+  notification.on('click', () => notification.close())
+  notification.show()
 }
