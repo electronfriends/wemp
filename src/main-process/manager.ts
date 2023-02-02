@@ -125,14 +125,22 @@ export async function startService(name: string): Promise<void> {
   const service = services[name]
 
   if (service) {
-    await service.start()
-      .then(() => updateMenuStatus(name, true))
-      .catch((error: Error) => logger.write(error.message, () => onServiceError(name)))
+    try {
+      await service.start()
+        .then(() => updateMenuStatus(name, true))
+        .catch((error: any) => logger.write(error.message, () => onServiceError(name)))
+    } catch (error: any) {
+      logger.write(error.message)
+    }
 
     if (service.needsUpgrade) {
-      await service.upgrade()
-        .then(() => service.needsUpgrade = false)
-        .catch((error: Error) => logger.write(error.message))
+      try {
+        await service.upgrade()
+          .then(() => service.needsUpgrade = false)
+          .catch((error: any) => logger.write(error.message))
+      } catch (error: any) {
+        logger.write(error.message)
+      }
     }
   } else {
     logger.write(`Service '${name}' does not exist.`)
@@ -162,9 +170,12 @@ export async function stopService(name: string, shouldRestart = false): Promise<
   const service = services[name]
 
   if (service) {
-    await service.stop()
-      .then(() => updateMenuStatus(name, false))
-      .catch((error: Error) => logger.write(error.message))
+    try {
+      await service.stop()
+        .then(() => updateMenuStatus(name, false))
+    } catch (error: any) {
+      logger.write(error.message)
+    }
 
     if (shouldRestart) {
       await startService(name)
