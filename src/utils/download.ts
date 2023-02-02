@@ -37,8 +37,8 @@ export default async function download(service: any, isUpdate: boolean): Promise
         }
 
         // Skip configuration and ignored directories
-        const isConfigFile = (fileName === service.config)
-        const isIgnored = (isUpdate && (service.ignore && service.ignore.some(n => fileName.includes(n))))
+        const isConfigFile = fileName === service.config
+        const isIgnored = isUpdate && (service.ignore && service.ignore.some((n: string) => fileName.includes(n)))
 
         if (!isConfigFile && !isIgnored) {
           const fileDestPath = path.join(servicePath, fileName)
@@ -52,7 +52,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
 
         entry.autodrain()
       })
-      .on('error', (error) => {
+      .on('error', (error: any) => {
         // Fallback to archives if PHP has a newer version
         if (service.name === 'PHP' && error.message.includes('invalid signature')) {
           service.url = service.url.replace('releases/', 'releases/archives/')

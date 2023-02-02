@@ -45,7 +45,7 @@ export default class Process {
    * Kill the child process.
    */
   kill(): Promise<void> {
-    return new Promise<void>((resolve, reject) => {
+    return new Promise<void>((resolve) => {
       // Let the child process know that it was intentionally killed
       this.child?.kill()
 

@@ -80,7 +80,7 @@ export async function checkServices(): Promise<void> {
       if (fs.existsSync(serviceConfig)) {
         let debounce: NodeJS.Timeout | null
 
-        fs.watch(serviceConfig, (event, filename) => {
+        fs.watch(serviceConfig, (_event, filename) => {
           if (!filename || debounce) return
           debounce = setTimeout(() => debounce = null, 1000)
           stopService(service.name, true)
