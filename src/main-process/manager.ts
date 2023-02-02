@@ -31,7 +31,7 @@ export async function checkServices(): Promise<void> {
 
     // Create the service instance
     if (!service.interface) {
-      services[service.name] = require(`../services/${serviceName}`)
+      services[service.name] = await import(`../services/${serviceName}.ts`)
     }
 
     // Check whether it is an installation or an update
