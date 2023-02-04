@@ -1,12 +1,21 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "removeComments": true,
+    "target": "ESNext",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ESNext", "DOM"],
+    "moduleResolution": "Node",
     "strict": true,
-    "noImplicitAny": false,
+    "sourceMap": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
+    "noEmit": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "types": [
+      "vite-plugin-electron/electron-env"
+    ]
   }
 }
