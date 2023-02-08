@@ -11,6 +11,5 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "suppressImplicitAnyIndexErrors": true 
-  },
-  "exclude": ["node_modules"] 
+  }
 }

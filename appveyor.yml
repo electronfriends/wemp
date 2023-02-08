@@ -10,9 +10,6 @@ cache:
 init:
   - git config --global core.autocrlf input
 
-install:
-  - ps: Install-Product node 19 x64
-
 build_script:
   - npm run release
 
