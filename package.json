@@ -14,7 +14,7 @@
   "author": "ElectronFriends",
   "main": "dist/bundle.js",
   "scripts": {
-    "build": "webpack",
+    "build": "webpack --mode=production",
     "build:dev": "webpack --mode=development",
     "package": "npm run build:dev && electron-builder --publish never",
     "release": "npm run build && electron-builder",

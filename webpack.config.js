@@ -1,7 +1,6 @@
 const path = require('path')
 
 module.exports = {
-  mode: 'development',
   target: 'electron-main',
   entry: './src/main.ts',
   output: {
@@ -13,7 +12,7 @@ module.exports = {
   },
   module: {
     rules: [
-      { test: /\.ts$/, include: /src/, loader: 'ts-loader' }
+      { test: /\.ts$/, loader: 'ts-loader' }
     ]
   }
 }
