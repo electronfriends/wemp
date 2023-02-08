@@ -8,6 +8,8 @@
     "experimentalDecorators": true,
     "removeComments": false,
     "noImplicitAny": false,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "suppressImplicitAnyIndexErrors": true 
   },
   "exclude": ["node_modules"] 
