@@ -1,4 +1,4 @@
-import { exec, execFileSync, spawnSync } from 'child_process'
+import { exec, execFileSync, spawn } from 'child_process'
 import path from 'path'
 
 import config from '../config'
@@ -51,13 +51,15 @@ export function shutdown(): Promise<void> {
       }
     }
 
-    const childProcess = spawnSync('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
+    const childProcess = spawn('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
 
-    if (childProcess.error) {
-      reject(childProcess.error.message)
-    } else {
+    childProcess.on('error', (err) => {
+      reject(err)
+    })
+
+    childProcess.on('spawn', () => {
       attemptShutdown()
-    }
+    })
   })
 }
 
