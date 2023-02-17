@@ -1,4 +1,4 @@
-import { exec, execSync, spawn } from 'child_process'
+import { exec, execFileSync, spawnSync } from 'child_process'
 import path from 'path'
 
 import config from '../config'
@@ -18,13 +18,13 @@ const servicePath: string = path.join(config.paths.services, 'mariadb', 'bin')
  * MariaDB needs to be installed before the first start.
  */
 export function install(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     exec('mysql_install_db.exe', { cwd: servicePath }, (error) => {
       if (error) {
-        return reject(error)
+        reject(error)
+      } else {
+        resolve()
       }
-
-      resolve()
     })
   })
 }
@@ -33,21 +33,31 @@ export function install(): Promise<void> {
  * Shut down the MariaDB server properly before an update.
  */
 export function shutdown(): Promise<void> {
-  return new Promise<void>((resolve, reject) => {
-    const process = spawn('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
+  const maxRetries = 3
+  let retryCount = 0
 
-    // Here we wait for the start message from the MariaDB server.
-    // This way we can make sure that the server has actually started.
-    process.stderr.on('data', (data) => {
-      if (data.toString().includes('starting')) {
-        execSync('mysqladmin.exe shutdown -u root', { cwd: servicePath })
+  return new Promise((resolve, reject) => {
+    function attemptShutdown() {
+      try {
+        execFileSync('mysqladmin.exe', ['shutdown', '-u', 'root'], { cwd: servicePath })
         resolve()
+      } catch (err) {
+        if (retryCount === maxRetries) {
+          reject(err)
+        } else {
+          retryCount++
+          setTimeout(attemptShutdown, 3000)
+        }
       }
-    })
+    }
 
-    process.on('error', (error: Error) => {
-      reject(error)
-    })
+    const childProcess = spawnSync('mariadbd.exe', ['--skip-grant-tables'], { cwd: servicePath })
+
+    if (childProcess.error) {
+      reject(childProcess.error.message)
+    } else {
+      attemptShutdown()
+    }
   })
 }
 
