@@ -15,7 +15,7 @@ if (!gotTheLock) {
 
   // Someone tried to run a second instance, we should focus our tray
   app.on('second-instance', () => {
-    if (tray) tray.focus()
+    tray?.focus()
   })
 
   // Stop the services before quitting
