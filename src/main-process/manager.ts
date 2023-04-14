@@ -45,8 +45,7 @@ export async function checkServices(): Promise<void> {
         // This will start MariaDB and shut it down properly via mysqladmin
         if (service.name === 'MariaDB' && !isFirstDownload) {
           await services[service.name].shutdown()
-            .then(() => services[service.name].needsUpgrade = true)
-            .catch((error: Error) => logger.write(error.message, () => onServiceDownloadError(service.name)))
+          services[service.name].needsUpgrade = true
         }
 
         await download(service, !isFirstDownload)
