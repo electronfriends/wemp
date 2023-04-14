@@ -30,7 +30,8 @@ if (!gotTheLock) {
     createMenu()
 
     await checkServices()
-    await startServices().then(() => onServicesReady())
+    await startServices()
+    onServicesReady()
 
     if (app.isPackaged) {
       autoUpdater.checkForUpdatesAndNotify()
