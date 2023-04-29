@@ -53,7 +53,7 @@ export default async function download(service: any, isUpdate: boolean): Promise
         entry.autodrain()
       })
       .on('error', async (error: any) => {
-        // Fallback to archives if PHP has a newer version
+        // Old PHP versions must be downloaded from the archive
         if (service.name === 'PHP' && error.message.includes('invalid signature')) {
           service.url = service.url.replace('releases/', 'releases/archives/')
           try {
