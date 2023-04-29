@@ -1,15 +1,16 @@
-import { ChildProcess, exec, spawn, SpawnOptionsWithoutStdio } from 'child_process'
+import { ChildProcess, exec, spawn } from 'child_process'
+import type { SpawnOptionsWithoutStdio } from 'child_process'
 
 import { updateMenuStatus } from '../main-process/menu'
 import * as logger from '../utils/logger'
 import { onServiceError } from './notification'
 
 export default class Process {
-  private child: ChildProcess | undefined
-  private name: string
-  private command: string
-  private args: string[]
-  private options: SpawnOptionsWithoutStdio | undefined
+  private readonly name: string
+  private readonly command: string
+  private readonly args: string[]
+  private readonly options?: SpawnOptionsWithoutStdio
+  private child?: ChildProcess
 
   /**
    * @constructor
@@ -19,7 +20,7 @@ export default class Process {
    * @param args - The arguments
    * @param options - The options
    */
-  constructor(name: string, command: string, args: string[], options: SpawnOptionsWithoutStdio | undefined) {
+  constructor(name: string, command: string, args: string[], options?: SpawnOptionsWithoutStdio) {
     this.name = name
     this.command = command
     this.args = args
@@ -44,11 +45,15 @@ export default class Process {
   /**
    * Kill the child process.
    */
-  kill(): Promise<void> {
-    return new Promise<void>((resolve) => {
-      // Let the child process know that it was intentionally killed
-      this.child?.kill()
+  async kill(): Promise<void> {
+    if (!this.child) {
+      return
+    }
 
+    // Let the child process know that it was intentionally killed
+    this.child.kill()
+
+    await new Promise<void>((resolve) => {
       exec(`taskkill /IM "${this.command}" /F`, () => resolve())
     })
   }
@@ -59,13 +64,13 @@ export default class Process {
    * @param restartOnClose - Whether the process should be restarted if it closes unexpectedly
    */
   async run(restartOnClose = false): Promise<void> {
-    const status = await this.isRunning()
+    const isRunning = await this.isRunning()
 
-    if (status) {
+    if (isRunning) {
       await this.kill()
     }
 
-    return new Promise<void>((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       this.child = spawn(this.command, this.args, this.options)
 
       this.child.stderr?.on('data', (data) => {
@@ -74,13 +79,14 @@ export default class Process {
 
       this.child.on('close', () => {
         // The process was closed on purpose
-        if (this.child?.killed) {
+        if (this.child.killed) {
           return
         }
 
         // The process should be restarted when closing unexpectedly
         if (restartOnClose) {
-          return this.run(true)
+          this.run(true)
+          return
         }
 
         updateMenuStatus(this.name, false)
