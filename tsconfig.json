@@ -9,7 +9,6 @@
     "removeComments": false,
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "skipLibCheck": true,
-    "suppressImplicitAnyIndexErrors": true 
+    "skipLibCheck": true
   }
 }
