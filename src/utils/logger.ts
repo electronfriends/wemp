@@ -2,7 +2,7 @@ import fs from 'fs'
 
 import config from '../config'
 
-// Empty the log file at every startup
+// Empty the contents of the log file at each startup
 fs.truncate(config.paths.logs, (error) => {
   if (error) {
     throw new Error('Could not truncate the log file: ' + error.message)
@@ -16,7 +16,7 @@ fs.truncate(config.paths.logs, (error) => {
  * @param callback - An optional callback
  */
 export function write(message: string, callback?: () => void): void {
-  // Remove new lines from the message
+  // Remove line breaks from the message
   message = message.replace(/\r?\n|\r/g, '')
 
   const content = `<${new Date().toLocaleString()}> ${message}\n`
