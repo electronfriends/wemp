@@ -1,4 +1,4 @@
-import { app } from 'electron'
+import { app, Menu } from 'electron'
 import { autoUpdater } from 'electron-updater'
 
 import { checkServices, startServices, stopServices } from './main-process/manager'
@@ -24,6 +24,9 @@ if (!gotTheLock) {
     await stopServices()
     app.exit()
   })
+
+  // Prevent Electron from setting a default menu
+  Menu.setApplicationMenu(null)
 
   // Set everything up when our application is ready
   app.whenReady().then(async () => {
