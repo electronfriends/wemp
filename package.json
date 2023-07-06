@@ -1,6 +1,6 @@
 {
   "name": "wemp",
-  "version": "0.7.4",
+  "version": "0.7.5",
   "description": "Wemp is a simple menu for managing Nginx, MariaDB and PHP on Windows.",
   "homepage": "https://github.com/electronfriends/wemp#readme",
   "bugs": {
