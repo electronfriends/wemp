@@ -23,17 +23,17 @@
   "dependencies": {
     "electron-settings": "^4.0.2",
     "electron-updater": "^6.1.1",
-    "node-fetch": "^3.3.1",
+    "node-fetch": "^3.3.2",
     "unzipper": "^0.10.14"
   },
   "devDependencies": {
-    "@types/node": "^20.4.0",
+    "@types/node": "^20.5.0",
     "@types/unzipper": "^0.10.6",
-    "electron": "^25.2.0",
-    "electron-builder": "^24.4.0",
+    "electron": "^25.5.0",
+    "electron-builder": "^24.6.3",
     "ts-loader": "^9.4.4",
     "typescript": "^5.1.6",
-    "webpack": "^5.88.1",
+    "webpack": "^5.88.2",
     "webpack-cli": "^5.1.4"
   }
 }
