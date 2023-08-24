@@ -14,6 +14,6 @@ install:
   - yarn install
 
 build_script:
-  - DEBUG="electron-forge:require-search" yarn run publish
+  - set DEBUG=electron-forge:require-search && yarn run publish
 
 test: off
