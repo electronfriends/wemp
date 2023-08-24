@@ -10,8 +10,10 @@ cache:
 init:
   - git config --global core.autocrlf input
 
-build_script:
+install:
   - yarn install
+
+build_script:
   - yarn run publish
 
 test: off
