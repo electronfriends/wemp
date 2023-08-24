@@ -1,11 +1,11 @@
-import { app } from 'electron'
-import settings from 'electron-settings'
-import path from 'path'
+import path from 'path';
 
-/**
- * The configuration for Wemp, where the paths and services are defined.
- * When a service gets a new version, it must be updated here.
- */
+import { app } from 'electron';
+import settings from 'electron-settings';
+
+// Here the different paths as well as the services for the menu are defined.
+// When a service gets a new version, it must be updated here.
+
 export default {
   paths: {
     icons: path.join(app.getAppPath(), 'icons'),
@@ -41,4 +41,4 @@ export default {
       url: 'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip'
     }
   ]
-}
+};
