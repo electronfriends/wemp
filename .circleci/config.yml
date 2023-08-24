@@ -8,6 +8,12 @@ jobs:
     executor:
       name: win/default
     steps:
+      - checkout
+
+      - run:
+          name: Install Node.js
+          command: choco install nodejs-lts -y
+
       - run:
           name: Install Dependencies
           command: yarn install
