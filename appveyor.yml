@@ -11,9 +11,9 @@ init:
   - git config --global core.autocrlf input
 
 install:
-  - npm install
+  - yarn install
 
 build_script:
-  - npm run publish
+  - DEBUG="electron-forge:require-search" yarn run publish
 
 test: off
