@@ -1,0 +1,17 @@
+version: 2.1
+
+orbs:
+  win: circleci/windows@5.0
+
+jobs:
+  build:
+    executor:
+      name: win/default
+    steps:
+      - run:
+          name: Install Dependencies
+          command: yarn install
+
+      - run:
+          name: Publish
+          command: yarn run publish
