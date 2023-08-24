@@ -10,7 +10,10 @@ cache:
 init:
   - git config --global core.autocrlf input
 
+install:
+  - yarn install
+
 build_script:
-  - npm run release
+  - set DEBUG=electron-forge:require-search && yarn run publish
 
 test: off

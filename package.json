@@ -1,39 +1,33 @@
 {
   "name": "wemp",
-  "version": "0.7.5",
-  "description": "Wemp is a simple menu for managing Nginx, MariaDB and PHP on Windows.",
-  "homepage": "https://github.com/electronfriends/wemp#readme",
-  "bugs": {
-    "url": "https://github.com/electronfriends/wemp/issues"
+  "version": "0.8.0-dev.1",
+  "description": "Wemp is a menu that makes it easy to set up and control a web server on Windows.",
+  "main": ".vite/build/main.js",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "lint": "echo \"No linting configured\""
   },
+  "author": "ElectronFriends",
+  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/electronfriends/wemp.git"
   },
-  "license": "MIT",
-  "author": "ElectronFriends",
-  "main": "dist/bundle.js",
-  "scripts": {
-    "build": "webpack --mode=production",
-    "build:dev": "webpack --mode=development",
-    "package": "npm run build:dev && electron-builder --publish never",
-    "release": "npm run build && electron-builder",
-    "start": "npm run build:dev && electron ."
+  "devDependencies": {
+    "@electron-forge/cli": "^6.4.1",
+    "@electron-forge/maker-squirrel": "^6.4.1",
+    "@electron-forge/plugin-vite": "^6.4.1",
+    "@electron-forge/publisher-github": "^6.4.1",
+    "electron": "^26.1.0"
   },
   "dependencies": {
     "electron-settings": "^4.0.2",
-    "electron-updater": "^6.1.1",
+    "electron-squirrel-startup": "^1.0.0",
     "node-fetch": "^3.3.2",
-    "unzipper": "^0.10.14"
-  },
-  "devDependencies": {
-    "@types/node": "^20.5.0",
-    "@types/unzipper": "^0.10.6",
-    "electron": "^25.5.0",
-    "electron-builder": "^24.6.3",
-    "ts-loader": "^9.4.4",
-    "typescript": "^5.1.6",
-    "webpack": "^5.88.2",
-    "webpack-cli": "^5.1.4"
+    "unzipper": "^0.10.14",
+    "update-electron-app": "^2.0.1"
   }
 }
