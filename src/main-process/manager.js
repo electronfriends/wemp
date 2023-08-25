@@ -3,7 +3,6 @@ import fs from 'fs';
 
 import { dialog } from 'electron';
 import settings from 'electron-settings';
-import fetch from 'node-fetch';
 
 import config from '../config';
 import * as serviceModules from '../services';
@@ -56,10 +55,10 @@ export async function checkServices() {
           if (service.name === 'MariaDB') {
             await currentService.install();
           } else {
-            const response = await fetch(`https://github.com/electronfriends/wemp/raw/main/stubs/${serviceName}/${service.config}`);
-            const body = await response.text();
-            const content = body.replace('{servicesPath}', servicesPath);
-            fs.writeFileSync(path.join(servicePath, service.config), content);
+            const serviceConfigPath = path.join(__dirname, `../../stubs/${serviceName}/${service.config}`);
+            const content = fs.readFileSync(serviceConfigPath, 'utf8');
+            const modifiedContent = content.replace('{servicesPath}', servicesPath);
+            fs.writeFileSync(path.join(servicePath, service.config), modifiedContent);
           }
         }
       } catch (error) {
