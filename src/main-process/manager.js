@@ -24,15 +24,16 @@ export async function checkServices() {
   }
 
   for (const service of config.services) {
-    if (service.interface) continue;
-
     // Prepare service-related variables.
     const serviceName = service.name.toLowerCase();
     const servicePath = path.join(servicesPath, serviceName);
     const serviceVersion = settings.getSync(serviceName);
 
     // Dynamically instantiate the service module.
-    const currentService = services[service.name] = new serviceModules[serviceName]();
+    let currentService;
+    if (!service.interface) {
+      currentService = services[service.name] = new serviceModules[serviceName]();
+    }
 
     // Check if it's the first download.
     const isFirstDownload = !fs.existsSync(servicePath);
