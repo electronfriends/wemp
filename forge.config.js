@@ -1,12 +1,16 @@
 module.exports = {
   packagerConfig: {
     appBundleId: 'com.electronfriends.wemp',
+    asar: true,
+    icon: 'icons/wemp',
   },
   rebuildConfig: {},
   makers: [
     {
       name: '@electron-forge/maker-squirrel',
-      config: {},
+      config: {
+        setupIcon: 'icons/wemp.ico',
+      },
     },
   ],
   publishers: [
