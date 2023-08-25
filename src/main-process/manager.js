@@ -62,7 +62,7 @@ export async function checkServices() {
           }
         }
       } catch (error) {
-        logger(`Failed to download service '${service.name}': ${error.message}`);
+        logger(`Error while downloading service '${service.name}': ${error.message}`);
         onServiceDownloadError(service.name);
       } finally {
         notification.close();

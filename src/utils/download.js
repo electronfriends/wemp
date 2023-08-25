@@ -13,18 +13,28 @@ import config from '../config';
  * @param {boolean} isUpdate - Whether it is an update or first installation.
  * @returns {Promise<void>}
  */
-export default function download(service, isUpdate) {
-  return new Promise(async (resolve, reject) => {
-    const serviceName = service.name.toLowerCase();
-    const servicePath = path.join(config.paths.services, serviceName);
+export default async function download(service, isUpdate) {
+  const serviceName = service.name.toLowerCase();
+  const servicePath = path.join(config.paths.services, serviceName);
 
-    const response = await fetch(service.url.replace(/{version}/g, service.version));
+  if (!fs.existsSync(servicePath)) {
+    fs.mkdirSync(servicePath, { recursive: true });
+  }
 
-    if (!response.ok) {
-      reject(response.statusText);
+  try {
+    let response = await fetch(service.url.replace(/{version}/g, service.version));
+
+    if (!response.ok && service.name === 'PHP') {
+      // Fallback for PHP: Older versions must be downloaded from the archives.
+      const fallbackUrl = service.url.replace('releases/', 'releases/archives/');
+      response = await fetch(fallbackUrl.replace(/{version}/g, service.version));
     }
 
-    response.body
+    if (!response.ok) {
+      throw new Error(`Failed to fetch: ${response.statusText}`);
+    }
+
+    await response.body
       .pipe(unzipper.Parse())
       .on('entry', async (entry) => {
         let fileName = entry.path;
@@ -49,18 +59,11 @@ export default function download(service, isUpdate) {
           }
         }
       })
-      .on('error', async (error) => {
-        // Older PHP versions must be downloaded from the archive.
-        if (service.name === 'PHP' && error.message.includes('invalid signature')) {
-          service.url = service.url.replace('releases/', 'releases/archives/');
-          await download(service, isUpdate);
-        } else {
-          reject(error.message);
-        }
-      })
-      .on('finish', () => {
-        settings.setSync(serviceName, service.version);
-        resolve();
-      });
-  });
+      .promise();
+
+    settings.setSync(serviceName, service.version);
+    return Promise.resolve();
+  } catch (error) {
+    return Promise.reject(error);
+  }
 }
