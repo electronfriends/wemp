@@ -12,7 +12,7 @@ import { onServiceDownload, onServiceDownloadError, onServiceError } from '../ut
 import { updateMenuStatus } from './menu';
 
 const services = {};
-const servicesPath = config.paths.services;
+let servicesPath = config.paths.services;
 
 /**
  * Check to see if any services need to be installed or updated.
