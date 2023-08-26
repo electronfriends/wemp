@@ -1,4 +1,4 @@
-import { exec } from 'child_process';
+import { exec, spawn } from 'child_process';
 
 import BaseService from './base-service';
 
@@ -26,11 +26,11 @@ class MariaDB extends BaseService {
     return new Promise((resolve, reject) => {
       const attemptShutdown = () => {
         try {
-          execFileSync('mysqladmin.exe', ['shutdown', '-u', 'root'], { cwd: this.cwd });
+          execFileSync('mysqladmin.exe', ['-u', 'root', 'shutdown'], { cwd: this.cwd });
           resolve();
-        } catch (err) {
+        } catch (error) {
           if (retryCount === maxRetries) {
-            reject(err);
+            reject(error);
           } else {
             retryCount++;
             setTimeout(attemptShutdown, 3000);
