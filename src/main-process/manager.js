@@ -146,7 +146,7 @@ export async function stopService(name, shouldRestart = false) {
       updateMenuStatus(name, false);
 
       if (shouldRestart) {
-        await startService(name);
+        setTimeout(() => startService(name), 500);
       }
     } catch (error) {
       logger(`Failed to stop service '${name}': ${error.message}`);
@@ -159,12 +159,13 @@ export async function stopService(name, shouldRestart = false) {
 
 /**
  * Stops all non-interface services defined in the configuration.
+ * @param {boolean} shouldRestart - Whether the services should restart after stopping.
  * @returns {Promise<void>}
  */
-export async function stopServices() {
+export async function stopServices(shouldRestart = false) {
   await Promise.all(
     config.services
       .filter(service => !service.interface)
-      .map(service => stopService(service.name))
+      .map(service => stopService(service.name, shouldRestart))
   );
 }
