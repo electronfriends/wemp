@@ -1,4 +1,4 @@
-import { exec, spawn } from 'child_process';
+import { exec, execFileSync, spawn } from 'child_process';
 
 import BaseService from './base-service';
 
