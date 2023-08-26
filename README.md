@@ -9,11 +9,11 @@
 
 ## Introduction
 
-Wemp is a simple menu in the notification area that allows you to easily set up and manage [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) on Windows.
+Wemp allows you to easily and quickly set up a web server on Windows that always uses the latest versions of [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) through automatic updates.
 
-The goal of this project is to always offer the latest versions of the services.
+You can manage the services in the menu that opens when you click on the Wemp icon in the notification area.
 
-<p align="center"><img src="https://user-images.githubusercontent.com/69470382/175114646-8e966bbb-7938-4895-bebd-db943cc5079b.png" alt="Wemp preview"></p>
+<p align="center"><img src="https://github.com/electronfriends/wemp/assets/69470382/ef05b121-1b4d-4a9e-aedd-35961e666d78" alt="Wemp preview"></p>
 
 ## Features
 
@@ -23,11 +23,11 @@ The goal of this project is to always offer the latest versions of the services.
 
 - **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net), a popular web interface.
 
-- **Monitoring** of configuration files to automatically restart services when changes are made.
+- ~~**Monitoring** of configuration files to automatically restart services when changes are made.~~
 
 - **Error logging** in a session-based log file so you can quickly track down errors.
 
-- **Autostart** to start Wemp directly at startup. Easy to configure.
+- **Autostart** option in the menu to always start Wemp directly at startup.
 
 ## Installation
 
@@ -45,11 +45,11 @@ If you need help with something, [create a new issue](https://github.com/electro
 
 ### Will the services be deleted if I uninstall Wemp?
 
-No. The services are installed independently of Wemp and remain untouched when Wemp is uninstalled.
+No. The services are installed separately from Wemp and are not deleted.
 
 ### Is it safe to downgrade an existing installation of Wemp?
 
-No. MariaDB does not support downgrades, by downgrading Wemp you risk corrupting your database.
+No. MariaDB does not support downgrading and by using an old Wemp version on an existing MariaDB installation you could risk losing your database.
 
 ## Thanks to
 
@@ -57,13 +57,13 @@ No. MariaDB does not support downgrades, by downgrading Wemp you risk corrupting
 
 - [Nginx](https://nginx.org), [MariaDB](https://mariadb.org), [PHP](https://php.net) and [phpMyAdmin](https://www.phpmyadmin.net) for providing their services.
 
-- [Icons8.com](https://icons8.com) for the free [Fluency](https://icons8.com/icon/set/logs/fluency) icons that we use in our menu.
+- [Icons8](https://icons8.com) for the free [Fluency](https://icons8.com/icons/fluency) icons that we use in our menu.
 
 ## Contributing
 
-Thank you for your interest in contributing to Wemp.
+If you want to help us with the development of Wemp, e.g. by fixing a bug or introducing a new feature, feel free to [create a new issue](https://github.com/electronfriends/wemp/issues/new) or make a pull request.
 
-If you find a bug or have a suggestion for a new feature, either [create a new issue](https://github.com/electronfriends/wemp/issues/new) or make a pull request.
+We appreciate all the support we can get.
 
 ## License
 
