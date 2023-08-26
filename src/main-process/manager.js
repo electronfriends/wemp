@@ -98,6 +98,7 @@ export async function setServicesPath() {
 
   // Update settings and config.
   settings.setSync('path', chosenPath);
+  config.paths.services = chosenPath;
   servicesPath = chosenPath;
 }
 

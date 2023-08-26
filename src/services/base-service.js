@@ -23,9 +23,7 @@ class BaseService {
   }
 
   async stop() {
-    if (this.process) {
-      await this.process.kill();
-    }
+    await this.process?.kill();
   }
 }
 
