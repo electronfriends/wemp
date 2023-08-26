@@ -81,7 +81,13 @@ export function createMenu() {
         {
           icon: path.join(iconsPath, 'folder.png'),
           label: 'Set Services Path',
-          click: () => setServicesPath().then(() => stopServices(true))
+          click: () => {
+            setServicesPath().then(async () => {
+              await stopServices();
+              app.relaunch();
+              app.exit(0);
+            });
+          }
         },
         {
           icon: path.join(iconsPath, 'event-log.png'),

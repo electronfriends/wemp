@@ -1,7 +1,6 @@
 import fs from 'fs';
 import path from 'path';
 
-import settings from 'electron-settings';
 import fetch from 'node-fetch';
 import unzipper from 'unzipper';
 
@@ -61,7 +60,6 @@ export default async function download(service, isUpdate) {
       })
       .promise();
 
-    settings.setSync(serviceName, service.version);
     return Promise.resolve();
   } catch (error) {
     return Promise.reject(error);

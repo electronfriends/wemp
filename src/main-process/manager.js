@@ -27,7 +27,7 @@ export async function checkServices() {
     // Prepare service-related variables.
     const serviceName = service.name.toLowerCase();
     const servicePath = path.join(servicesPath, serviceName);
-    const serviceVersion = settings.getSync(serviceName);
+    const serviceVersion = settings.getSync(`paths.${servicesPath}.${serviceName}`);
 
     // Dynamically instantiate the service module.
     let currentService;
@@ -62,6 +62,9 @@ export async function checkServices() {
             fs.writeFileSync(path.join(servicePath, service.config), modifiedContent);
           }
         }
+
+        // Set the service version for the current path.
+        settings.setSync(`paths.${servicesPath}.${serviceName}`, service.version);
       } catch (error) {
         logger(`Error while downloading service '${service.name}': ${error.message}`);
         onServiceDownloadError(service.name);
