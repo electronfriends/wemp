@@ -87,18 +87,6 @@ export async function setServicesPath() {
 
   const chosenPath = result.filePaths[0] || servicesPath;
 
-  // Remove the default service path if it is empty.
-  if (chosenPath !== servicesPath) {
-    try {
-      const files = fs.readdirSync(chosenPath);
-      if (files.length === 0) {
-        fs.rmdirSync(chosenPath);
-      }
-    } catch (error) {
-      logger(`Error while checking or removing directory: ${error.message}`);
-    }
-  }
-
   // Update settings and config.
   settings.setSync('path', chosenPath);
   config.paths.services = chosenPath;
