@@ -5,11 +5,12 @@ import logger from '../utils/logger';
 import { onServiceError } from './notification';
 
 class Process {
-  constructor(name, executable, args, options) {
+  constructor(name, executable, args, options, restartOnClose = false) {
     this.name = name;
     this.executable = executable;
     this.args = args;
     this.options = options;
+    this.restartOnClose = restartOnClose;
     this.child = undefined;
   }
 
@@ -40,7 +41,7 @@ class Process {
     });
   }
 
-  async run(restartOnClose = false) {
+  async run() {
     try {
       const isRunning = await this.isRunning();
 
@@ -48,13 +49,13 @@ class Process {
         await this.kill();
       }
 
-      await this.start(restartOnClose);
+      await this.start();
     } catch (error) {
       throw error;
     }
   }
 
-  start(restartOnClose) {
+  start() {
     return new Promise((resolve, reject) => {
       this.child = spawn(this.executable, this.args, this.options);
 
@@ -67,7 +68,7 @@ class Process {
           return;
         }
 
-        if (restartOnClose) {
+        if (this.restartOnClose) {
           this.run(true);
           return;
         }
