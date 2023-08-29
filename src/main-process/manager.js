@@ -72,6 +72,21 @@ export async function checkServices() {
         notification.close();
       }
     }
+
+    // Watch for service configuration file changes.
+    if (!service.interface) {
+      const serviceConfig = path.join(servicePath, service.config);
+
+      if (fs.existsSync(serviceConfig)) {
+        let debounce;
+
+        fs.watch(serviceConfig, (event, filename) => {
+          if (!filename || debounce) return;
+          debounce = setTimeout(() => debounce = null, 1000);
+          stopService(service.name, true);
+        });
+      }
+    }
   }
 }
 

@@ -23,7 +23,7 @@ You can manage the services in the menu that opens when you click on the Wemp ic
 
 - **Database management** powered by [phpMyAdmin](https://www.phpmyadmin.net), a popular web interface.
 
-- ~~**Monitoring** of configuration files to automatically restart services when changes are made.~~
+- **Monitoring** of configuration files to automatically restart services when changes are made.
 
 - **Error logging** in a session-based log file so you can quickly track down errors.
 
