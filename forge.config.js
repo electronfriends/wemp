@@ -1,6 +1,5 @@
 module.exports = {
   packagerConfig: {
-    appBundleId: 'com.electronfriends.wemp',
     asar: true,
     icon: 'icons/wemp',
   },

@@ -22,9 +22,6 @@ if (!gotTheLock) {
   // Prevent Electron from setting a default menu.
   Menu.setApplicationMenu(null);
 
-  // Set the app user model ID for Windows notifications.
-  app.setAppUserModelId('com.electronfriends.wemp');
-
   // Handle the ready event to start the services and create the menu.
   app.on('ready', async () => {
     createMenu();
