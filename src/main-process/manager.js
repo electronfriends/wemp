@@ -66,7 +66,7 @@ export async function checkServices() {
         // Set the service version for the current path.
         settings.setSync(`paths.${servicesPath}.${serviceName}`, service.version);
       } catch (error) {
-        logger(`Error while downloading service '${service.name}': ${error.message}`);
+        logger(`Error while downloading service '${service.name}': ${error}`);
         onServiceDownloadError(service.name);
       } finally {
         notification.close();
@@ -120,7 +120,7 @@ export async function startService(name) {
       await service.start();
       updateMenuStatus(name, true);
     } catch (error) {
-      logger(`Failed to start service '${name}': ${error.message}`);
+      logger(`Failed to start service '${name}': ${error}`);
       onServiceError(name);
     }
   } else {
@@ -156,7 +156,7 @@ export async function stopService(name, shouldRestart = false) {
         setTimeout(() => startService(name), 500);
       }
     } catch (error) {
-      logger(`Failed to stop service '${name}': ${error.message}`);
+      logger(`Failed to stop service '${name}': ${error}`);
       onServiceError(name);
     }
   } else {

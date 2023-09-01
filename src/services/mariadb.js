@@ -65,7 +65,7 @@ class MariaDB extends BaseService {
         await this.upgrade();
         this.needsUpgrade = false;
       } catch (error) {
-        logger(`Failed to upgrade MariaDB: ${error.message}`);
+        logger(`Failed to upgrade MariaDB: ${error}`);
       }
     }
   }

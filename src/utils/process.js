@@ -28,7 +28,7 @@ class Process {
 
       return stdout.includes(this.executable);
     } catch (error) {
-      logger(`Failed to check if process is running: ${error.message}`);
+      logger(`Failed to check if process is running: ${error}`);
       return false;
     }
   }
