@@ -20,7 +20,6 @@ module.exports = {
           owner: 'electronfriends',
           name: 'wemp',
         },
-        prerelease: true,
       },
     },
   ],
