@@ -3,6 +3,7 @@ import fs from 'fs';
 
 import { dialog } from 'electron';
 import settings from 'electron-settings';
+import semverGt from 'semver/functions/gt';
 
 import config from '../config';
 import * as serviceModules from '../services';
@@ -39,7 +40,7 @@ export async function checkServices() {
     const isFirstDownload = !fs.existsSync(servicePath);
 
     // If it's the first download or service version has changed.
-    if (isFirstDownload || serviceVersion !== service.version) {
+    if (isFirstDownload || semverGt(service.version, serviceVersion)) {
       const notification = onServiceDownload(service, !isFirstDownload);
 
       try {

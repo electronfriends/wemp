@@ -28,6 +28,7 @@
     "electron-settings": "^4.0.2",
     "electron-squirrel-startup": "^1.0.0",
     "node-fetch": "^3.3.2",
+    "semver": "^7.5.4",
     "unzipper": "^0.10.14",
     "update-electron-app": "^2.0.1"
   }
