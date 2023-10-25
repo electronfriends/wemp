@@ -1,5 +1,6 @@
 import { app, autoUpdater, Menu } from 'electron';
 import settings from 'electron-settings';
+import { updateElectronApp } from 'update-electron-app';
 
 import { createMenu, tray } from './main-process/menu';
 import { checkServices, startServices, stopServices } from './main-process/manager';
@@ -17,7 +18,7 @@ if (!gotTheLock) {
   }
 
   // Enable automatic updates for the app.
-  require('update-electron-app')();
+  updateElectronApp();
 
   // Prevent Electron from setting a default menu.
   Menu.setApplicationMenu(null);
