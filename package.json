@@ -22,7 +22,7 @@
     "@electron-forge/maker-squirrel": "^6.4.2",
     "@electron-forge/plugin-vite": "^6.4.2",
     "@electron-forge/publisher-github": "^6.4.2",
-    "electron": "^26.2.4"
+    "electron": "^27.0.2"
   },
   "dependencies": {
     "electron-settings": "^4.0.2",
@@ -30,6 +30,6 @@
     "node-fetch": "^3.3.2",
     "semver": "^7.5.4",
     "unzipper": "^0.10.14",
-    "update-electron-app": "^2.0.1"
+    "update-electron-app": "^3.0.0"
   }
 }
