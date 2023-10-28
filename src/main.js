@@ -1,4 +1,4 @@
-import { app, autoUpdater, Menu } from 'electron';
+import { app, Menu } from 'electron';
 import settings from 'electron-settings';
 import { updateElectronApp } from 'update-electron-app';
 
@@ -32,15 +32,6 @@ if (!gotTheLock) {
     if (settings.getSync('showReadyNotification')) {
       onServicesReady();
     }
-
-    // Check if a temporary setting for 'open at login' is set, and update login settings.
-    if (settings.hasSync('tempOpenAtLogin')) {
-      const tempOpenAtLogin = settings.getSync('tempOpenAtLogin');
-      if (tempOpenAtLogin) {
-        app.setLoginItemSettings({ openAtLogin: true });
-      }
-      settings.unsetSync('tempOpenAtLogin');
-    }
   });
 
   // Handle the before-quit event to stop services before quitting.
@@ -55,16 +46,6 @@ if (!gotTheLock) {
     if (tray) {
       tray.focus();
       tray.popUpContextMenu();
-    }
-  });
-
-  // If 'open at login' is enabled when an update is downloaded, temporarily disable it.
-  // We will have to manually apply it to the new version.
-  autoUpdater.on('update-downloaded', () => {
-    const loginItemSettings = app.getLoginItemSettings();
-    if (loginItemSettings.openAtLogin) {
-      app.setLoginItemSettings({ openAtLogin: false });
-      settings.setSync('tempOpenAtLogin', true);
     }
   });
 }
