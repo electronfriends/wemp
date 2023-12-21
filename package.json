@@ -18,11 +18,11 @@
     "url": "https://github.com/electronfriends/wemp.git"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.1.0",
-    "@electron-forge/maker-squirrel": "^7.1.0",
-    "@electron-forge/plugin-vite": "^7.1.0",
-    "@electron-forge/publisher-github": "^7.1.0",
-    "electron": "^27.1.2"
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/plugin-vite": "^7.2.0",
+    "@electron-forge/publisher-github": "^7.2.0",
+    "electron": "^28.0.0"
   },
   "dependencies": {
     "electron-settings": "^4.0.2",
