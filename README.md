@@ -47,10 +47,6 @@ If you need help with something, [create a new issue](https://github.com/electro
 
 No. The services are installed separately from Wemp and are not deleted.
 
-### Is it safe to downgrade an existing installation of Wemp?
-
-No. MariaDB does not support downgrading and by using an old Wemp version on an existing MariaDB installation you could risk losing your database.
-
 ## Thanks to
 
 - [Electron](https://www.electronjs.org) for the tools to create a Windows application with JavaScript.
