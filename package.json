@@ -3,26 +3,20 @@
   "productName": "Wemp",
   "version": "0.8.8",
   "description": "Wemp is a menu that makes it easy to set up and control a web server on Windows.",
-  "main": ".vite/build/main.js",
-  "scripts": {
-    "start": "electron-forge start",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "publish": "electron-forge publish",
-    "lint": "echo \"No linting configured\""
-  },
-  "author": "ElectronFriends",
-  "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/electronfriends/wemp.git"
   },
-  "devDependencies": {
-    "@electron-forge/cli": "^7.2.0",
-    "@electron-forge/maker-squirrel": "^7.2.0",
-    "@electron-forge/plugin-vite": "^7.2.0",
-    "@electron-forge/publisher-github": "^7.2.0",
-    "electron": "^28.1.4"
+  "license": "MIT",
+  "author": "ElectronFriends",
+  "type": "commonjs",
+  "main": ".vite/build/main.js",
+  "scripts": {
+    "lint": "echo \"No linting configured\"",
+    "make": "electron-forge make",
+    "package": "electron-forge package",
+    "publish": "electron-forge publish",
+    "start": "electron-forge start"
   },
   "dependencies": {
     "electron-settings": "^4.0.2",
@@ -31,5 +25,12 @@
     "semver": "^7.5.4",
     "unzipper": "^0.10.14",
     "update-electron-app": "^3.0.0"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^7.2.0",
+    "@electron-forge/maker-squirrel": "^7.2.0",
+    "@electron-forge/plugin-vite": "^7.2.0",
+    "@electron-forge/publisher-github": "^7.2.0",
+    "electron": "^28.1.4"
   }
 }
