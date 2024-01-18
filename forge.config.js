@@ -1,7 +1,7 @@
 module.exports = {
   packagerConfig: {
     asar: true,
-    icon: 'icons/wemp',
+    icon: 'icons/wemp.ico',
   },
   rebuildConfig: {},
   makers: [
