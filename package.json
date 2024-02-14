@@ -1,7 +1,7 @@
 {
   "name": "wemp",
   "productName": "Wemp",
-  "version": "0.8.9",
+  "version": "0.8.10",
   "description": "Wemp is a menu that makes it easy to set up and control a web server on Windows.",
   "repository": {
     "type": "git",
