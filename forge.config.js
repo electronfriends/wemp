@@ -8,6 +8,7 @@ module.exports = {
     {
       name: '@electron-forge/maker-squirrel',
       config: {
+        iconUrl: 'https://raw.githubusercontent.com/electronfriends/wemp/main/icons/wemp.ico',
         setupIcon: 'icons/wemp.ico',
       },
     },
