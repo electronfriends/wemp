@@ -28,7 +28,6 @@ if (!gotTheLock) {
     createMenu();
     await checkServices();
     await startServices();
-
     if (settings.getSync('showReadyNotification')) {
       onServicesReady();
     }

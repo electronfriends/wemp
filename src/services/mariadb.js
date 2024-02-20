@@ -1,6 +1,9 @@
 import { exec, execFileSync, spawn } from 'child_process';
+import { promisify } from 'util';
 
 import BaseService from './base-service';
+
+const execute = promisify(exec);
 
 class MariaDB extends BaseService {
   constructor() {
@@ -8,15 +11,11 @@ class MariaDB extends BaseService {
   }
 
   async install() {
-    return new Promise((resolve, reject) => {
-      exec('mysql_install_db.exe', { cwd: this.cwd }, (error) => {
-        if (error) {
-          reject(error);
-        } else {
-          resolve();
-        }
-      });
-    });
+    try {
+      await execute('mysql_install_db.exe', { cwd: this.cwd });
+    } catch (error) {
+      throw new Error(`Failed to install MySQL: ${error.message}`);
+    }
   }
 
   async shutdown() {

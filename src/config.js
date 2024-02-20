@@ -3,14 +3,13 @@ import path from 'path';
 import { app } from 'electron';
 import settings from 'electron-settings';
 
-// Here the different paths as well as the services for the menu are defined.
-// When a service gets a new version, it must be updated here.
+const defaultPath = 'C:\\Wemp';
 
 export default {
   paths: {
     icons: path.join(app.getAppPath(), 'icons'),
     logs: path.join(app.getPath('userData'), 'error.log'),
-    services: settings.getSync('path')?.toString() || 'C:\\Wemp'
+    services: settings.getSync('path')?.toString() || defaultPath
   },
   services: [
     {

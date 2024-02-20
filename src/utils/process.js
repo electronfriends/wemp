@@ -1,8 +1,11 @@
 import { exec, spawn } from 'child_process';
+import { promisify } from 'util';
 
 import { updateMenuStatus } from '../main-process/menu';
 import logger from '../utils/logger';
 import { onServiceError } from './notification';
+
+const execPromise = promisify(exec);
 
 class Process {
   constructor(name, executable, args, options, restartOnClose = false) {
@@ -16,19 +19,10 @@ class Process {
 
   async isRunning() {
     try {
-      const stdout = await new Promise((resolve, reject) => {
-        exec('tasklist', (error, stdout) => {
-          if (error) {
-            reject(error);
-            return;
-          }
-          resolve(stdout);
-        });
-      });
-
+      const { stdout } = await execPromise('tasklist');
       return stdout.includes(this.executable);
     } catch (error) {
-      logger(`Failed to check if process is running: ${error}`);
+      logger(`Failed to check if process is running: ${error.message}`);
       return false;
     }
   }
@@ -36,9 +30,11 @@ class Process {
   async kill() {
     this.child?.kill();
 
-    await new Promise(resolve => {
-      exec(`taskkill /F /IM "${this.executable}"`, () => resolve());
-    });
+    try {
+      await execPromise(`taskkill /F /IM "${this.executable}"`);
+    } catch (error) {
+      logger(`Failed to kill process: ${error.message}`);
+    }
   }
 
   async run() {
@@ -51,7 +47,7 @@ class Process {
 
       await this.start();
     } catch (error) {
-      throw error;
+      logger(`Failed to start process: ${error.message}`);
     }
   }
 
@@ -59,11 +55,16 @@ class Process {
     return new Promise((resolve, reject) => {
       this.child = spawn(this.executable, this.args, this.options);
 
-      this.child.stderr?.on('data', (data) => {
+      const dataHandler = (data) => {
         logger(`[${this.name}] ${data}`);
-      });
+      };
 
-      this.child.on('close', () => {
+      const errorHandler = (error) => {
+        logger(`[${this.name}] Error: ${error.message}`);
+        reject(error);
+      };
+
+      const closeHandler = () => {
         if (this.child.killed) {
           return;
         }
@@ -75,15 +76,16 @@ class Process {
 
         updateMenuStatus(this.name, false);
         onServiceError(this.name);
-      });
+      };
 
-      this.child.on('error', (error) => {
-        reject(error);
-      });
-
-      this.child.on('spawn', () => {
+      const spawnHandler = () => {
         resolve();
-      });
+      };
+
+      this.child.stderr?.on('data', dataHandler);
+      this.child.on('error', errorHandler);
+      this.child.on('close', closeHandler);
+      this.child.on('spawn', spawnHandler);
     });
   }
 }

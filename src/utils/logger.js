@@ -13,8 +13,16 @@ export default function logger(message) {
   const sanitizedMessage = message.replace(/[\r\n]+/g, ' ');
   const logMessage = `[${timestamp}] ${sanitizedMessage}\n`;
 
-  fs.appendFileSync(logFilePath, logMessage);
+  fs.appendFile(logFilePath, logMessage, (err) => {
+    if (err) {
+      console.error('Error writing to log file:', err);
+    }
+  });
 }
 
 // Clear the log file when the application is started.
-fs.writeFileSync(logFilePath, '');
+fs.writeFile(logFilePath, '', (err) => {
+  if (err) {
+    console.error('Error clearing log file:', err);
+  }
+});

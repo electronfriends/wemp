@@ -13,14 +13,14 @@ import config from '../config';
  * @returns {Promise<void>}
  */
 export default async function download(service, isUpdate) {
-  const serviceName = service.name.toLowerCase();
-  const servicePath = path.join(config.paths.services, serviceName);
-
-  if (!fs.existsSync(servicePath)) {
-    fs.mkdirSync(servicePath, { recursive: true });
-  }
-
   try {
+    const serviceName = service.name.toLowerCase();
+    const servicePath = path.join(config.paths.services, serviceName);
+
+    if (!fs.existsSync(servicePath)) {
+      fs.mkdirSync(servicePath, { recursive: true });
+    }
+
     let response = await fetch(service.url.replace(/{version}/g, service.version));
 
     if (!response.ok && service.name === 'PHP') {
