@@ -21,11 +21,11 @@ export default async function download(service, isUpdate) {
       fs.mkdirSync(servicePath, { recursive: true });
     }
 
-    let response = await fetch(service.url.replace(/{version}/g, service.version));
+    let response = await fetch(service.downloadUrl.replace(/{version}/g, service.version));
 
     if (!response.ok && service.name === 'PHP') {
       // Fallback for PHP: Older versions must be downloaded from the archives.
-      const fallbackUrl = service.url.replace('releases/', 'releases/archives/');
+      const fallbackUrl = service.downloadUrl.replace('releases/', 'releases/archives/');
       response = await fetch(fallbackUrl.replace(/{version}/g, service.version));
     }
 

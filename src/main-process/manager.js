@@ -31,7 +31,7 @@ export async function checkServices() {
       const serviceVersion = settings.getSync(`paths.${servicesPath}.${serviceName}`);
 
       let currentService;
-      if (!service.interface) {
+      if (service.name !== 'phpMyAdmin') {
         currentService = services[service.name] = new serviceModules[serviceName]();
       }
 
@@ -169,25 +169,25 @@ export async function stopService(name, shouldRestart = false) {
 }
 
 /**
- * Start all non-interface services defined in the configuration.
+ * Starts all services defined in the configuration.
  */
 export async function startServices() {
   await Promise.all(
     config.services
-      .filter(service => !service.interface)
+      .filter(service => service.name !== 'phpMyAdmin')
       .map(service => startService(service.name))
   );
 }
 
 /**
- * Stops all non-interface services defined in the configuration.
+ * Stops all services defined in the configuration.
  * @param {boolean} shouldRestart - Whether the services should restart after stopping.
  * @returns {Promise<void>}
  */
 export async function stopServices(shouldRestart = false) {
   await Promise.all(
     config.services
-      .filter(service => !service.interface)
+      .filter(service => service.name !== 'phpMyAdmin')
       .map(service => stopService(service.name, shouldRestart))
   );
 }
