@@ -9,15 +9,17 @@
 
 ## Introduction
 
-Wemp allows you to easily and quickly set up a web server on Windows that always uses the latest versions of [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net) through automatic updates.
+Wemp allows you to easily and quickly set up a web server on Windows with [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://php.net).
 
-You can manage the services in the menu that opens when you click on the Wemp icon in the notification area.
+It comes bundled with these services and receives regular updates to keep the versions up to date.
+
+You can manage the services in the menu that opens when you click the Wemp icon in the system tray.
 
 <p align="center"><img src="https://github.com/electronfriends/wemp/assets/69470382/ef05b121-1b4d-4a9e-aedd-35961e666d78" alt="Wemp preview"></p>
 
 ## Features
 
-- **Easy to use** for both experienced and inexperienced users.
+- **Easy to use** for both novice and experienced users.
 
 - **Regular updates** to always offer the latest versions of all services.
 
@@ -46,6 +48,14 @@ If you need help with something, [create a new issue](https://github.com/electro
 ### Will the services be deleted if I uninstall Wemp?
 
 No. The services are installed separately from Wemp and are not deleted.
+
+### Why does the autostart option get reset after every update?
+
+This is due to Electron Forge and we have already opened an [issue](https://github.com/electron/forge/issues/3333) about this, but unfortunately there has been no response yet.
+
+### Can I use a particular version of a service?
+
+No. Wemp always uses the versions it has configured internally. But this is planned for the future.
 
 ## Thanks to
 
