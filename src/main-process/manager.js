@@ -35,7 +35,7 @@ export async function checkServices() {
         currentService = services[service.name] = new serviceModules[serviceName]();
       }
 
-      const isFirstDownload = !fs.existsSync(servicePath);
+      const isFirstDownload = serviceVersion === undefined || !fs.existsSync(servicePath);
 
       if (isFirstDownload || semverGt(service.version, serviceVersion)) {
         const notification = onServiceDownload(service, !isFirstDownload);
