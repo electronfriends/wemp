@@ -31,6 +31,6 @@
     "@electron-forge/maker-squirrel": "~7.2.0",
     "@electron-forge/plugin-vite": "~7.2.0",
     "@electron-forge/publisher-github": "~7.2.0",
-    "electron": "^29.0.1"
+    "electron": "^29.1.4"
   }
 }
