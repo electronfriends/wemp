@@ -19,7 +19,7 @@
     "start": "electron-forge start"
   },
   "dependencies": {
-    "electron-settings": "^4.0.2",
+    "electron-settings": "^4.0.3",
     "electron-squirrel-startup": "^1.0.0",
     "node-fetch": "^3.3.2",
     "semver": "^7.6.0",
@@ -27,10 +27,10 @@
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
-    "@electron-forge/cli": "~7.2.0",
-    "@electron-forge/maker-squirrel": "~7.2.0",
-    "@electron-forge/plugin-vite": "~7.2.0",
-    "@electron-forge/publisher-github": "~7.2.0",
-    "electron": "^29.1.4"
+    "@electron-forge/cli": "~7.3.1",
+    "@electron-forge/maker-squirrel": "~7.3.1",
+    "@electron-forge/plugin-vite": "~7.3.1",
+    "@electron-forge/publisher-github": "~7.3.1",
+    "electron": "^29.3.0"
   }
 }
