@@ -2,7 +2,7 @@
 # yarn lockfile v1
 
 
-"@electron-forge/cli@~7.4.0":
+"@electron-forge/cli@^7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@electron-forge/cli/-/cli-7.4.0.tgz#db16f4bc678d1f6cec8890cdf86041e9c8336350"
   integrity sha512-a+zZv3ja/IxkJzNyx4sOHSZv6DPV85S0PEVF6pcRjUpbDL5r+DxjRFsNc0Nq4UIWyFm1nw7RWoPdd9uDst4Tvg==
@@ -83,7 +83,7 @@
     fs-extra "^10.0.0"
     which "^2.0.2"
 
-"@electron-forge/maker-squirrel@~7.4.0":
+"@electron-forge/maker-squirrel@^7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@electron-forge/maker-squirrel/-/maker-squirrel-7.4.0.tgz#982f3a7ad9d45258de8f78133eefdd79c90f870e"
   integrity sha512-mCQyufnSNfjffiKho59ZqVg4W601zGOl6h01OyfDwjOU/G4iQtpnnDEOXGe26q7OVT5ORb1WDnfyGgBeJ6Ge7g==
@@ -122,7 +122,7 @@
   dependencies:
     "@electron-forge/shared-types" "7.4.0"
 
-"@electron-forge/publisher-github@~7.4.0":
+"@electron-forge/publisher-github@^7.4.0":
   version "7.4.0"
   resolved "https://registry.yarnpkg.com/@electron-forge/publisher-github/-/publisher-github-7.4.0.tgz#8f067a93bd2a8da82ce587ab946379754b77a734"
   integrity sha512-hrxKNssJyU8Yuz0qv384y5RKojMG0nWeG7/kidjp8PX/RnqjGRU/JJ0Worl28g8LGiLt5R5JIfNLngLaFMn8tg==
