@@ -17,16 +17,6 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
   // Prevent Electron from setting a default menu.
   Menu.setApplicationMenu(null);
 
-  // Handle the ready event to start the services and create the menu.
-  app.on('ready', async () => {
-    createMenu();
-    await checkServices();
-    await startServices();
-    if (settings.getSync('showReadyNotification')) {
-      onServicesReady();
-    }
-  });
-
   // Handle the before-quit event to stop services before quitting.
   app.on('before-quit', async (event) => {
     event.preventDefault();
@@ -39,6 +29,16 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
     if (tray) {
       tray.focus();
       tray.popUpContextMenu();
+    }
+  });
+
+  // Handle the ready event to start the services and create the menu.
+  app.whenReady().then(async () => {
+    createMenu();
+    await checkServices();
+    await startServices();
+    if (settings.getSync('showReadyNotification')) {
+      onServicesReady();
     }
   });
 }

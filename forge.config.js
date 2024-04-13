@@ -2,6 +2,7 @@ export default {
   packagerConfig: {
     asar: true,
     icon: 'icons/wemp.ico',
+    extraResource: ['icons', 'stubs']
   },
   rebuildConfig: {},
   makers: [

@@ -9,7 +9,8 @@ export default {
   paths: {
     icons: path.join(app.getAppPath(), 'icons'),
     logs: path.join(app.getPath('userData'), 'error.log'),
-    services: settings.getSync('path')?.toString() || defaultPath
+    services: settings.getSync('path')?.toString() || defaultPath,
+    stubs: path.join(app.getAppPath(), 'stubs')
   },
   services: [
     {

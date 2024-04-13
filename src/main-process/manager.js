@@ -52,8 +52,8 @@ export async function checkServices() {
             if (service.name === 'MariaDB') {
               await currentService.install();
             } else {
-              const serviceConfigPath = path.join(__dirname, `../../stubs/${serviceName}/${service.config}`);
-              const content = fs.readFileSync(serviceConfigPath, 'utf8');
+              const stubConfigPath = path.join(config.paths.stubs, `${serviceName}/${service.config}`);
+              const content = fs.readFileSync(stubConfigPath, 'utf8');
               const modifiedContent = content.replace('{servicesPath}', servicesPath);
               fs.writeFileSync(path.join(servicePath, service.config), modifiedContent);
             }

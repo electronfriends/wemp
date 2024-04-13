@@ -9,39 +9,43 @@ import { setServicesPath, startService, stopService, stopServices } from './mana
 
 export let menu, tray;
 
+const iconsPath = config.paths.icons;
+
+/**
+ * Create a service menu item.
+ * @param {Object} service - The service object.
+ * @returns {MenuItem} - The created menu item.
+ */
+function createServiceMenuItem(service) {
+  const serviceName = service.name.toLowerCase();
+  const submenu = service.name !== 'phpMyAdmin' ? [
+    { icon: path.join(iconsPath, 'circled-play.png'), label: 'Start', click: () => startService(service.name) },
+    { icon: path.join(iconsPath, 'restart.png'), label: 'Restart', click: () => stopService(service.name, true) },
+    { icon: path.join(iconsPath, 'shutdown.png'), label: 'Stop', click: () => stopService(service.name) },
+    { type: 'separator' }
+  ] : [
+    { icon: path.join(iconsPath, 'web.png'), label: 'Open Web Interface', click: () => shell.openExternal(service.webInterfaceUrl) },
+  ];
+
+  return new MenuItem({
+    icon: path.join(iconsPath, serviceName + '.png'),
+    id: service.name,
+    label: service.name,
+    visible: service.name === 'phpMyAdmin',
+    submenu: [
+      { icon: path.join(iconsPath, serviceName + '.png'), label: `${service.name} ${service.version}`, enabled: false },
+      { type: 'separator' },
+      ...submenu,
+      { icon: path.join(iconsPath, 'settings.png'), label: 'Open Configuration', click: () => shell.openPath(path.join(config.paths.services, serviceName, service.config)) },
+      { icon: path.join(iconsPath, 'folder.png'), label: 'Open Directory', click: () => shell.openPath(path.join(config.paths.services, serviceName)) }
+    ]
+  });
+}
+
 /**
  * Create the menu template and tray.
  */
 export function createMenu() {
-  const iconsPath = config.paths.icons;
-  const servicesPath = config.paths.services;
-
-  const createServiceMenuItem = (service) => {
-    const serviceName = service.name.toLowerCase();
-    const submenu = service.name !== 'phpMyAdmin' ? [
-      { icon: path.join(iconsPath, 'circled-play.png'), label: 'Start', click: () => startService(service.name) },
-      { icon: path.join(iconsPath, 'restart.png'), label: 'Restart', click: () => stopService(service.name, true) },
-      { icon: path.join(iconsPath, 'shutdown.png'), label: 'Stop', click: () => stopService(service.name) },
-      { type: 'separator' }
-    ] : [
-      { icon: path.join(iconsPath, 'web.png'), label: 'Open Web Interface', click: () => shell.openExternal(service.webInterfaceUrl) },
-    ];
-
-    return new MenuItem({
-      icon: path.join(iconsPath, serviceName + '.png'),
-      id: service.name,
-      label: service.name,
-      visible: service.name === 'phpMyAdmin',
-      submenu: [
-        { icon: path.join(iconsPath, serviceName + '.png'), label: `${service.name} ${service.version}`, enabled: false },
-        { type: 'separator' },
-        ...submenu,
-        { icon: path.join(iconsPath, 'settings.png'), label: 'Open Configuration', click: () => shell.openPath(path.join(servicesPath, serviceName, service.config)) },
-        { icon: path.join(iconsPath, 'file-explorer.png'), label: 'Open Directory', click: () => shell.openPath(path.join(servicesPath, serviceName)) }
-      ]
-    });
-  };
-
   const serviceMenuItems = config.services.map(createServiceMenuItem);
 
   const menuTemplate = [
@@ -79,9 +83,9 @@ export function updateMenuStatus(name, isRunning) {
   const serviceMenu = menu.getMenuItemById(name);
 
   if (serviceMenu) {
-    const startItem = menu.getMenuItemById(`${name}-start`);
-    const restartItem = menu.getMenuItemById(`${name}-restart`);
-    const stopItem = menu.getMenuItemById(`${name}-stop`);
+    const startItem = serviceMenu.submenu.items.find(item => item.label === 'Start');
+    const restartItem = serviceMenu.submenu.items.find(item => item.label === 'Restart');
+    const stopItem = serviceMenu.submenu.items.find(item => item.label === 'Stop');
 
     if (startItem) {
       startItem.enabled = !isRunning;
