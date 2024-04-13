@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 
 import { dialog } from 'electron';
 import settings from 'electron-settings';
@@ -27,7 +26,7 @@ export async function checkServices() {
 
     for (const service of config.services) {
       const serviceName = service.name.toLowerCase();
-      const servicePath = path.join(servicesPath, serviceName);
+      const servicePath = `${servicesPath}/${serviceName}`;
       const serviceVersion = settings.getSync(`paths.${servicesPath}.${serviceName}`);
 
       let currentService;
@@ -52,10 +51,10 @@ export async function checkServices() {
             if (service.name === 'MariaDB') {
               await currentService.install();
             } else {
-              const stubConfigPath = path.join(config.paths.stubs, `${serviceName}/${service.config}`);
+              const stubConfigPath = `${config.paths.stubs}/${serviceName}/${service.config}`;
               const content = fs.readFileSync(stubConfigPath, 'utf8');
               const modifiedContent = content.replace('{servicesPath}', servicesPath);
-              fs.writeFileSync(path.join(servicePath, service.config), modifiedContent);
+              fs.writeFileSync(`${servicePath}/${service.config}`, modifiedContent);
             }
           }
 
@@ -100,7 +99,7 @@ function watchServiceConfig(serviceName) {
   const serviceConfig = config.services.find(s => s.name === serviceName)?.config;
 
   if (service && serviceConfig) {
-    const serviceConfigPath = path.join(servicesPath, serviceName, serviceConfig);
+    const serviceConfigPath = `${servicesPath}/${serviceName}/${serviceConfig}`;
     if (fs.existsSync(serviceConfigPath)) {
       service.debounce = service.debounce || null;
 

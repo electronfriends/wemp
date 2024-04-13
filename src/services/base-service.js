@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import config from '../config';
 import Process from '../utils/process';
 
@@ -14,7 +12,7 @@ class BaseService {
   }
 
   get cwd() {
-    return path.join(config.paths.services, this.name.toLowerCase(), this.binPath);
+    return `${config.paths.services}/${this.name.toLowerCase()}/${this.binPath}`;
   }
 
   async start() {

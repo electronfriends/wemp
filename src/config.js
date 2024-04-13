@@ -1,16 +1,15 @@
-import path from 'node:path';
-
 import { app } from 'electron';
 import settings from 'electron-settings';
 
+const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();
 const defaultPath = 'C:\\Wemp';
 
 export default {
   paths: {
-    icons: path.join(app.getAppPath(), 'icons'),
-    logs: path.join(app.getPath('userData'), 'error.log'),
+    icons: `${appPath}/icons`,
+    logs: `${app.getPath('userData')}/error.log`,
     services: settings.getSync('path')?.toString() || defaultPath,
-    stubs: path.join(app.getAppPath(), 'stubs')
+    stubs: `${appPath}/stubs`
   },
   services: [
     {

@@ -1,5 +1,4 @@
 import fs from 'node:fs';
-import path from 'node:path';
 
 import fetch from 'node-fetch';
 import unzipper from 'unzipper';
@@ -15,7 +14,7 @@ import config from '../config';
 export default async function download(service, isUpdate) {
   try {
     const serviceName = service.name.toLowerCase();
-    const servicePath = path.join(config.paths.services, serviceName);
+    const servicePath = `${config.paths.services}/${serviceName}`;
 
     if (!fs.existsSync(servicePath)) {
       fs.mkdirSync(servicePath, { recursive: true });
@@ -49,7 +48,7 @@ export default async function download(service, isUpdate) {
         if (isConfigFile || isIgnored) {
           entry.autodrain();
         } else {
-          const fileDestPath = path.join(servicePath, fileName);
+          const fileDestPath = `${servicePath}/${fileName}`;
 
           if (entry.type === 'Directory') {
             fs.mkdirSync(fileDestPath, { recursive: true });

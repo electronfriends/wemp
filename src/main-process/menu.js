@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import { Menu, MenuItem, Tray, app, shell } from 'electron';
 import settings from 'electron-settings';
 
@@ -19,25 +17,25 @@ const iconsPath = config.paths.icons;
 function createServiceMenuItem(service) {
   const serviceName = service.name.toLowerCase();
   const submenu = service.name !== 'phpMyAdmin' ? [
-    { icon: path.join(iconsPath, 'circled-play.png'), label: 'Start', click: () => startService(service.name) },
-    { icon: path.join(iconsPath, 'restart.png'), label: 'Restart', click: () => stopService(service.name, true) },
-    { icon: path.join(iconsPath, 'shutdown.png'), label: 'Stop', click: () => stopService(service.name) },
+    { icon: `${iconsPath}/circled-play.png`, label: 'Start', click: () => startService(service.name) },
+    { icon: `${iconsPath}/restart.png`, label: 'Restart', click: () => stopService(service.name, true) },
+    { icon: `${iconsPath}/shutdown.png`, label: 'Stop', click: () => stopService(service.name) },
     { type: 'separator' }
   ] : [
-    { icon: path.join(iconsPath, 'web.png'), label: 'Open Web Interface', click: () => shell.openExternal(service.webInterfaceUrl) },
+    { icon: `${iconsPath}/web.png`, label: 'Open Web Interface', click: () => shell.openExternal(service.webInterfaceUrl) },
   ];
 
   return new MenuItem({
-    icon: path.join(iconsPath, serviceName + '.png'),
+    icon: `${iconsPath}/${serviceName}.png`,
     id: service.name,
     label: service.name,
     visible: service.name === 'phpMyAdmin',
     submenu: [
-      { icon: path.join(iconsPath, serviceName + '.png'), label: `${service.name} ${service.version}`, enabled: false },
+      { icon: `${iconsPath}/${serviceName}.png`, label: `${service.name} ${service.version}`, enabled: false },
       { type: 'separator' },
       ...submenu,
-      { icon: path.join(iconsPath, 'settings.png'), label: 'Open Configuration', click: () => shell.openPath(path.join(config.paths.services, serviceName, service.config)) },
-      { icon: path.join(iconsPath, 'folder.png'), label: 'Open Directory', click: () => shell.openPath(path.join(config.paths.services, serviceName)) }
+      { icon: `${iconsPath}/settings.png`, label: 'Open Configuration', click: () => shell.openPath(`${config.paths.services}/${serviceName}/${service.config}`) },
+      { icon: `${iconsPath}/folder.png`, label: 'Open Directory', click: () => shell.openPath(`${config.paths.services}/${serviceName}`) }
     ]
   });
 }
@@ -50,12 +48,12 @@ export function createMenu() {
 
   const menuTemplate = [
     {
-      icon: path.join(iconsPath, 'wemp.png'),
+      icon: `${iconsPath}/wemp.png`,
       label: `Wemp ${app.getVersion()}`,
       submenu: [
-        { icon: path.join(iconsPath, 'restart.png'), label: 'Restart All Services', click: () => stopServices(true) },
-        { icon: path.join(iconsPath, 'folder.png'), label: 'Set Services Path', click: async () => { await setServicesPath(); await stopServices(); app.relaunch(); app.exit(0); } },
-        { icon: path.join(iconsPath, 'event-log.png'), label: 'View Error Logs', click: () => shell.openPath(config.paths.logs) },
+        { icon: `${iconsPath}/restart.png`, label: 'Restart All Services', click: () => stopServices(true) },
+        { icon: `${iconsPath}/folder.png`, label: 'Set Services Path', click: async () => { await setServicesPath(); await stopServices(); app.relaunch(); app.exit(0); } },
+        { icon: `${iconsPath}/event-log.png`, label: 'View Error Logs', click: () => shell.openPath(config.paths.logs) },
         { type: 'separator' },
         { type: 'checkbox', label: 'Autostart Wemp', checked: app.getLoginItemSettings().openAtLogin, click: (menuItem) => app.setLoginItemSettings({ openAtLogin: menuItem.checked }) },
         { type: 'checkbox', label: 'Show Ready Notification', checked: settings.getSync('showReadyNotification'), click: (menuItem) => settings.setSync('showReadyNotification', menuItem.checked) }
@@ -64,11 +62,11 @@ export function createMenu() {
     { type: 'separator' },
     ...serviceMenuItems,
     { type: 'separator' },
-    { icon: path.join(iconsPath, 'shutdown.png'), label: 'Quit Wemp', click: () => app.quit() }
+    { icon: `${iconsPath}/shutdown.png`, label: 'Quit Wemp', click: () => app.quit() }
   ];
 
   menu = Menu.buildFromTemplate(menuTemplate);
-  tray = new Tray(path.join(iconsPath, 'wemp.png'));
+  tray = new Tray(`${iconsPath}/wemp.png`);
   tray.on('click', () => tray.popUpContextMenu());
   tray.setToolTip('Click to manage your web server');
   tray.setContextMenu(menu);
