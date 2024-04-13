@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 import config from '../config';
 import Process from '../utils/process';

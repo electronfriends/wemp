@@ -1,4 +1,4 @@
-import path from 'path';
+import path from 'node:path';
 
 import { Menu, MenuItem, Tray, app, shell } from 'electron';
 import settings from 'electron-settings';

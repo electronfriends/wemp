@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   packagerConfig: {
     asar: true,
     icon: 'icons/wemp.ico',
@@ -34,7 +34,7 @@ module.exports = {
           {
             // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
             entry: 'src/main.js',
-            config: 'vite.config.mjs',
+            config: 'vite.main.config.js',
           },
         ],
         renderer: [],

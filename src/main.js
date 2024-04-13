@@ -1,22 +1,16 @@
 import { app, Menu } from 'electron';
 import settings from 'electron-settings';
+import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
 import { createMenu, tray } from './main-process/menu';
 import { checkServices, startServices, stopServices } from './main-process/manager';
 import { onServicesReady } from './utils/notification';
 
-// Try to acquire a single instance lock.
-const gotTheLock = app.requestSingleInstanceLock();
-
-if (!gotTheLock) {
+// Try to acquire a single instance lock and handle squirrel startup.
+if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
 } else {
-  // Handle creating/removing shortcuts on Windows when installing/uninstalling.
-  if (require('electron-squirrel-startup')) {
-    app.quit();
-  }
-
   // Enable automatic updates for the app.
   updateElectronApp();
 
