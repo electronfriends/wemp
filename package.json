@@ -1,7 +1,7 @@
 {
   "name": "wemp",
   "productName": "Wemp",
-  "version": "0.9.4",
+  "version": "0.9.5",
   "description": "Easily set up a web server with Nginx, MariaDB and PHP on Windows.",
   "repository": {
     "type": "git",
