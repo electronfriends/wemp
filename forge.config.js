@@ -23,6 +23,7 @@ export default {
           name: 'wemp',
         },
         draft: false,
+        generateReleaseNotes: true,
       },
     },
   ],
