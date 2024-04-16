@@ -2,7 +2,7 @@ export default {
   packagerConfig: {
     asar: true,
     icon: 'icons/wemp.ico',
-    extraResource: ['icons', 'stubs']
+    extraResource: ['icons', 'stubs'],
   },
   rebuildConfig: {},
   makers: [
@@ -22,6 +22,7 @@ export default {
           owner: 'electronfriends',
           name: 'wemp',
         },
+        draft: false,
       },
     },
   ],
