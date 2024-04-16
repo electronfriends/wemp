@@ -35,13 +35,11 @@ Manage the services conveniently through the system tray menu by clicking the We
 3. Once downloaded, the services will start automatically.
 4. Get started at http://localhost and manage your database at http://localhost/phpmyadmin.
 
-For assistance, [create a new issue](https://github.com/electronfriends/wemp/issues/new) and we'll be happy to help.
-
 ## FAQs
 
 ### Will uninstalling Wemp delete the services?
 
-No, the services are separate from Wemp and remain intact after uninstalling.
+No, the services are installed separately from Wemp and remain in place when Wemp is uninstalled.
 
 ### Why does the autostart option reset after updates?
 
@@ -49,7 +47,7 @@ This is a known issue with Electron Forge, for which we've opened an [issue](htt
 
 ### Can I use specific service versions?
 
-Not yet.
+Not yet, but it is planned.
 
 ## Thanks to
 
