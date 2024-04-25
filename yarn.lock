@@ -1316,10 +1316,10 @@ ee-first@1.1.1:
   resolved "https://registry.yarnpkg.com/ee-first/-/ee-first-1.1.1.tgz#590c61156b0ae2f4f0255732a158b266bc56b21d"
   integrity sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==
 
-electron-settings@^4.0.3:
-  version "4.0.3"
-  resolved "https://registry.yarnpkg.com/electron-settings/-/electron-settings-4.0.3.tgz#227bf05744a803cf425f63000bc758c78dd3897b"
-  integrity sha512-SQzaUoJXg9Nao/KjlI1w0qAsn2xb2QPYYOiF0gSPI8X+fnXOrTmTspEyOONw9O3OVKuog4n8hlPS076vy3QMiA==
+electron-settings@^4.0.4:
+  version "4.0.4"
+  resolved "https://registry.yarnpkg.com/electron-settings/-/electron-settings-4.0.4.tgz#b2e6f17a7b0a03cbaf64be28aa460b533d24e8ad"
+  integrity sha512-yR6ByH3hHqDgbcQ9y5foA2Pr2fSMIggFDMsHe71z1Og6myw7vxMlrkIzenmmrmZHeFLlvQyt7+gTZCH8BywHBw==
   dependencies:
     lodash "^4.17.21"
     mkdirp "^1.0.4"
@@ -1345,10 +1345,10 @@ electron-winstaller@^5.3.0:
   optionalDependencies:
     "@electron/windows-sign" "^1.1.2"
 
-electron@^30.0.0:
-  version "30.0.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-30.0.0.tgz#6b72a27dcc46759fac5f12e147ef64554e596391"
-  integrity sha512-GRwKphq/TUhSlb44OwSckXKl50f5OR/pm9MvF3rBLyqcxwfu7L11xejrZ0hDea1eKyCkzGd4B+cIqaQiDguPEA==
+electron@^30.0.1:
+  version "30.0.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-30.0.1.tgz#2caf0eb7ed591b9b9842b522421bcae3aa8293d6"
+  integrity sha512-iwxkI/n2wBd29NH7TH0ZY8aWGzCoKpzJz+D10u7aGSJi1TV6d4MSM3rWyKvT/UkAHkTKOEgYfUyCa2vWQm8L0g==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"
@@ -3593,10 +3593,10 @@ unpipe@1.0.0, unpipe@~1.0.0:
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
 
-unzipper@^0.11.3:
-  version "0.11.3"
-  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.11.3.tgz#7c7cfb19b368192721c0258b27ee0b33ceabe5ec"
-  integrity sha512-Xs72T2f5DkRU1ULU/5kywmMXHI3ZJIL6a1Eb/7eTwmqbOS35ed10PYGDeKMXOuJ5zZrp/HYNeRj80HZsBtOyrA==
+unzipper@^0.11.4:
+  version "0.11.4"
+  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.11.4.tgz#cc15fb4efae1846e4dce4fcdb29855a87a52993c"
+  integrity sha512-T6CZQdmCMhlpHM+x4E5E9pIYCXH5INcrI8Cowr4tLQIciuw5nnp+X/LEwgeuFnay3vp9hVo4ydPw3WYSg2agWQ==
   dependencies:
     big-integer "^1.6.17"
     bluebird "~3.4.1"
@@ -3644,10 +3644,10 @@ vary@~1.1.2:
   resolved "https://registry.yarnpkg.com/vary/-/vary-1.1.2.tgz#2299f02c6ded30d4a5961b0b9f74524a18f634fc"
   integrity sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==
 
-vite@^5.2.9:
-  version "5.2.9"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-5.2.9.tgz#cd9a356c6ff5f7456c09c5ce74068ffa8df743d9"
-  integrity sha512-uOQWfuZBlc6Y3W/DTuQ1Sr+oIXWvqljLvS881SVmAj00d5RdgShLcuXWxseWPd4HXwiYBFW/vXHfKFeqj9uQnw==
+vite@^5.2.10:
+  version "5.2.10"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-5.2.10.tgz#2ac927c91e99d51b376a5c73c0e4b059705f5bd7"
+  integrity sha512-PAzgUZbP7msvQvqdSD+ErD5qGnSFiGOoWmV5yAKUEI0kdhjbH6nMWVyZQC/hSc4aXwc0oJ9aEdIiF9Oje0JFCw==
   dependencies:
     esbuild "^0.20.1"
     postcss "^8.4.38"
