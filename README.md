@@ -11,7 +11,7 @@
 
 ## Introduction
 
-Wemp simplifies the process of setting up a web server with [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://www.php.net) on Windows. It includes these services and keeps them up to date with regular updates.
+Wemp simplifies the process of setting up a web server with [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://www.php.net) on Windows. It downloads these services and keeps them up to date with regular updates.
 
 Manage the services conveniently through the system tray menu by clicking the Wemp icon.
 
