@@ -27,7 +27,6 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
   // Handle the second-instance event to focus the tray and open the context menu.
   app.on('second-instance', () => {
     if (tray) {
-      tray.focus();
       tray.popUpContextMenu();
     }
   });
