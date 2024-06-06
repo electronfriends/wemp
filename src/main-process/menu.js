@@ -1,5 +1,3 @@
-import path from 'node:path';
-
 import { Menu, MenuItem, Tray, app, shell } from 'electron';
 import settings from 'electron-settings';
 
@@ -57,7 +55,7 @@ export function createMenu() {
         { icon: `${iconsPath}/folder.png`, label: 'Set Services Path', click: async () => { await setServicesPath(); await stopServices(); app.relaunch(); app.exit(0); } },
         { icon: `${iconsPath}/event-log.png`, label: 'View Error Logs', click: () => shell.openPath(config.paths.logs) },
         { type: 'separator' },
-        ...(app.isPackaged ? [{ type: 'checkbox', label: 'Autostart Wemp', checked: app.getLoginItemSettings().openAtLogin, click: (menuItem) => app.setLoginItemSettings({ openAtLogin: menuItem.checked, path: path.join(process.execPath, '../Wemp.exe') }) }] : []),
+        ...(app.isPackaged ? [{ type: 'checkbox', label: 'Autostart Wemp', checked: app.getLoginItemSettings().openAtLogin, click: (menuItem) => app.setLoginItemSettings({ openAtLogin: menuItem.checked }) }] : []),
         { type: 'checkbox', label: 'Show Ready Notification', checked: settings.getSync('showReadyNotification'), click: (menuItem) => settings.setSync('showReadyNotification', menuItem.checked) }
       ]
     },
