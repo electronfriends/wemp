@@ -41,13 +41,16 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 
 No, the services are installed separately from Wemp and remain in place when Wemp is uninstalled.
 
+### Why does the autostart option get reset after every update?
+
+This is due to Electron Forge and we have already opened an [issue](https://github.com/electron/forge/issues/3333) about this, but unfortunately there has been no response yet.
+
 ### Can I use specific service versions?
 
-Not yet, but it is planned for future versions.
+Not yet, but it is planned for a future version of Wemp.
 
 ## Thanks to
 
-- [Electron](https://www.electronjs.org) for enabling Windows application development with JavaScript.
 - [Icons8](https://icons8.com) for providing the free Fluency icons used in our menu.
 
 ## Contributing
