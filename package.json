@@ -23,7 +23,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "node-fetch": "^3.3.2",
     "semver": "^7.6.2",
-    "unzipper": "^0.11.6",
+    "unzipper": "^0.12.1",
     "update-electron-app": "^3.0.0"
   },
   "devDependencies": {
@@ -31,8 +31,8 @@
     "@electron-forge/maker-squirrel": "^7.4.0",
     "@electron-forge/plugin-vite": "^7.4.0",
     "@electron-forge/publisher-github": "^7.4.0",
-    "electron": "^30.1.0",
-    "vite": "^5.2.12"
+    "electron": "^31.1.0",
+    "vite": "^5.3.3"
   },
   "packageManager": "yarn@1.22.19+sha1.4ba7fc5c6e704fce2066ecbfb0b0d8976fe62447"
 }
