@@ -1,8 +1,9 @@
 name: Release app
 
 on:
-  release:
-    types: [created]
+  push:
+    branches:
+      - main
 
 jobs:
   build:
