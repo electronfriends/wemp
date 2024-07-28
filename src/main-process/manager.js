@@ -1,6 +1,6 @@
 import fs from 'node:fs';
 
-import { dialog } from 'electron';
+import { dialog } from 'electron/main';
 import settings from 'electron-settings';
 import semverGt from 'semver/functions/gt';
 
