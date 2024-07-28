@@ -1,4 +1,4 @@
-import { Notification } from 'electron/main';
+import { Notification } from 'electron';
 
 /**
  * Show a notification when a service download or update begins.

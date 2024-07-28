@@ -1,4 +1,4 @@
-import { app } from 'electron/main';
+import { app } from 'electron';
 import settings from 'electron-settings';
 
 const appPath = app.isPackaged ? process.resourcesPath : app.getAppPath();

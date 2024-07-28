@@ -1,4 +1,4 @@
-import { app, Menu } from 'electron/main';
+import { app, Menu } from 'electron';
 import settings from 'electron-settings';
 import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';

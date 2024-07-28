@@ -1,6 +1,6 @@
 import path from 'node:path';
 
-import { app, Menu, MenuItem, shell, Tray } from 'electron/main';
+import { app, Menu, MenuItem, shell, Tray } from 'electron';
 import settings from 'electron-settings';
 
 import config from '../config';
