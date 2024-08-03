@@ -1335,10 +1335,10 @@ electron-winstaller@^5.3.0:
   optionalDependencies:
     "@electron/windows-sign" "^1.1.2"
 
-electron@^31.3.0:
-  version "31.3.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-31.3.0.tgz#4a084a8229d5bd829c33b8b65073381d0e925093"
-  integrity sha512-3LMRMmK4UK0A+jYSLGLYdfhc20TgY2v5jD3iGmhRZlDYj0gn7xBj/waRjlNalysZ0D2rgPvoes0wHuf5e/Bguw==
+electron@^31.3.1:
+  version "31.3.1"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-31.3.1.tgz#de5f21f10db1ba0568e0cdd7ae76ec40a4b800c3"
+  integrity sha512-9fiuWlRhBfygtcT+auRd/WdBK/f8LZZcrpx0RjpXhH2DPTP/PfnkC4JB1PW55qCbGbh4wAgkYbf4ExIag8oGCA==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^20.9.0"
@@ -3576,10 +3576,10 @@ unpipe@1.0.0, unpipe@~1.0.0:
   resolved "https://registry.yarnpkg.com/unpipe/-/unpipe-1.0.0.tgz#b2bf4ee8514aae6165b4817829d21b2ef49904ec"
   integrity sha512-pjy2bYhSsufwWlKwPc+l3cN7+wuJlK6uz0YdJEOlQDbl6jo/YlPi4mb8agUkVC8BF7V8NuzeyPNqRksA3hztKQ==
 
-unzipper@^0.12.2:
-  version "0.12.2"
-  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.12.2.tgz#34392e350b5f98f08e9fda9876ff98694078a112"
-  integrity sha512-ecRhBc+ZfQkYnRr8L7OkxvAAWDkqP3Dun9CHUmYYZx/mErGdy7N7ju6ODJ7uKmm9PD99aAG8grxzl5y9lmEK2A==
+unzipper@^0.12.3:
+  version "0.12.3"
+  resolved "https://registry.yarnpkg.com/unzipper/-/unzipper-0.12.3.tgz#31958f5eed7368ed8f57deae547e5a673e984f87"
+  integrity sha512-PZ8hTS+AqcGxsaQntl3IRBw65QrBI6lxzqDEL7IAo/XCEqRTKGfOX56Vea5TH9SZczRVxuzk1re04z/YjuYCJA==
   dependencies:
     bluebird "~3.7.2"
     duplexer2 "~0.1.4"
