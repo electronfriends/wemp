@@ -21,7 +21,7 @@ export default {
     },
     {
       name: 'MariaDB',
-      version: '11.4.2',
+      version: '11.5.2',
       config: 'data/my.ini',
       downloadUrl: 'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip'
     },
