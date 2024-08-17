@@ -1,0 +1,89 @@
+name: Update Service Versions
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  update_service_versions:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Install jq
+        run: sudo apt-get install -y jq
+
+      - name: Check Nginx version
+        id: nginx
+        run: |
+          latest_nginx=$(curl -s https://nginx.org/en/download.html | grep -oP '(?<=nginx-)[0-9]+\.[0-9]+\.[0-9]+' | sort -V | tail -n 1)
+          echo "latest_nginx=$latest_nginx" >> $GITHUB_ENV
+
+      - name: Check MariaDB version
+        id: mariadb
+        run: |
+          latest_mariadb=$(curl -s https://downloads.mariadb.org/rest-api/mariadb/all-releases/?olderReleases=false | jq -r '.releases[] | select(.status == "stable") | .release_number' | sort -V | tail -n 1)
+          echo "latest_mariadb=$latest_mariadb" >> $GITHUB_ENV
+
+      - name: Check PHP version
+        id: php
+        run: |
+          latest_php=$(curl -s https://windows.php.net/download/ | grep -oP 'PHP [0-9]+\.[0-9]+ \(\K[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+          echo "latest_php=$latest_php" >> $GITHUB_ENV
+
+      - name: Check phpMyAdmin version
+        id: phpmyadmin
+        run: |
+          latest_phpmyadmin=$(curl -s https://www.phpmyadmin.net/downloads/ | grep -oP '(?<=phpMyAdmin-)[0-9]+\.[0-9]+\.[0-9]+' | head -n 1)
+          echo "latest_phpmyadmin=$latest_phpmyadmin" >> $GITHUB_ENV
+
+      - name: Check for version updates
+        id: check_versions
+        run: |
+          # Function to check for existing PRs
+          check_existing_pr() {
+            title=$1
+            pr_exists=$(gh pr list --state open --search "$title" | grep -q "$title" && echo true || echo false)
+            echo $pr_exists
+          }
+
+          # Get current versions
+          current_nginx=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'Nginx')
+          current_mariadb=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'MariaDB')
+          current_php=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'PHP')
+          current_phpmyadmin=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'phpMyAdmin')
+
+          # Update and create PRs if necessary
+          create_pr() {
+            service=$1
+            current_version=$2
+            latest_version=$3
+            if [ "$current_version" != "$latest_version" ]; then
+              pr_title="Bump $service from $current_version to $latest_version"
+              if [ "$(check_existing_pr "$pr_title")" = "false" ]; then
+                # Update src/config.js with the new version
+                sed -i "s/version: '$current_version'/version: '$latest_version'/g" src/config.js
+                git config --global user.name "GitHub Actions"
+                git config --global user.email "actions@github.com"
+                git commit -am "$pr_title"
+                git push
+                gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head update-${service,,}-version
+              fi
+            fi
+          }
+
+          create_pr "Nginx" "$current_nginx" "${{ env.latest_nginx }}"
+          create_pr "MariaDB" "$current_mariadb" "${{ env.latest_mariadb }}"
+          create_pr "PHP" "$current_php" "${{ env.latest_php }}"
+          create_pr "phpMyAdmin" "$current_phpmyadmin" "${{ env.latest_phpmyadmin }}"
