@@ -51,6 +51,7 @@ jobs:
       - name: Check for version updates
         id: check_versions
         run: |
+          set -ex
           # Function to check for existing PRs
           check_existing_pr() {
             title=$1
@@ -58,11 +59,30 @@ jobs:
             echo $pr_exists
           }
 
-          # Get current versions
+          # Get current versions with error checks
           current_nginx=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'Nginx')
+          if [ -z "$current_nginx" ]; then
+            echo "Error: Nginx version not found in src/config.js"
+            exit 1
+          fi
+
           current_mariadb=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'MariaDB')
+          if [ -z "$current_mariadb" ]; then
+            echo "Error: MariaDB version not found in src/config.js"
+            exit 1
+          fi
+
           current_php=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'PHP')
+          if [ -z "$current_php" ]; then
+            echo "Error: PHP version not found in src/config.js"
+            exit 1
+          fi
+
           current_phpmyadmin=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'phpMyAdmin')
+          if [ -z "$current_phpmyadmin" ]; then
+            echo "Error: phpMyAdmin version not found in src/config.js"
+            exit 1
+          fi
 
           # Update and create PRs if necessary
           create_pr() {
@@ -74,12 +94,20 @@ jobs:
               if [ "$(check_existing_pr "$pr_title")" = "false" ]; then
                 # Update src/config.js with the new version
                 sed -i "s/version: '$current_version'/version: '$latest_version'/g" src/config.js
-                git config --global user.name "GitHub Actions"
-                git config --global user.email "actions@github.com"
-                git commit -am "$pr_title"
-                git push
-                gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head update-${service,,}-version
+                if ! git diff --quiet; then
+                  git config --global user.name "GitHub Actions"
+                  git config --global user.email "actions@github.com"
+                  git commit -am "$pr_title"
+                  git push
+                  gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head update-${service,,}-version
+                else
+                  echo "No changes to commit for $service"
+                fi
+              else
+                echo "PR already exists for $service"
               fi
+            else
+              echo "No version update needed for $service"
             fi
           }
 
