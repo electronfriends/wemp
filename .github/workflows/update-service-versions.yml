@@ -51,7 +51,6 @@ jobs:
       - name: Check for version updates
         id: check_versions
         run: |
-          set -ex
           # Function to check for existing PRs
           check_existing_pr() {
             title=$1
@@ -59,28 +58,24 @@ jobs:
             echo $pr_exists
           }
 
-          # Get current versions with error checks
-          current_nginx=$(grep -oP '(?<="name":\s*"Nginx",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
+          # Extract current versions using sed
+          current_nginx=$(sed -n 's/.*"name": "Nginx",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
           if [ -z "$current_nginx" ]; then
-            echo "Error: Nginx version not found in src/config.js"
             exit 1
           fi
 
-          current_mariadb=$(grep -oP '(?<="name":\s*"MariaDB",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
+          current_mariadb=$(sed -n 's/.*"name": "MariaDB",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
           if [ -z "$current_mariadb" ]; then
-            echo "Error: MariaDB version not found in src/config.js"
             exit 1
           fi
 
-          current_php=$(grep -oP '(?<="name":\s*"PHP",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
+          current_php=$(sed -n 's/.*"name": "PHP",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
           if [ -z "$current_php" ]; then
-            echo "Error: PHP version not found in src/config.js"
             exit 1
           fi
 
-          current_phpmyadmin=$(grep -oP '(?<="name":\s*"phpMyAdmin",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
+          current_phpmyadmin=$(sed -n 's/.*"name": "phpMyAdmin",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
           if [ -z "$current_phpmyadmin" ]; then
-            echo "Error: phpMyAdmin version not found in src/config.js"
             exit 1
           fi
 
@@ -100,15 +95,9 @@ jobs:
                   git commit -am "$pr_title"
                   git push
                   gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head update-${service,,}-version
-                else
-                  echo "No changes to commit for $service"
                 fi
-              else
-                echo "PR already exists for $service"
               fi
-            else
-              echo "No version update needed for $service"
-            }
+            fi
           }
 
           create_pr "Nginx" "$current_nginx" "${{ env.latest_nginx }}"
