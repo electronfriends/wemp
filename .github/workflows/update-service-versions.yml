@@ -60,25 +60,25 @@ jobs:
           }
 
           # Get current versions with error checks
-          current_nginx=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'Nginx')
+          current_nginx=$(grep -oP '(?<="name":\s*"Nginx",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
           if [ -z "$current_nginx" ]; then
             echo "Error: Nginx version not found in src/config.js"
             exit 1
           fi
 
-          current_mariadb=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'MariaDB')
+          current_mariadb=$(grep -oP '(?<="name":\s*"MariaDB",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
           if [ -z "$current_mariadb" ]; then
             echo "Error: MariaDB version not found in src/config.js"
             exit 1
           fi
 
-          current_php=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'PHP')
+          current_php=$(grep -oP '(?<="name":\s*"PHP",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
           if [ -z "$current_php" ]; then
             echo "Error: PHP version not found in src/config.js"
             exit 1
           fi
 
-          current_phpmyadmin=$(grep -oP '(?<=version:\s)[0-9]+\.[0-9]+\.[0-9]+' src/config.js | grep -m 1 'phpMyAdmin')
+          current_phpmyadmin=$(grep -oP '(?<="name":\s*"phpMyAdmin",\s*"version":\s*")[0-9]+\.[0-9]+\.[0-9]+' src/config.js)
           if [ -z "$current_phpmyadmin" ]; then
             echo "Error: phpMyAdmin version not found in src/config.js"
             exit 1
@@ -93,7 +93,7 @@ jobs:
               pr_title="Bump $service from $current_version to $latest_version"
               if [ "$(check_existing_pr "$pr_title")" = "false" ]; then
                 # Update src/config.js with the new version
-                sed -i "s/version: '$current_version'/version: '$latest_version'/g" src/config.js
+                sed -i "s/\"name\": \"$service\", \"version\": \"$current_version\"/\"name\": \"$service\", \"version\": \"$latest_version\"/g" src/config.js
                 if ! git diff --quiet; then
                   git config --global user.name "GitHub Actions"
                   git config --global user.email "actions@github.com"
@@ -108,7 +108,7 @@ jobs:
               fi
             else
               echo "No version update needed for $service"
-            fi
+            }
           }
 
           create_pr "Nginx" "$current_nginx" "${{ env.latest_nginx }}"
