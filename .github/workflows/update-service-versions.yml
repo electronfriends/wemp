@@ -24,6 +24,9 @@ jobs:
       - name: Install jq
         run: sudo apt-get install -y jq
 
+      - name: Authenticate with GitHub CLI
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | gh auth login --with-token
+
       - name: Check Nginx version
         id: nginx
         run: |
@@ -51,56 +54,33 @@ jobs:
       - name: Check for version updates
         id: check_versions
         run: |
-          # Function to check for existing PRs
+          set -e
+
           check_existing_pr() {
             title=$1
             pr_exists=$(gh pr list --state open --search "$title" | grep -q "$title" && echo true || echo false)
             echo $pr_exists
           }
 
-          # Extract current versions using sed
-          current_nginx=$(sed -n 's/.*"name": "Nginx",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
-          if [ -z "$current_nginx" ]; then
-            exit 1
-          fi
-
-          current_mariadb=$(sed -n 's/.*"name": "MariaDB",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
-          if [ -z "$current_mariadb" ]; then
-            exit 1
-          fi
-
-          current_php=$(sed -n 's/.*"name": "PHP",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
-          if [ -z "$current_php" ]; then
-            exit 1
-          fi
-
-          current_phpmyadmin=$(sed -n 's/.*"name": "phpMyAdmin",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)
-          if [ -z "$current_phpmyadmin" ]; then
-            exit 1
-          fi
-
-          # Update and create PRs if necessary
-          create_pr() {
+          update_and_pr() {
             service=$1
             current_version=$2
             latest_version=$3
             if [ "$current_version" != "$latest_version" ]; then
               pr_title="Bump $service from $current_version to $latest_version"
               if [ "$(check_existing_pr "$pr_title")" = "false" ]; then
-                # Update src/config.js with the new version
+                git checkout -b "update-${service,,}-version"
                 sed -i "s/\"name\": \"$service\", \"version\": \"$current_version\"/\"name\": \"$service\", \"version\": \"$latest_version\"/g" src/config.js
-                if ! git diff --quiet; then
-                  git config --global user.name "GitHub Actions"
-                  git config --global user.email "actions@github.com"
-                  git commit -am "$pr_title"
-                  git push
-                  gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head update-${service,,}-version
-                fi
+                git config --global user.name "GitHub Actions"
+                git config --global user.email "actions@github.com"
+                git commit -am "$pr_title"
+                git push --set-upstream origin "update-${service,,}-version"
+                gh pr create --title "$pr_title" --body "Bump $service version from $current_version to $latest_version" --base main --head "update-${service,,}-version"
               fi
             fi
           }
 
-          create_pr "Nginx" "$current_nginx" "${{ env.latest_nginx }}"
-          create_pr "MariaDB" "$current_mariadb" "${{ env.latest_mariadb }}"
-          create_pr "PHP" "$current_php" "${{ env.latest_php }}"
-          create_pr "phpMyAdmin" "$current_phpmyadmin" "${{ env.latest_phpmyadmin }}"
+          update_and_pr "Nginx" "$(sed -n 's/.*"name": "Nginx",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)" "${{ env.latest_nginx }}"
+          update_and_pr "MariaDB" "$(sed -n 's/.*"name": "MariaDB",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)" "${{ env.latest_mariadb }}"
+          update_and_pr "PHP" "$(sed -n 's/.*"name": "PHP",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)" "${{ env.latest_php }}"
+          update_and_pr "phpMyAdmin" "$(sed -n 's/.*"name": "phpMyAdmin",.*"version": "\([0-9]\+\.[0-9]\+\.[0-9]\+\)".*/\1/p' src/config.js)" "${{ env.latest_phpmyadmin }}"
