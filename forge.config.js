@@ -38,6 +38,7 @@ export default {
             // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
             entry: 'src/main.js',
             config: 'vite.main.config.js',
+            target: 'main',
           },
         ],
         renderer: [],
