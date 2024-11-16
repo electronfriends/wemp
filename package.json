@@ -1,38 +1,37 @@
 {
   "name": "wemp",
-  "productName": "Wemp",
-  "version": "0.9.17",
-  "description": "Easily set up a web server with Nginx, MariaDB and PHP on Windows.",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/electronfriends/wemp.git"
-  },
-  "license": "MIT",
+  "version": "1.0.0-beta",
+  "description": "Easily set up and manage your web server environment on Windows.",
+  "main": "./out/main/index.js",
   "author": "ElectronFriends",
-  "type": "module",
-  "main": ".vite/build/main.js",
+  "homepage": "https://github.com/electronfriends/wemp",
   "scripts": {
-    "lint": "echo \"No linting configured\"",
-    "make": "electron-forge make",
-    "package": "electron-forge package",
-    "publish": "electron-forge publish",
-    "start": "electron-forge start"
+    "format": "prettier --write .",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "start": "electron-vite preview",
+    "dev": "electron-vite dev",
+    "build": "electron-vite build",
+    "postinstall": "electron-builder install-app-deps",
+    "build:unpack": "npm run build && electron-builder --dir",
+    "build:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
-    "electron-settings": "^4.0.4",
-    "electron-squirrel-startup": "^1.0.1",
-    "node-fetch": "^3.3.2",
-    "semver": "^7.6.3",
-    "unzipper": "^0.12.3",
-    "update-electron-app": "^3.0.0"
+    "@electron-toolkit/preload": "^3.0.1",
+    "@electron-toolkit/utils": "^3.0.0",
+    "electron-updater": "^6.3.9"
   },
   "devDependencies": {
-    "@electron-forge/cli": "^7.5.0",
-    "@electron-forge/maker-squirrel": "^7.5.0",
-    "@electron-forge/plugin-vite": "^7.5.0",
-    "@electron-forge/publisher-github": "^7.5.0",
-    "electron": "^33.0.1",
-    "vite": "^5.4.9"
-  },
-  "packageManager": "yarn@1.22.22"
+    "@electron-toolkit/eslint-config": "^1.0.2",
+    "@rushstack/eslint-patch": "^1.10.4",
+    "@vitejs/plugin-vue": "^5.2.0",
+    "@vue/eslint-config-prettier": "^10.1.0",
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^2.3.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-vue": "^9.31.0",
+    "prettier": "^3.3.3",
+    "vite": "^5.4.11",
+    "vue": "^3.5.13"
+  }
 }

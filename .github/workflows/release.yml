@@ -2,12 +2,13 @@ name: Release app
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - v*.*.*
 
 jobs:
-  build:
+  release:
     runs-on: windows-latest
+
     steps:
       - name: GitHub checkout
         uses: actions/checkout@v4
@@ -18,9 +19,19 @@ jobs:
           node-version: 22
 
       - name: Install dependencies
-        run: yarn install
+        run: npm ci
 
-      - name: Publish app
+      - name: Build app
+        run: npm run build:win
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          files: |
+            dist/*.exe
+            dist/*.zip
+            dist/*.yml
+            dist/*.blockmap
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-        run: yarn run publish
