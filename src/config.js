@@ -30,7 +30,7 @@ export default {
       version: '8.4.2',
       config: 'php.ini',
       ignore: ['extras/'],
-      downloadUrl: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip'
+      downloadUrl: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs17-x64.zip'
     },
     {
       name: 'phpMyAdmin',
