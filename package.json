@@ -32,7 +32,7 @@
     "@electron-forge/plugin-vite": "^7.6.0",
     "@electron-forge/publisher-github": "^7.6.0",
     "electron": "^33.2.1",
-    "vite": "^6.0.5"
+    "vite": "^6.0.6"
   },
   "packageManager": "yarn@1.22.22"
 }
