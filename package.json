@@ -27,8 +27,10 @@
     "update-electron-app": "^3.1.0"
   },
   "devDependencies": {
+    "@electron/fuses": "^1.8.0",
     "@electron-forge/cli": "^7.6.0",
     "@electron-forge/maker-squirrel": "^7.6.0",
+    "@electron-forge/plugin-fuses": "^7.6.0",
     "@electron-forge/plugin-vite": "^7.6.0",
     "@electron-forge/publisher-github": "^7.6.0",
     "electron": "^33.2.1",
