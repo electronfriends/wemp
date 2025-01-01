@@ -1,7 +1,7 @@
-import { FusesPlugin } from '@electron-forge/plugin-fuses';
-import { FuseV1Options, FuseVersion } from '@electron/fuses';
+const { FusesPlugin } = require('@electron-forge/plugin-fuses');
+const { FuseV1Options, FuseVersion } = require('@electron/fuses');
 
-export default {
+module.exports = {
   packagerConfig: {
     asar: true,
     icon: 'icons/wemp.ico',
@@ -40,7 +40,7 @@ export default {
           {
             // `entry` is just an alias for `build.lib.entry` in the corresponding file of `config`.
             entry: 'src/main.js',
-            config: 'vite.main.config.js',
+            config: 'vite.main.config.mjs',
             target: 'main',
           },
         ],
