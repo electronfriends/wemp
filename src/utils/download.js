@@ -1,9 +1,12 @@
 import fs from 'node:fs';
+import { promisify } from 'node:util';
 
 import fetch from 'node-fetch';
-import unzipper from 'unzipper';
+import yauzl from 'yauzl';
 
 import config from '../config';
+
+const fromBuffer = promisify(yauzl.fromBuffer);
 
 /**
  * Download and extract the service files.
@@ -32,12 +35,19 @@ export default async function download(service, isUpdate) {
       throw new Error(`Failed to fetch: ${response.statusText}`);
     }
 
-    await response.body
-      .pipe(unzipper.Parse())
-      .on('entry', async (entry) => {
-        let fileName = entry.path;
+    const buffer = await response.buffer();
+    const zipfile = await fromBuffer(buffer, { lazyEntries: true });
 
-        // Every service except PHP puts its content in a directory.
+    return new Promise((resolve, reject) => {
+      const extractionPromises = [];
+
+      zipfile.on('error', reject);
+
+      zipfile.on('entry', async (entry) => {
+        let fileName = entry.fileName;
+
+        // All services except PHP have their files inside a root directory in the ZIP.
+        // For example: "nginx-1.27.3/nginx.exe" -> "nginx.exe"
         if (service.name !== 'PHP') {
           fileName = fileName.substr(fileName.indexOf('/') + 1);
         }
@@ -46,21 +56,46 @@ export default async function download(service, isUpdate) {
         const isIgnored = isUpdate && service.ignore?.some(n => fileName.includes(n));
 
         if (isConfigFile || isIgnored) {
-          entry.autodrain();
-        } else {
-          const fileDestPath = `${servicePath}/${fileName}`;
-
-          if (entry.type === 'Directory') {
-            fs.mkdirSync(fileDestPath, { recursive: true });
-          } else if (entry.type === 'File') {
-            entry.pipe(fs.createWriteStream(fileDestPath));
-          }
+          zipfile.readEntry();
+          return;
         }
-      })
-      .promise();
 
-    return Promise.resolve();
+        const fileDestPath = `${servicePath}/${fileName}`;
+
+        if (/\/$/.test(entry.fileName)) {
+          fs.mkdirSync(fileDestPath, { recursive: true });
+          zipfile.readEntry();
+        } else {
+          const extractPromise = new Promise((resolveExtract, rejectExtract) => {
+            zipfile.openReadStream(entry, (err, readStream) => {
+              if (err) {
+                rejectExtract(err);
+                return;
+              }
+
+              const writeStream = fs.createWriteStream(fileDestPath);
+              readStream.pipe(writeStream);
+
+              writeStream.on('finish', resolveExtract);
+              writeStream.on('error', rejectExtract);
+              readStream.on('error', rejectExtract);
+            });
+          });
+
+          extractionPromises.push(extractPromise);
+          zipfile.readEntry();
+        }
+      });
+
+      zipfile.on('end', () => {
+        Promise.all(extractionPromises)
+          .then(resolve)
+          .catch(reject);
+      });
+
+      zipfile.readEntry();
+    });
   } catch (error) {
-    return Promise.reject(error);
+    throw error; // Let the caller handle the error
   }
 }
