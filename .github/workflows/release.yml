@@ -18,10 +18,20 @@ jobs:
           node-version: 'lts/*'
           cache: 'yarn'
 
+      - name: Get version
+        id: package_version
+        run: echo "version=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          echo "exists=$(git ls-remote --tags origin "v${{ steps.package_version.outputs.version }}" | wc -l)" >> $GITHUB_OUTPUT
+
       - name: Install dependencies
         run: yarn install
 
       - name: Publish app
+        if: steps.check_tag.outputs.exists == '0'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: yarn run publish
