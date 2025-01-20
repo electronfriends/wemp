@@ -1,101 +1,112 @@
 import fs from 'node:fs';
+import path from 'node:path';
 import { promisify } from 'node:util';
 
-import fetch from 'node-fetch';
 import yauzl from 'yauzl';
 
 import config from '../config';
+import log from './logger';
 
 const fromBuffer = promisify(yauzl.fromBuffer);
 
+// Try to download the service package, with PHP fallback support
+async function fetchServicePackage(downloadUrl, version, serviceName) {
+  const url = downloadUrl.replace(/{version}/g, version);
+  let response = await fetch(url);
+
+  if (!response.ok && serviceName === 'php') {
+    const fallbackUrl = url.replace('releases/', 'releases/archives/');
+    response = await fetch(fallbackUrl);
+  }
+
+  if (!response.ok) {
+    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+  }
+
+  return Buffer.from(await response.arrayBuffer());
+}
+
+// Extract files from ZIP, removing root folder if present
+async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
+  return new Promise((resolve, reject) => {
+    const extractionPromises = [];
+    let rootFolder = null;
+
+    zipFile.on('entry', (entry) => {
+      let fileName = entry.fileName;
+
+      if (rootFolder === null) {
+        const parts = fileName.split('/');
+        rootFolder = parts.length > 1 ? parts[0] + '/' : '';
+      }
+
+      if (rootFolder && fileName.startsWith(rootFolder)) {
+        fileName = fileName.substring(rootFolder.length);
+      }
+
+      if (!fileName || /\/$/.test(fileName)) {
+        zipFile.readEntry();
+        return;
+      }
+
+      const isConfigFile = fileName === serviceConfig.config;
+      const isIgnoredFile = isUpdate && serviceConfig.ignore?.some(n => fileName.includes(n));
+
+      if (isConfigFile || isIgnoredFile) {
+        zipFile.readEntry();
+        return;
+      }
+
+      const destPath = path.join(servicePath, fileName);
+      fs.mkdirSync(path.dirname(destPath), { recursive: true });
+
+      extractionPromises.push(
+        extractFile(zipFile, entry, destPath)
+          .catch(error => log.error(`Failed to extract ${fileName}`, error))
+      );
+    });
+
+    zipFile.on('error', reject);
+    zipFile.on('end', () => Promise.all(extractionPromises).then(resolve).catch(reject));
+    zipFile.readEntry();
+  });
+}
+
+// Extract a single file from the ZIP archive
+function extractFile(zipFile, entry, destPath) {
+  return new Promise((resolve, reject) => {
+    zipFile.openReadStream(entry, (err, readStream) => {
+      if (err) {
+        reject(err);
+        return;
+      }
+
+      const writeStream = fs.createWriteStream(destPath);
+      readStream.pipe(writeStream);
+
+      writeStream.on('finish', resolve);
+      writeStream.on('error', reject);
+      readStream.on('error', reject);
+    });
+    zipFile.readEntry();
+  });
+}
+
 /**
- * Download and extract the service files.
- * @param {object} service - The service configuration.
- * @param {boolean} isUpdate - Whether it is an update or first installation.
- * @returns {Promise<void>}
+ * Download and extract a service package
+ * @param {import('../config').ServiceConfig} service
+ * @param {boolean} isUpdate - Whether this is an update or fresh install
  */
 export default async function download(service, isUpdate) {
+  const servicePath = `${config.paths.services}/${service.id}`;
+
   try {
-    const serviceName = service.name.toLowerCase();
-    const servicePath = `${config.paths.services}/${serviceName}`;
-
-    if (!fs.existsSync(servicePath)) {
-      fs.mkdirSync(servicePath, { recursive: true });
-    }
-
-    let response = await fetch(service.downloadUrl.replace(/{version}/g, service.version));
-
-    if (!response.ok && service.name === 'PHP') {
-      // Fallback for PHP: Older versions must be downloaded from the archives.
-      const fallbackUrl = service.downloadUrl.replace('releases/', 'releases/archives/');
-      response = await fetch(fallbackUrl.replace(/{version}/g, service.version));
-    }
-
-    if (!response.ok) {
-      throw new Error(`Failed to fetch: ${response.statusText}`);
-    }
-
-    const buffer = await response.buffer();
-    const zipfile = await fromBuffer(buffer, { lazyEntries: true });
-
-    return new Promise((resolve, reject) => {
-      const extractionPromises = [];
-
-      zipfile.on('error', reject);
-
-      zipfile.on('entry', async (entry) => {
-        let fileName = entry.fileName;
-
-        // All services except PHP have their files inside a root directory in the ZIP.
-        // For example: "nginx-1.27.3/nginx.exe" -> "nginx.exe"
-        if (service.name !== 'PHP') {
-          fileName = fileName.substr(fileName.indexOf('/') + 1);
-        }
-
-        const isConfigFile = fileName === service.config;
-        const isIgnored = isUpdate && service.ignore?.some(n => fileName.includes(n));
-
-        if (isConfigFile || isIgnored) {
-          zipfile.readEntry();
-          return;
-        }
-
-        const fileDestPath = `${servicePath}/${fileName}`;
-
-        if (/\/$/.test(entry.fileName)) {
-          fs.mkdirSync(fileDestPath, { recursive: true });
-          zipfile.readEntry();
-        } else {
-          const extractPromise = new Promise((resolveExtract, rejectExtract) => {
-            zipfile.openReadStream(entry, (err, readStream) => {
-              if (err) {
-                rejectExtract(err);
-                return;
-              }
-
-              const writeStream = fs.createWriteStream(fileDestPath);
-              readStream.pipe(writeStream);
-
-              writeStream.on('finish', resolveExtract);
-              writeStream.on('error', rejectExtract);
-              readStream.on('error', rejectExtract);
-            });
-          });
-
-          extractionPromises.push(extractPromise);
-          zipfile.readEntry();
-        }
-      });
-
-      zipfile.on('end', () => {
-        Promise.all(extractionPromises)
-          .then(resolve)
-          .catch(reject);
-      });
-
-      zipfile.readEntry();
-    });
+    fs.mkdirSync(servicePath, { recursive: true });
+    const buffer = await fetchServicePackage(service.downloadUrl, service.version, service.id);
+    const zipFile = await fromBuffer(buffer, { lazyEntries: true });
+    await extractFiles(zipFile, servicePath, service, isUpdate);
   } catch (error) {
-    throw error; // Let the caller handle the error
+    log.error(`Failed to download ${service.id}`, error);
+    throw error;
   }
 }

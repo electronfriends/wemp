@@ -20,7 +20,6 @@
   "dependencies": {
     "electron-settings": "^4.0.4",
     "electron-squirrel-startup": "^1.0.1",
-    "node-fetch": "^3.3.2",
     "semver": "^7.6.3",
     "update-electron-app": "^3.1.0",
     "yauzl": "^3.2.0"

@@ -1,13 +1,21 @@
 import { exec, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
 
-import { updateMenuStatus } from '../main-process/menu';
-import logger from '../utils/logger';
+import log from './logger';
 import { onServiceError } from './notification';
+import { updateMenuStatus } from '../core/menu';
 
-const execPromise = promisify(exec);
+const execute = promisify(exec);
 
 class Process {
+  /**
+   * Create a new process wrapper
+   * @param {string} name - Process display name
+   * @param {string} executable - Executable name
+   * @param {string[]} args - Command line arguments
+   * @param {Object} options - Process options
+   * @param {boolean} restartOnClose - Whether to restart on unexpected close
+   */
   constructor(name, executable, args, options, restartOnClose = false) {
     this.name = name;
     this.executable = executable;
@@ -17,75 +25,80 @@ class Process {
     this.child = undefined;
   }
 
+  /**
+   * Check if process is running using Windows tasklist
+   * @returns {Promise<boolean>} Whether the process is running
+   */
   async isRunning() {
     try {
-      const { stdout } = await execPromise('tasklist');
+      const { stdout } = await execute('tasklist');
       return stdout.includes(this.executable);
     } catch (error) {
-      logger(`Failed to check if process is running: ${error.message}`);
+      log.error(`Failed to check if ${this.name} is running`, error);
       return false;
     }
   }
 
+  /**
+   * Force kill process using taskkill
+   */
   async kill() {
-    this.child?.kill();
-
     try {
-      await execPromise(`taskkill /F /IM "${this.executable}"`);
+      this.child?.kill();
+      await execute(`taskkill /F /IM "${this.executable}"`);
     } catch (error) {
-      logger(`Failed to kill process: ${error.message}`);
+      log.error(`Failed to kill ${this.name}`, error);
     }
   }
 
+  /**
+   * Start or restart the process
+   * @throws {Error} If the process fails to start
+   */
   async run() {
     try {
-      const isRunning = await this.isRunning();
-
-      if (isRunning) {
+      if (await this.isRunning()) {
         await this.kill();
       }
-
       await this.start();
     } catch (error) {
-      logger(`Failed to start process: ${error.message}`);
+      log.error(`Failed to start ${this.name}`, error);
+      throw error;
     }
   }
 
+  /**
+   * Start the process and handle its lifecycle events
+   * @returns {Promise<void>} Resolves when process is started
+   * @throws {Error} If the process fails to start
+   */
   start() {
     return new Promise((resolve, reject) => {
       this.child = spawn(this.executable, this.args, this.options);
 
-      const dataHandler = (data) => {
-        logger(`[${this.name}] ${data}`);
-      };
+      this.child.stderr?.on('data', (data) => {
+        log.warn(`[${this.name}] ${data}`);
+      });
 
-      const errorHandler = (error) => {
-        logger(`[${this.name}] Error: ${error.message}`);
+      this.child.on('error', (error) => {
+        log.error(`[${this.name}] Process error`, error);
         reject(error);
-      };
+      });
 
-      const closeHandler = () => {
-        if (this.child.killed) {
-          return;
+      this.child.on('close', () => {
+        if (!this.child.killed) {
+          if (this.restartOnClose) {
+            this.run().catch(error =>
+              log.error(`Failed to restart ${this.name}`, error)
+            );
+          } else {
+            updateMenuStatus(this.name, false);
+            onServiceError(this.name);
+          }
         }
+      });
 
-        if (this.restartOnClose) {
-          this.run(true);
-          return;
-        }
-
-        updateMenuStatus(this.name, false);
-        onServiceError(this.name);
-      };
-
-      const spawnHandler = () => {
-        resolve();
-      };
-
-      this.child.stderr?.on('data', dataHandler);
-      this.child.on('error', errorHandler);
-      this.child.on('close', closeHandler);
-      this.child.on('spawn', spawnHandler);
+      this.child.on('spawn', resolve);
     });
   }
 }

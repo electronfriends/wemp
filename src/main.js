@@ -3,8 +3,8 @@ import settings from 'electron-settings';
 import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
-import { checkServices, startServices, stopServices } from './main-process/manager';
-import { createMenu, tray } from './main-process/menu';
+import { initializeServices, startServices, stopServices } from './core/manager';
+import { createMenu, tray } from './core/menu';
 import { onServicesReady } from './utils/notification';
 
 // Ensure single instance and handle squirrel startup
@@ -34,7 +34,7 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
   // Initialize app when ready
   app.whenReady().then(async () => {
     createMenu();
-    await checkServices();
+    await initializeServices();
     await startServices();
 
     // Show notification if enabled
