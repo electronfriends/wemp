@@ -215,8 +215,13 @@ class PHPService extends Service {
       this.name,
       'php-cgi.exe',
       ['-b', '127.0.0.1:9000'],
-      { cwd: `${config.paths.services}/${this.id}` },
-      true
+      {
+        cwd: `${config.paths.services}/${this.id}`,
+        env: {
+          ...process.env,
+          PHP_FCGI_MAX_REQUESTS: '0'
+        }
+      }
     );
   }
 }

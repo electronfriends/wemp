@@ -14,14 +14,12 @@ class Process {
    * @param {string} executable - Executable name
    * @param {string[]} args - Command line arguments
    * @param {Object} options - Process options
-   * @param {boolean} restartOnClose - Whether to restart on unexpected close
    */
-  constructor(name, executable, args, options, restartOnClose = false) {
+  constructor(name, executable, args, options) {
     this.name = name;
     this.executable = executable;
     this.args = args;
     this.options = options;
-    this.restartOnClose = restartOnClose;
     this.child = undefined;
   }
 
@@ -70,7 +68,6 @@ class Process {
   /**
    * Start the process and handle its lifecycle events
    * @returns {Promise<void>} Resolves when process is started
-   * @throws {Error} If the process fails to start
    */
   start() {
     return new Promise((resolve, reject) => {
@@ -87,14 +84,8 @@ class Process {
 
       this.child.on('close', () => {
         if (!this.child.killed) {
-          if (this.restartOnClose) {
-            this.run().catch(error =>
-              log.error(`Failed to restart ${this.name}`, error)
-            );
-          } else {
-            updateMenuStatus(this.name, false);
-            onServiceError(this.name);
-          }
+          updateMenuStatus(this.name, false);
+          onServiceError(this.name);
         }
       });
 
