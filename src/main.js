@@ -41,16 +41,5 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
     if (settings.getSync('showReadyNotification')) {
       onServicesReady();
     }
-
-    // Update autostart settings in production
-    if (app.isPackaged) {
-      const loginItemSettings = app.getLoginItemSettings();
-      if (loginItemSettings.openAtLogin && loginItemSettings.path !== process.execPath) {
-        app.setLoginItemSettings({
-          openAtLogin: true,
-          path: process.execPath
-        });
-      }
-    }
   });
 }

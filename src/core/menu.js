@@ -1,3 +1,5 @@
+import path from 'node:path';
+
 import { app, Menu, MenuItem, shell, Tray, nativeImage } from 'electron';
 import settings from 'electron-settings';
 
@@ -130,7 +132,19 @@ export function createMenu() {
           label: 'Autostart Wemp',
           enabled: app.isPackaged,
           checked: app.getLoginItemSettings().openAtLogin,
-          click: (menuItem) => app.setLoginItemSettings({ openAtLogin: menuItem.checked })
+          click: (menuItem) => {
+            const updateExe = path.resolve(process.execPath, '..', 'Update.exe');
+            const exeName = path.basename(process.execPath);
+
+            app.setLoginItemSettings({
+              openAtLogin: menuItem.checked,
+              path: updateExe,
+              args: [
+                '--processStart', exeName,
+                '--process-start-args', '"--autostart"'
+              ]
+            });
+          }
         },
         {
           type: 'checkbox',
