@@ -41,7 +41,7 @@ const SERVICES = [
   {
     id: 'phpmyadmin',
     name: 'phpMyAdmin',
-    version: '5.2.1',
+    version: '5.2.2',
     config: 'config.inc.php',
     downloadUrl: 'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip'
   }
