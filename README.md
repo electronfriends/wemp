@@ -41,7 +41,7 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 
 ### Will uninstalling Wemp delete the services?
 
-No, the services are installed separately from Wemp and remain in place when Wemp is uninstalled.
+No. Uninstalling Wemp only removes the application itself. All services, configurations, and your web files remain completely intact and in their original location.
 
 ### Can I use specific service versions?
 
