@@ -1,5 +1,7 @@
 <p align="center">
-  <img src="https://user-images.githubusercontent.com/69470382/125867402-6a8af134-1e03-4d98-b1df-c347a2849c4e.png">
+  <a href="https://electronfriends.org" target="_blank">
+    <img src="https://user-images.githubusercontent.com/69470382/125867402-6a8af134-1e03-4d98-b1df-c347a2849c4e.png">
+  </a>
 </p>
 
 <p align="center">
@@ -30,10 +32,10 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 
 ## Installation
 
-1. Download and run the latest Wemp setup from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
+1. Download and run the latest Wemp installer from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
 2. Choose the installation path (default is `C:\Wemp`).
-3. Once downloaded, the services will start automatically.
-4. Get started at http://localhost and manage your database at http://localhost/phpmyadmin.
+3. After installation, the services will be downloaded and started automatically.
+4. Access your web server at http://localhost or manage your database at http://localhost/phpmyadmin.
 
 ## FAQs
 
@@ -41,17 +43,38 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 
 No, the services are installed separately from Wemp and remain in place when Wemp is uninstalled.
 
-### Why does the autostart option get reset after every update?
-
-This is due to Electron Forge and we have already opened an [issue](https://github.com/electron/forge/issues/3333) about this, but unfortunately there has been no response yet.
-
 ### Can I use specific service versions?
 
-Not yet, but it is planned for a future version of Wemp.
+Support for specific PHP versions is planned for a future release. Currently, there are no plans for version selection of other services.
+
+## Development
+
+Want to contribute? Here's how to set up the development environment:
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/electronfriends/wemp.git
+   cd wemp
+   ```
+
+2. Install dependencies:
+   ```bash
+   yarn install
+   ```
+
+3. Start the development environment:
+   ```bash
+   yarn start
+   ```
+
+4. To build the installer:
+   ```bash
+   yarn make
+   ```
 
 ## Thanks to
 
-- [Icons8](https://icons8.com) for providing the free Fluency icons used in our menu.
+- [Icons8](https://icons8.com) for providing the icons used in our application.
 
 ## Contributing
 
