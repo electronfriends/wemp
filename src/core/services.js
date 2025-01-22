@@ -67,8 +67,8 @@ class MariaDBService extends Service {
     return new Process(
       this.name,
       'mysqld.exe',
-      ['--defaults-file=data/my.ini'],
-      { cwd: `${config.paths.services}/${this.id}` },
+      ['--defaults-file=../data/my.ini'],
+      { cwd: `${config.paths.services}/${this.id}/bin` },
       true
     );
   }
@@ -80,7 +80,7 @@ class MariaDBService extends Service {
   async install() {
     try {
       await execute('mysql_install_db.exe', {
-        cwd: `${config.paths.services}/${this.id}`
+        cwd: `${config.paths.services}/${this.id}/bin`
       });
     } catch (error) {
       throw new Error(`Failed to install MariaDB: ${error.message}`);
@@ -97,7 +97,7 @@ class MariaDBService extends Service {
     const tryShutdown = async () => {
       try {
         await execute('mysqladmin.exe -u root shutdown', {
-          cwd: `${config.paths.services}/${this.id}`
+          cwd: `${config.paths.services}/${this.id}/bin`
         });
         return true;
       } catch (error) {
@@ -120,7 +120,7 @@ class MariaDBService extends Service {
     // Emergency shutdown as fallback
     try {
       const emergencyProcess = spawn('mysqld.exe', ['--skip-grant-tables'], {
-        cwd: `${config.paths.services}/${this.id}`,
+        cwd: `${config.paths.services}/${this.id}/bin`,
         stdio: 'pipe'
       });
 
@@ -154,7 +154,7 @@ class MariaDBService extends Service {
   async upgrade() {
     return new Promise((resolve, reject) => {
       const upgradeProcess = spawn('mysql_upgrade.exe', ['-u', 'root'], {
-        cwd: `${config.paths.services}/${this.id}`,
+        cwd: `${config.paths.services}/${this.id}/bin`,
         stdio: 'pipe'
       });
 
@@ -186,7 +186,7 @@ class MariaDBService extends Service {
     while (Date.now() - startTime < constants.timeouts.START) {
       try {
         await execute('mysqladmin.exe -u root ping', {
-          cwd: `${config.paths.services}/${this.id}`
+          cwd: `${config.paths.services}/${this.id}/bin`
         });
         return;
       } catch (error) {
