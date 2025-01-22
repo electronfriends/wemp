@@ -43,6 +43,27 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 
 No. Uninstalling Wemp only removes the application itself. All services, configurations, and your web files remain completely intact and in their original location.
 
+### How can I use PHP, MariaDB, and Nginx from the command line?
+
+To use these services from the command line, you'll need to add their paths to your user's PATH environment variable:
+
+- PHP: `C:\Wemp\php`
+- MariaDB: `C:\Wemp\mariadb\bin`
+- Nginx: `C:\Wemp\nginx`
+
+Note: If you installed Wemp in a different location, replace `C:\Wemp` with your chosen installation path.
+
+To add these paths:
+
+1. Open Windows Settings (press `Win + I`)
+2. Go to System > About > Advanced system settings
+3. Click Environment Variables
+4. Under "User variables", select Path and click Edit
+5. Click New and add each path separately
+6. Click OK to save
+
+Once added, you can use commands like `php -v`, `mysql`, and `nginx -t` from your terminal. You may need to restart your terminal for the changes to take effect.
+
 ### Can I use specific service versions?
 
 Support for specific PHP versions is planned for a future release. Currently, there are no plans for version selection of other services.
