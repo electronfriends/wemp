@@ -68,8 +68,7 @@ class MariaDBService extends Service {
       this.name,
       'mysqld.exe',
       ['--defaults-file=../data/my.ini'],
-      { cwd: `${config.paths.services}/${this.id}/bin` },
-      true
+      { cwd: `${config.paths.services}/${this.id}/bin` }
     );
   }
 
@@ -216,7 +215,8 @@ class PHPService extends Service {
       this.name,
       'php-cgi.exe',
       ['-b', '127.0.0.1:9000'],
-      { cwd: `${config.paths.services}/${this.id}` }
+      { cwd: `${config.paths.services}/${this.id}` },
+      true
     );
   }
 }
