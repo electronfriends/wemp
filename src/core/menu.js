@@ -58,16 +58,19 @@ function createServiceMenuItem(service) {
       {
         icon: nativeImage.createFromDataURL(iconMap.start),
         label: 'Start',
+        enabled: false,
         click: () => startService(service.id)
       },
       {
         icon: nativeImage.createFromDataURL(iconMap.restart),
         label: 'Restart',
+        enabled: false,
         click: () => stopService(service.id, true)
       },
       {
         icon: nativeImage.createFromDataURL(iconMap.shutdown),
         label: 'Stop',
+        enabled: false,
         click: () => stopService(service.id)
       },
       { type: 'separator' }
@@ -91,7 +94,6 @@ function createServiceMenuItem(service) {
     icon: serviceIcon,
     id: service.id,
     label: service.name,
-    visible: service.id === 'phpmyadmin',
     submenu
   });
 }
@@ -169,6 +171,4 @@ export function updateMenuStatus(name, isRunning) {
     startItem.enabled = !isRunning;
     restartItem.enabled = stopItem.enabled = isRunning;
   }
-
-  serviceMenu.visible = true;
 }
