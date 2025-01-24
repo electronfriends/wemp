@@ -133,15 +133,14 @@ export function createMenu() {
           enabled: app.isPackaged,
           checked: app.getLoginItemSettings().openAtLogin,
           click: (menuItem) => {
-            const updateExe = path.resolve(process.execPath, '..', 'Update.exe');
+            const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
             const exeName = path.basename(process.execPath);
 
             app.setLoginItemSettings({
               openAtLogin: menuItem.checked,
               path: updateExe,
               args: [
-                '--processStart', exeName,
-                '--process-start-args', '"--autostart"'
+                '--processStart', exeName
               ]
             });
           }
