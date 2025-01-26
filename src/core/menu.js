@@ -131,18 +131,26 @@ export function createMenu() {
           type: 'checkbox',
           label: 'Autostart Wemp',
           enabled: app.isPackaged,
-          checked: app.getLoginItemSettings().openAtLogin,
+          checked: (() => {
+            const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
+            const exeName = path.basename(process.execPath);
+            const loginSettings = {
+              path: updateExe,
+              args: ['--processStart', exeName]
+            };
+
+            return app.getLoginItemSettings(loginSettings).openAtLogin;
+          })(),
           click: (menuItem) => {
             const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
             const exeName = path.basename(process.execPath);
-
-            app.setLoginItemSettings({
+            const loginSettings = {
               openAtLogin: menuItem.checked,
               path: updateExe,
-              args: [
-                '--processStart', exeName
-              ]
-            });
+              args: ['--processStart', exeName]
+            };
+
+            app.setLoginItemSettings(loginSettings);
           }
         },
         {
