@@ -85,11 +85,7 @@ async function updateService(serviceConfig, isFirstDownload) {
 // Create initial service configuration from stub
 async function setupConfigFromStub(serviceConfig) {
   const stubFile = path.join(config.paths.stubs, serviceConfig.id, serviceConfig.config);
-
-  if (!fs.existsSync(stubFile)) {
-    log.error(`Stub file not found for ${serviceConfig.name}: ${stubFile}`);
-    throw new Error(`Missing stub file for ${serviceConfig.name}`);
-  }
+  if (!fs.existsSync(stubFile)) return;
 
   try {
     let content = fs.readFileSync(stubFile, 'utf-8');
