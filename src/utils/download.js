@@ -30,40 +30,43 @@ async function fetchServicePackage(downloadUrl, version, serviceName) {
 async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
   return new Promise((resolve, reject) => {
     const extractionPromises = [];
-    let rootFolder = null;
+    let rootFolder = '';
+    let isFirstEntry = true;
 
     zipFile.on('entry', (entry) => {
-      let fileName = entry.fileName;
-
-      if (rootFolder === null) {
-        const parts = fileName.split('/');
+      // Detect root folder from first entry
+      if (isFirstEntry) {
+        const parts = entry.fileName.split('/');
         rootFolder = parts.length > 1 ? parts[0] + '/' : '';
+        isFirstEntry = false;
       }
 
-      if (rootFolder && fileName.startsWith(rootFolder)) {
-        fileName = fileName.substring(rootFolder.length);
-      }
-
-      if (!fileName || /\/$/.test(fileName)) {
-        zipFile.readEntry();
-        return;
-      }
-
-      const isConfigFile = fileName === serviceConfig.config;
-      const isIgnoredFile = isUpdate && serviceConfig.ignore?.some(n => fileName.includes(n));
-
-      if (isConfigFile || isIgnoredFile) {
-        zipFile.readEntry();
-        return;
-      }
+      // Remove root folder from path if it exists
+      const fileName = rootFolder && entry.fileName.startsWith(rootFolder)
+        ? entry.fileName.substring(rootFolder.length)
+        : entry.fileName;
 
       const destPath = path.join(servicePath, fileName);
-      fs.mkdirSync(path.dirname(destPath), { recursive: true });
 
-      extractionPromises.push(
-        extractFile(zipFile, entry, destPath)
-          .catch(error => log.error(`Failed to extract ${fileName}`, error))
-      );
+      // Skip config files and ignored files during updates
+      if (fileName === serviceConfig.config ||
+          (isUpdate && serviceConfig.ignore?.some(n => fileName.includes(n)))) {
+        zipFile.readEntry();
+        return;
+      }
+
+      // Create directory or extract file
+      if (/\/$/.test(fileName)) {
+        fs.mkdirSync(destPath, { recursive: true });
+      } else {
+        fs.mkdirSync(path.dirname(destPath), { recursive: true });
+        extractionPromises.push(
+          extractFile(zipFile, entry, destPath)
+            .catch(error => log.error(`Failed to extract ${fileName}`, error))
+        );
+      }
+
+      zipFile.readEntry();
     });
 
     zipFile.on('error', reject);
@@ -76,19 +79,16 @@ async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
 function extractFile(zipFile, entry, destPath) {
   return new Promise((resolve, reject) => {
     zipFile.openReadStream(entry, (err, readStream) => {
-      if (err) {
-        reject(err);
-        return;
-      }
+      if (err) return reject(err);
 
       const writeStream = fs.createWriteStream(destPath);
-      readStream.pipe(writeStream);
+      readStream
+        .pipe(writeStream)
+        .on('finish', resolve)
+        .on('error', reject);
 
-      writeStream.on('finish', resolve);
-      writeStream.on('error', reject);
       readStream.on('error', reject);
     });
-    zipFile.readEntry();
   });
 }
 
