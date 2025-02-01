@@ -20,7 +20,7 @@ const SERVICES = [
     name: 'Nginx',
     version: '1.27.3',
     config: 'conf/nginx.conf',
-    ignore: ['conf/', 'html/', 'logs/'],
+    ignore: ['conf/', 'html/'],
     downloadUrl: 'https://nginx.org/download/nginx-{version}.zip'
   },
   {
