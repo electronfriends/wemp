@@ -26,7 +26,7 @@ export async function initializeServices() {
       await setServicesPath();
     }
 
-    await Promise.all(config.services.map(async (serviceConfig) => {
+    for (const serviceConfig of config.services) {
       const settingsKey = `paths.${servicesPath}.${serviceConfig.id}`;
       const installedVersion = settings.getSync(settingsKey);
       const isFirstDownload = !installedVersion || !fs.existsSync(`${servicesPath}/${serviceConfig.id}`);
@@ -39,7 +39,7 @@ export async function initializeServices() {
         const service = createService(serviceConfig);
         services.set(serviceConfig.id, service);
       }
-    }));
+    }
   } catch (error) {
     log.error('Error during service initialization', error);
     throw error;
