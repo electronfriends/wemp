@@ -74,7 +74,6 @@ class MariaDBService extends Service {
 
   /**
    * Initialize MariaDB database files
-   * @throws {Error} If installation fails
    */
   async install() {
     try {
@@ -82,13 +81,13 @@ class MariaDBService extends Service {
         cwd: `${config.paths.services}/${this.id}/bin`
       });
     } catch (error) {
-      throw new Error(`Failed to install MariaDB: ${error.message}`);
+      log.error(`Failed to install MariaDB: ${error.message}`);
     }
   }
 
   /**
    * Attempt graceful shutdown of MariaDB
-   * @throws {Error} If both normal and emergency shutdown fail
+   * Falls back to emergency shutdown if normal shutdown fails
    */
   async shutdown() {
     let retryCount = 0;
@@ -101,7 +100,8 @@ class MariaDBService extends Service {
         return true;
       } catch (error) {
         if (retryCount >= constants.retries.max) {
-          throw new Error(`Failed to shutdown MariaDB after ${constants.retries.max} attempts`);
+          log.error(`Failed to shutdown MariaDB after ${constants.retries.max} attempts`);
+          return false;
         }
         retryCount++;
         await new Promise(resolve => setTimeout(resolve, constants.retries.delay));
@@ -110,14 +110,9 @@ class MariaDBService extends Service {
     };
 
     try {
-      const success = await tryShutdown();
-      if (success) return;
-    } catch (error) {
-      log.warn('Normal shutdown failed, attempting emergency shutdown', error);
-    }
+      if (await tryShutdown()) return;
 
-    // Emergency shutdown as fallback
-    try {
+      // Emergency shutdown as fallback
       const emergencyProcess = spawn('mysqld.exe', ['--skip-grant-tables'], {
         cwd: `${config.paths.services}/${this.id}/bin`,
         stdio: 'pipe'
@@ -142,36 +137,39 @@ class MariaDBService extends Service {
         }, constants.timeouts.STOP);
       });
     } catch (error) {
-      throw new Error(`Emergency shutdown failed: ${error.message}`);
+      log.error(`Emergency shutdown failed: ${error.message}`);
     }
   }
 
   /**
    * Run database upgrade process
-   * @throws {Error} If upgrade fails or times out
    */
   async upgrade() {
-    return new Promise((resolve, reject) => {
-      const upgradeProcess = spawn('mysql_upgrade.exe', ['-u', 'root'], {
-        cwd: `${config.paths.services}/${this.id}/bin`,
-        stdio: 'pipe'
-      });
+    try {
+      await new Promise((resolve, reject) => {
+        const upgradeProcess = spawn('mysql_upgrade.exe', ['-u', 'root'], {
+          cwd: `${config.paths.services}/${this.id}/bin`,
+          stdio: 'pipe'
+        });
 
-      const timeout = setTimeout(() => {
-        upgradeProcess.kill();
-        reject(new Error('Upgrade timed out'));
-      }, constants.timeouts.UPGRADE);
+        const timeout = setTimeout(() => {
+          upgradeProcess.kill();
+          reject(new Error('Upgrade timed out'));
+        }, constants.timeouts.UPGRADE);
 
-      upgradeProcess.on('close', code => {
-        clearTimeout(timeout);
-        code === 0 ? resolve() : reject(new Error(`Upgrade failed with code ${code}`));
-      });
+        upgradeProcess.on('close', code => {
+          clearTimeout(timeout);
+          code === 0 ? resolve() : reject(new Error(`Upgrade failed with code ${code}`));
+        });
 
-      upgradeProcess.on('error', error => {
-        clearTimeout(timeout);
-        reject(error);
+        upgradeProcess.on('error', error => {
+          clearTimeout(timeout);
+          reject(error);
+        });
       });
-    });
+    } catch (error) {
+      log.error(`Failed to upgrade MariaDB: ${error.message}`);
+    }
   }
 
   /**
@@ -197,7 +195,7 @@ class MariaDBService extends Service {
 
   /**
    * Stop MariaDB gracefully
-   * @throws {Error} If both graceful and force stop fail
+   * Falls back to force kill if graceful stop fails
    */
   async stop() {
     try {
