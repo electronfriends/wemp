@@ -27,17 +27,17 @@ export async function initializeServices() {
     }
 
     for (const serviceConfig of config.services) {
+      if (serviceConfig.id !== 'phpmyadmin') {
+        const service = createService(serviceConfig);
+        services.set(serviceConfig.id, service);
+      }
+
       const settingsKey = `paths.${servicesPath}.${serviceConfig.id}`;
       const installedVersion = settings.getSync(settingsKey);
       const isFirstDownload = !installedVersion || !fs.existsSync(`${servicesPath}/${serviceConfig.id}`);
 
       if (isFirstDownload || semverGt(serviceConfig.version, installedVersion)) {
         await updateService(serviceConfig, isFirstDownload);
-      }
-
-      if (serviceConfig.id !== 'phpmyadmin') {
-        const service = createService(serviceConfig);
-        services.set(serviceConfig.id, service);
       }
     }
   } catch (error) {
@@ -65,12 +65,7 @@ async function updateService(serviceConfig, isFirstDownload) {
         await setupConfigFromStub(serviceConfig);
       }
     } else if (service?.upgrade) {
-      // Run upgrade only for updates, not first installs
-      try {
-        await service.upgrade();
-      } catch (error) {
-        log.error(`Failed to upgrade ${service.name}`, error);
-      }
+      await service.upgrade();
     }
 
     settings.setSync(`paths.${servicesPath}.${serviceConfig.id}`, serviceConfig.version);
