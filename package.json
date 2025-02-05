@@ -20,7 +20,7 @@
   "dependencies": {
     "electron-settings": "^4.0.4",
     "electron-squirrel-startup": "^1.0.1",
-    "semver": "^7.7.0",
+    "semver": "^7.7.1",
     "update-electron-app": "^3.1.1",
     "yauzl": "^3.2.0"
   },
@@ -32,7 +32,7 @@
     "@electron-forge/publisher-github": "^7.6.1",
     "@electron/fuses": "^1.8.0",
     "electron": "^34.0.2",
-    "vite": "^6.0.11"
+    "vite": "^6.1.0"
   },
   "packageManager": "yarn@1.22.22"
 }
