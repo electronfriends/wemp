@@ -7,6 +7,9 @@ import { initializeServices, startServices, stopServices } from './core/manager'
 import { createMenu, tray } from './core/menu';
 import { onServicesReady } from './utils/notification';
 
+// Set application user model ID
+app.setAppUserModelId('com.electronfriends.wemp');
+
 // Ensure single instance and handle squirrel startup
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
