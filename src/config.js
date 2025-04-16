@@ -33,7 +33,7 @@ const SERVICES = [
   {
     id: 'php',
     name: 'PHP',
-    version: '8.3.19',
+    version: '8.3.20',
     config: 'php.ini',
     ignore: ['extras/'],
     downloadUrl: 'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip'
