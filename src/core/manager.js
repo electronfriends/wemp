@@ -16,6 +16,17 @@ const services = new Map();
 let servicesPath = config.paths.services;
 
 /**
+ * Get the full path for a service
+ * @param {string} serviceId - Service identifier
+ * @param {string} [subPath] - Optional sub-path within service directory
+ * @returns {string} Full path
+ */
+function getServicePath(serviceId, subPath) {
+  const basePath = path.join(servicesPath, serviceId);
+  return subPath ? path.join(basePath, subPath) : basePath;
+}
+
+/**
  * Initialize all services, downloading and configuring as needed
  * @throws {Error} If initialization fails
  */
@@ -34,7 +45,7 @@ export async function initializeServices() {
 
       const settingsKey = `paths.${servicesPath}.${serviceConfig.id}`;
       const installedVersion = settings.getSync(settingsKey);
-      const isFirstDownload = !installedVersion || !fs.existsSync(`${servicesPath}/${serviceConfig.id}`);
+      const isFirstDownload = !installedVersion || !fs.existsSync(getServicePath(serviceConfig.id));
 
       if (isFirstDownload || semverGt(serviceConfig.version, installedVersion)) {
         await updateService(serviceConfig, isFirstDownload);
@@ -84,11 +95,13 @@ async function setupConfigFromStub(serviceConfig) {
 
   try {
     let content = fs.readFileSync(stubFile, 'utf-8');
-    content = content.replace(/{servicesPath}/g, servicesPath.replace(/\\/g, '/'));
+    // Use a normalized path with forward slashes for replacement
+    const normalizedPath = servicesPath.replace(/\\/g, '/');
+    content = content.replace(/{servicesPath}/g, normalizedPath);
 
-    const configPath = path.join(servicesPath, serviceConfig.id, serviceConfig.config);
-    fs.mkdirSync(path.dirname(configPath), { recursive: true });
-    fs.writeFileSync(configPath, content);
+    const configDir = path.dirname(getServicePath(serviceConfig.id, serviceConfig.config));
+    fs.mkdirSync(configDir, { recursive: true });
+    fs.writeFileSync(getServicePath(serviceConfig.id, serviceConfig.config), content);
   } catch (error) {
     log.error(`Failed to setup config for ${serviceConfig.name}`, error);
     throw error;
@@ -207,24 +220,24 @@ function watchServiceConfig(id) {
   const serviceConfig = config.services.find(s => s.id === id)?.config;
   if (!serviceConfig) return;
 
-  const configPath = `${servicesPath}/${id}/${serviceConfig}`;
+  const configPath = getServicePath(id, serviceConfig);
   if (!fs.existsSync(configPath)) return;
 
   let debounceTimer;
-  let restartPromise = null;
+  let isRestarting = false;
 
   service.configWatcher = fs.watch(configPath, () => {
-    if (restartPromise) return;
+    if (isRestarting) return;
 
     clearTimeout(debounceTimer);
     debounceTimer = setTimeout(async () => {
       try {
-        restartPromise = stopService(id, true);
-        await restartPromise;
+        isRestarting = true;
+        await stopService(id, true);
       } catch (error) {
         log.error(`Config watch error for ${service.name}`, error);
       } finally {
-        restartPromise = null;
+        isRestarting = false;
       }
     }, constants.timeouts.DEBOUNCE);
   });
