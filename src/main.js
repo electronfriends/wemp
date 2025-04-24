@@ -1,4 +1,4 @@
-import { app, Menu } from 'electron';
+import { app, Menu, dialog } from 'electron';
 import settings from 'electron-settings';
 import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
@@ -6,6 +6,7 @@ import { updateElectronApp } from 'update-electron-app';
 import { initializeServices, startServices, stopServices } from './core/manager';
 import { createMenu, tray } from './core/menu';
 import { onServicesReady } from './utils/notification';
+import log from './utils/logger';
 
 // Ensure single instance and handle squirrel startup
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
@@ -17,11 +18,19 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
   // Prevent default menu
   Menu.setApplicationMenu(null);
 
-  // Stop services before quitting
+  // Graceful shutdown handling
+  let isQuitting = false;
   app.on('before-quit', async (event) => {
-    event.preventDefault();
-    await stopServices();
-    app.exit();
+    if (!isQuitting) {
+      event.preventDefault();
+      isQuitting = true;
+      try {
+        await stopServices();
+      } catch (error) {
+        log.error('Error during shutdown', error);
+      }
+      app.exit();
+    }
   });
 
   // Focus tray and open context menu on second instance
@@ -33,13 +42,21 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
 
   // Initialize app when ready
   app.whenReady().then(async () => {
-    createMenu();
-    await initializeServices();
-    await startServices();
+    try {
+      createMenu();
+      await initializeServices();
+      await startServices();
 
-    // Show notification if enabled
-    if (settings.getSync('showReadyNotification')) {
-      onServicesReady();
+      // Show notification if enabled
+      if (settings.getSync('showReadyNotification')) {
+        onServicesReady();
+      }
+    } catch (error) {
+      log.error('Failed to initialize application', error);
+      dialog.showErrorBox(
+        'Initialization Error',
+        'Failed to start Wemp. Check the error logs for details.'
+      );
     }
   });
 }

@@ -46,6 +46,8 @@ class Process {
       await execute(`taskkill /F /IM "${this.executable}"`);
     } catch (error) {
       log.error(`Failed to kill ${this.name}`, error);
+    } finally {
+      this.child = undefined;
     }
   }
 
