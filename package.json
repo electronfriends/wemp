@@ -31,8 +31,8 @@
     "@electron-forge/plugin-vite": "^7.8.0",
     "@electron-forge/publisher-github": "^7.8.0",
     "@electron/fuses": "^1.8.0",
-    "electron": "^35.1.5",
-    "vite": "^6.3.0"
+    "electron": "^35.2.1",
+    "vite": "^6.3.3"
   },
   "packageManager": "yarn@1.22.22"
 }
