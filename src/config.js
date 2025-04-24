@@ -18,7 +18,7 @@ const SERVICES = [
   {
     id: 'nginx',
     name: 'Nginx',
-    version: '1.27.5',
+    version: '1.28.0',
     config: 'conf/nginx.conf',
     ignore: ['conf/', 'html/'],
     downloadUrl: 'https://nginx.org/download/nginx-{version}.zip'
