@@ -1,5 +1,6 @@
 import { exec, spawn } from 'node:child_process';
 import { promisify } from 'node:util';
+import path from 'node:path';
 
 import config, { constants } from '../config';
 import Process from '../utils/process';
@@ -53,22 +54,26 @@ class Service {
 
 class NginxService extends Service {
   createProcess() {
+    const servicePath = path.join(config.paths.services, this.id);
     return new Process(
+      this.id,
       this.name,
       'nginx.exe',
-      ['-p', `${config.paths.services}/${this.id}`],
-      { cwd: `${config.paths.services}/${this.id}` }
+      ['-p', servicePath],
+      { cwd: servicePath }
     );
   }
 }
 
 class MariaDBService extends Service {
   createProcess() {
+    const serviceBinPath = path.join(config.paths.services, this.id, 'bin');
     return new Process(
+      this.id,
       this.name,
       'mysqld.exe',
       ['--defaults-file=../data/my.ini'],
-      { cwd: `${config.paths.services}/${this.id}/bin` }
+      { cwd: serviceBinPath }
     );
   }
 
@@ -78,7 +83,7 @@ class MariaDBService extends Service {
   async install() {
     try {
       await execute('mysql_install_db.exe', {
-        cwd: `${config.paths.services}/${this.id}/bin`
+        cwd: path.join(config.paths.services, this.id, 'bin')
       });
     } catch (error) {
       log.error(`Failed to install MariaDB: ${error.message}`);
@@ -90,54 +95,60 @@ class MariaDBService extends Service {
    * Falls back to emergency shutdown if normal shutdown fails
    */
   async shutdown() {
-    let retryCount = 0;
-
-    const tryShutdown = async () => {
+    const serviceBinPath = path.join(config.paths.services, this.id, 'bin');
+    for (let i = 0; i <= constants.retries.max; i++) {
       try {
         await execute('mysqladmin.exe -u root shutdown', {
-          cwd: `${config.paths.services}/${this.id}/bin`
+          cwd: serviceBinPath
         });
-        return true;
+        log.info('MariaDB shutdown gracefully.');
+        return;
       } catch (error) {
-        if (retryCount >= constants.retries.max) {
-          log.error(`Failed to shutdown MariaDB after ${constants.retries.max} attempts`);
-          return false;
+        if (i < constants.retries.max) {
+          await new Promise(resolve => setTimeout(resolve, constants.retries.delay));
+        } else {
+          log.error(`Failed to gracefully shutdown MariaDB after ${i + 1} attempts. Attempting emergency shutdown.`);
         }
-        retryCount++;
-        await new Promise(resolve => setTimeout(resolve, constants.retries.delay));
-        return false;
       }
-    };
+    }
 
+    // Emergency shutdown as fallback
     try {
-      if (await tryShutdown()) return;
-
-      // Emergency shutdown as fallback
       const emergencyProcess = spawn('mysqld.exe', ['--skip-grant-tables'], {
-        cwd: `${config.paths.services}/${this.id}/bin`,
+        cwd: serviceBinPath,
         stdio: 'pipe'
       });
 
       await new Promise((resolve, reject) => {
+        const emergencyTimeout = setTimeout(() => {
+          emergencyProcess.kill();
+          reject(new Error('Emergency shutdown timed out'));
+        }, constants.timeouts.STOP);
+
         emergencyProcess.on('spawn', async () => {
           try {
-            await tryShutdown();
+            // Attempt one more graceful shutdown now that the emergency process might have prepared it
+            await execute('mysqladmin.exe -u root shutdown', {
+              cwd: serviceBinPath
+            });
+            log.info('MariaDB emergency shutdown successful.');
             resolve();
           } catch (error) {
-            reject(error);
+            reject(new Error(`Final shutdown attempt during emergency mode failed: ${error.message}`));
           } finally {
+            clearTimeout(emergencyTimeout);
             emergencyProcess.kill();
           }
         });
 
-        emergencyProcess.on('error', reject);
-        setTimeout(() => {
-          emergencyProcess.kill();
-          reject(new Error('Emergency shutdown timed out'));
-        }, constants.timeouts.STOP);
+        emergencyProcess.on('error', (err) => {
+          clearTimeout(emergencyTimeout);
+          reject(new Error(`MariaDB emergency process error: ${err.message}`));
+        });
       });
     } catch (error) {
       log.error(`Emergency shutdown failed: ${error.message}`);
+      throw error;
     }
   }
 
@@ -148,7 +159,7 @@ class MariaDBService extends Service {
     try {
       await new Promise((resolve, reject) => {
         const upgradeProcess = spawn('mysql_upgrade.exe', ['-u', 'root'], {
-          cwd: `${config.paths.services}/${this.id}/bin`,
+          cwd: path.join(config.paths.services, this.id, 'bin'),
           stdio: 'pipe'
         });
 
@@ -179,11 +190,12 @@ class MariaDBService extends Service {
   async start() {
     await super.start();
     const startTime = Date.now();
+    const serviceBinPath = path.join(config.paths.services, this.id, 'bin');
 
     while (Date.now() - startTime < constants.timeouts.START) {
       try {
         await execute('mysqladmin.exe -u root ping', {
-          cwd: `${config.paths.services}/${this.id}/bin`
+          cwd: serviceBinPath
         });
         return;
       } catch (error) {
@@ -201,8 +213,9 @@ class MariaDBService extends Service {
     try {
       await this.shutdown();
     } catch (error) {
-      log.error('Error during MariaDB shutdown', error);
       await super.stop();
+    } finally {
+      this.process = null;
     }
   }
 }
@@ -210,11 +223,12 @@ class MariaDBService extends Service {
 class PHPService extends Service {
   createProcess() {
     return new Process(
+      this.id,
       this.name,
       'php-cgi.exe',
       ['-b', '127.0.0.1:9000'],
       {
-        cwd: `${config.paths.services}/${this.id}`,
+        cwd: path.join(config.paths.services, this.id),
         env: {
           ...process.env,
           PHP_FCGI_MAX_REQUESTS: '0'

@@ -8,6 +8,11 @@ import { createMenu, tray } from './core/menu';
 import { onServicesReady } from './utils/notification';
 import log from './utils/logger';
 
+// Shared application state
+export const appState = {
+  isQuitting: false
+};
+
 // Ensure single instance and handle squirrel startup
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
@@ -19,11 +24,10 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
   Menu.setApplicationMenu(null);
 
   // Graceful shutdown handling
-  let isQuitting = false;
   app.on('before-quit', async (event) => {
-    if (!isQuitting) {
+    if (!appState.isQuitting) {
       event.preventDefault();
-      isQuitting = true;
+      appState.isQuitting = true;
       try {
         await stopServices();
       } catch (error) {

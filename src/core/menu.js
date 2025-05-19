@@ -22,23 +22,23 @@ import log from '../utils/logger';
 
 export let menu, tray;
 
-const iconMap = {
-  wemp: wempIcon,
-  start: startIcon,
-  restart: restartIcon,
-  shutdown: shutdownIcon,
-  settings: settingsIcon,
-  folder: folderIcon,
-  web: webIcon,
-  log: logIcon,
-  nginx: nginxIcon,
-  mariadb: mariadbIcon,
-  php: phpIcon,
-  phpmyadmin: phpmyadminIcon
+const icons = {
+  wemp: nativeImage.createFromDataURL(wempIcon),
+  start: nativeImage.createFromDataURL(startIcon),
+  restart: nativeImage.createFromDataURL(restartIcon),
+  shutdown: nativeImage.createFromDataURL(shutdownIcon),
+  settings: nativeImage.createFromDataURL(settingsIcon),
+  folder: nativeImage.createFromDataURL(folderIcon),
+  web: nativeImage.createFromDataURL(webIcon),
+  log: nativeImage.createFromDataURL(logIcon),
+  nginx: nativeImage.createFromDataURL(nginxIcon),
+  mariadb: nativeImage.createFromDataURL(mariadbIcon),
+  php: nativeImage.createFromDataURL(phpIcon),
+  phpmyadmin: nativeImage.createFromDataURL(phpmyadminIcon)
 };
 
 function createServiceMenuItem(service) {
-  const serviceIcon = nativeImage.createFromDataURL(iconMap[service.id]);
+  const serviceIcon = icons[service.id];
 
   const submenu = [
     {
@@ -51,26 +51,26 @@ function createServiceMenuItem(service) {
 
   if (service.id === 'phpmyadmin') {
     submenu.push({
-      icon: nativeImage.createFromDataURL(iconMap.web),
+      icon: icons.web,
       label: 'Open Web Interface',
       click: () => shell.openExternal('http://localhost/phpmyadmin')
     });
   } else {
     submenu.push(
       {
-        icon: nativeImage.createFromDataURL(iconMap.start),
+        icon: icons.start,
         label: 'Start',
         enabled: false,
         click: () => startService(service.id)
       },
       {
-        icon: nativeImage.createFromDataURL(iconMap.restart),
+        icon: icons.restart,
         label: 'Restart',
         enabled: false,
         click: () => stopService(service.id, true)
       },
       {
-        icon: nativeImage.createFromDataURL(iconMap.shutdown),
+        icon: icons.shutdown,
         label: 'Stop',
         enabled: false,
         click: () => stopService(service.id)
@@ -81,14 +81,14 @@ function createServiceMenuItem(service) {
 
   submenu.push(
     {
-      icon: nativeImage.createFromDataURL(iconMap.settings),
+      icon: icons.settings,
       label: 'Open Configuration',
-      click: () => shell.openPath(`${config.paths.services}/${service.id}/${service.config}`)
+      click: () => shell.openPath(path.join(config.paths.services, service.id, service.config))
     },
     {
-      icon: nativeImage.createFromDataURL(iconMap.folder),
+      icon: icons.folder,
       label: 'Open Directory',
-      click: () => shell.openPath(`${config.paths.services}/${service.id}`)
+      click: () => shell.openPath(path.join(config.paths.services, service.id))
     }
   );
 
@@ -103,16 +103,16 @@ function createServiceMenuItem(service) {
 export function createMenu() {
   const menuTemplate = [
     {
-      icon: nativeImage.createFromDataURL(iconMap.wemp),
+      icon: icons.wemp,
       label: `Wemp ${app.getVersion()}`,
       submenu: [
         {
-          icon: nativeImage.createFromDataURL(iconMap.restart),
+          icon: icons.restart,
           label: 'Restart All Services',
           click: () => stopServices(true)
         },
         {
-          icon: nativeImage.createFromDataURL(iconMap.folder),
+          icon: icons.folder,
           label: 'Set Services Path',
           click: async () => {
             await setServicesPath();
@@ -122,7 +122,7 @@ export function createMenu() {
           }
         },
         {
-          icon: nativeImage.createFromDataURL(iconMap.log),
+          icon: icons.log,
           label: 'View Error Logs',
           click: () => shell.openPath(config.paths.logs)
         },
@@ -165,14 +165,14 @@ export function createMenu() {
     ...config.services.map(createServiceMenuItem),
     { type: 'separator' },
     {
-      icon: nativeImage.createFromDataURL(iconMap.shutdown),
+      icon: icons.shutdown,
       label: 'Quit Wemp',
       click: () => app.quit()
     }
   ];
 
   menu = Menu.buildFromTemplate(menuTemplate);
-  tray = new Tray(nativeImage.createFromDataURL(iconMap.wemp));
+  tray = new Tray(icons.wemp);
 
   tray.on('click', () => tray.popUpContextMenu());
   tray.setToolTip('Click to manage your web server');

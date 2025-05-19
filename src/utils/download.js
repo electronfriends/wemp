@@ -62,7 +62,6 @@ async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
         fs.mkdirSync(path.dirname(destPath), { recursive: true });
         extractionPromises.push(
           extractFile(zipFile, entry, destPath)
-            .catch(error => log.error(`Failed to extract ${fileName}`, error))
         );
       }
 
@@ -98,7 +97,7 @@ function extractFile(zipFile, entry, destPath) {
  * @param {boolean} isUpdate - Whether this is an update or fresh install
  */
 export default async function download(service, isUpdate) {
-  const servicePath = `${config.paths.services}/${service.id}`;
+  const servicePath = path.join(config.paths.services, service.id);
 
   try {
     fs.mkdirSync(servicePath, { recursive: true });
