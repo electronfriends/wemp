@@ -64,10 +64,6 @@ To add these paths:
 
 Once added, you can use commands like `php -v`, `mysql`, and `nginx -t` from your terminal. You may need to restart your terminal for the changes to take effect.
 
-### Can I use specific service versions?
-
-Support for specific PHP versions is planned for a future release. Currently, there are no plans for version selection of other services.
-
 ## Development
 
 Want to contribute? Here's how to set up the development environment:
