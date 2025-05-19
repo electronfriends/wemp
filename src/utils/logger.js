@@ -2,6 +2,8 @@ import fs from 'node:fs';
 
 import config from '../config';
 
+const LOG_RETENTION_DAYS = 7;
+
 class Logger {
   /**
    * Create a new logger instance
@@ -9,7 +11,71 @@ class Logger {
    */
   constructor(logPath) {
     this.logPath = logPath;
-    this.clear();
+    this.#initializeLogFile();
+  }
+
+  /**
+   * Initializes the log file by trimming old entries.
+   * @private
+   */
+  #initializeLogFile() {
+    try {
+      if (!fs.existsSync(this.logPath)) {
+        return;
+      }
+
+      const originalContent = fs.readFileSync(this.logPath, 'utf-8');
+      if (!originalContent.trim()) {
+        return;
+      }
+
+      const lines = originalContent.split('\n');
+      const retainedLogLines = [];
+      let currentEntryHeaderTimestamp = null;
+      const cutoffTimestamp = Date.now() - (LOG_RETENTION_DAYS * 24 * 60 * 60 * 1000);
+
+      // Regex captures content within the first pair of square brackets.
+      const logEntryHeaderRegex = /^\[(.*?)\]/;
+
+      for (const line of lines) {
+        if (!line && retainedLogLines.length === 0) continue;
+
+        const match = line.match(logEntryHeaderRegex);
+        if (match) {
+          const timestampString = match[1];
+          try {
+            const entryTimestamp = new Date(timestampString).getTime();
+            if (!isNaN(entryTimestamp) && entryTimestamp >= cutoffTimestamp) {
+              currentEntryHeaderTimestamp = entryTimestamp;
+              retainedLogLines.push(line);
+            } else {
+              currentEntryHeaderTimestamp = null;
+            }
+          } catch (e) {
+            currentEntryHeaderTimestamp = null;
+          }
+        } else {
+          if (currentEntryHeaderTimestamp !== null) {
+            retainedLogLines.push(line);
+          }
+        }
+      }
+
+      let newContent = retainedLogLines.join('\n');
+      if (retainedLogLines.length > 0 && retainedLogLines.some(line => line.trim() !== '') && !newContent.endsWith('\n')) {
+        newContent += '\n';
+      } else if (retainedLogLines.filter(line => line.trim() !== '').length === 0) {
+        newContent = '';
+      }
+
+      // Only write if content has actually changed or if it was all whitespace and now correctly empty.
+      if (newContent !== originalContent || (originalContent.trim() === '' && newContent === '')) {
+        fs.writeFileSync(this.logPath, newContent);
+      }
+    } catch (err) {
+      console.error('Failed to initialize log file:', err);
+      this.clear();
+    }
   }
 
   /**
@@ -29,14 +95,6 @@ class Logger {
     } catch (err) {
       console.error('Failed to write to log file:', err);
     }
-  }
-
-  /**
-   * Log informational message
-   * @param {string} message - Message to log
-   */
-  info(message) {
-    return this.#write('INFO', message);
   }
 
   /**
@@ -60,7 +118,11 @@ class Logger {
    * Clear log file contents
    */
   clear() {
-    fs.writeFileSync(this.logPath, '');
+    try {
+      fs.writeFileSync(this.logPath, '');
+    } catch (err) {
+      console.error('Failed to clear log file:', err);
+    }
   }
 }
 

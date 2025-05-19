@@ -101,7 +101,6 @@ class MariaDBService extends Service {
         await execute('mysqladmin.exe -u root shutdown', {
           cwd: serviceBinPath
         });
-        log.info('MariaDB shutdown gracefully.');
         return;
       } catch (error) {
         if (i < constants.retries.max) {
@@ -131,7 +130,6 @@ class MariaDBService extends Service {
             await execute('mysqladmin.exe -u root shutdown', {
               cwd: serviceBinPath
             });
-            log.info('MariaDB emergency shutdown successful.');
             resolve();
           } catch (error) {
             reject(new Error(`Final shutdown attempt during emergency mode failed: ${error.message}`));
