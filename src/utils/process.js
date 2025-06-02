@@ -92,8 +92,15 @@ class Process {
         reject(error);
       });
 
-      this.child.on('close', () => {
+      this.child.on('close', (code, signal) => {
         if (this.child.killed || appState.isQuitting) {
+          return;
+        }
+
+        // Windows often terminates processes with exit code 1 during shutdown
+        // or sends SIGTERM when the system is shutting down
+        if (signal === 'SIGTERM' || code === 1) {
+          log.info(`[${this.displayName}] Process terminated by system (likely shutdown)`);
           return;
         }
 
