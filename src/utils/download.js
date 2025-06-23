@@ -9,7 +9,14 @@ import log from './logger';
 
 const fromBuffer = promisify(yauzl.fromBuffer);
 
-// Try to download the service package, with PHP fallback support
+/**
+ * Try to download the service package, with PHP fallback support
+ * @param {string} downloadUrl - The download URL template with {version} placeholder
+ * @param {string} version - The version to download
+ * @param {string} serviceName - The name of the service (used for PHP fallback)
+ * @returns {Promise<Buffer>} The downloaded file as a buffer
+ * @throws {Error} If the download fails
+ */
 async function fetchServicePackage(downloadUrl, version, serviceName) {
   const url = downloadUrl.replace(/{version}/g, version);
   let response = await fetch(url);
@@ -26,7 +33,14 @@ async function fetchServicePackage(downloadUrl, version, serviceName) {
   return Buffer.from(await response.arrayBuffer());
 }
 
-// Extract files from ZIP, removing root folder if present
+/**
+ * Extract files from ZIP, removing root folder if present
+ * @param {yauzl.ZipFile} zipFile - The opened ZIP file
+ * @param {string} servicePath - The destination path for extraction
+ * @param {import('../config').ServiceConfig} serviceConfig - The service configuration
+ * @param {boolean} isUpdate - Whether this is an update or fresh install
+ * @returns {Promise<void>} Resolves when extraction is complete
+ */
 async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
   return new Promise((resolve, reject) => {
     const extractionPromises = [];
@@ -36,8 +50,8 @@ async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
     zipFile.on('entry', (entry) => {
       // Detect root folder from first entry
       if (isFirstEntry) {
-        const parts = entry.fileName.split('/');
-        rootFolder = parts.length > 1 ? parts[0] + '/' : '';
+        const pathParts = entry.fileName.split('/');
+        rootFolder = pathParts.length > 1 ? pathParts[0] + '/' : '';
         isFirstEntry = false;
       }
 
@@ -46,35 +60,50 @@ async function extractFiles(zipFile, servicePath, serviceConfig, isUpdate) {
         ? entry.fileName.substring(rootFolder.length)
         : entry.fileName;
 
-      const destPath = path.join(servicePath, fileName);
-
-      // Skip config files and ignored files during updates
-      if (fileName === serviceConfig.config ||
-          (isUpdate && serviceConfig.ignore?.some(n => fileName.includes(n)))) {
+      // Skip empty filenames
+      if (!fileName) {
         zipFile.readEntry();
         return;
       }
 
-      // Create directory or extract file
-      if (/\/$/.test(fileName)) {
+      // Skip config files and ignored files during updates
+      if (fileName === serviceConfig.config ||
+          (isUpdate && serviceConfig.ignore?.some(pattern => fileName.includes(pattern)))) {
+        zipFile.readEntry();
+        return;
+      }
+
+      const destPath = path.join(servicePath, fileName);
+      const isDirectory = fileName.endsWith('/');
+
+      if (isDirectory) {
         fs.mkdirSync(destPath, { recursive: true });
       } else {
         fs.mkdirSync(path.dirname(destPath), { recursive: true });
-        extractionPromises.push(
-          extractFile(zipFile, entry, destPath)
-        );
+        extractionPromises.push(extractFile(zipFile, entry, destPath));
       }
 
       zipFile.readEntry();
     });
 
     zipFile.on('error', reject);
-    zipFile.on('end', () => Promise.all(extractionPromises).then(resolve).catch(reject));
+    zipFile.on('end', () => {
+      Promise.all(extractionPromises)
+        .then(resolve)
+        .catch(reject);
+    });
+
     zipFile.readEntry();
   });
 }
 
-// Extract a single file from the ZIP archive
+/**
+ * Extract a single file from the ZIP archive
+ * @param {yauzl.ZipFile} zipFile - The opened ZIP file
+ * @param {yauzl.Entry} entry - The ZIP entry to extract
+ * @param {string} destPath - The destination file path
+ * @returns {Promise<void>} Resolves when file extraction is complete
+ */
 function extractFile(zipFile, entry, destPath) {
   return new Promise((resolve, reject) => {
     zipFile.openReadStream(entry, (err, readStream) => {
