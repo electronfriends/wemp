@@ -26,7 +26,7 @@ const SERVICES = [
   {
     id: 'mariadb',
     name: 'MariaDB',
-    version: '11.7.2',
+    version: '11.8.2',
     config: 'data/my.ini',
     downloadUrl: 'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip'
   },
