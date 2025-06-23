@@ -8,11 +8,6 @@ import { createMenu, tray } from './core/menu';
 import { onServicesReady } from './utils/notification';
 import log from './utils/logger';
 
-// Shared application state
-export const appState = {
-  isQuitting: false
-};
-
 // Ensure single instance and handle squirrel startup
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
@@ -25,16 +20,13 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
 
   // Graceful shutdown handling
   app.on('before-quit', async (event) => {
-    if (!appState.isQuitting) {
-      event.preventDefault();
-      appState.isQuitting = true;
-      try {
-        await stopServices();
-      } catch (error) {
-        log.error('Error during shutdown', error);
-      }
-      app.exit();
+    event.preventDefault();
+    try {
+      await stopServices();
+    } catch (error) {
+      log.error('Error during shutdown', error);
     }
+    app.exit();
   });
 
   // Focus tray and open context menu on second instance

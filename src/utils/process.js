@@ -4,7 +4,6 @@ import { promisify } from 'node:util';
 import log from './logger';
 import { onServiceError } from './notification';
 import { updateMenuStatus } from '../core/menu';
-import { appState } from '../main';
 
 const execute = promisify(exec);
 
@@ -93,20 +92,16 @@ class Process {
       });
 
       this.child.on('close', (code, signal) => {
-        if (this.child.killed || appState.isQuitting) {
+        if (this.child.killed) {
           return;
         }
 
-        // Windows often terminates processes with exit code 1 during shutdown
-        // or sends SIGTERM when the system is shutting down
-        if (signal === 'SIGTERM' || code === 1) {
-          log.info(`[${this.displayName}] Process terminated by system (likely shutdown)`);
-          return;
+        // Only show error for truly unexpected exits (not normal shutdown codes)
+        if (code !== 0 && code !== 1 && signal !== 'SIGTERM') {
+          log.warn(`[${this.displayName}] Service stopped unexpectedly with code ${code}, signal ${signal}`);
+          updateMenuStatus(this.id, false);
+          onServiceError(this.displayName);
         }
-
-        log.warn(`[${this.displayName}] Service stopped unexpectedly.`);
-        updateMenuStatus(this.id, false);
-        onServiceError(this.displayName);
       });
 
       this.child.on('spawn', resolve);
