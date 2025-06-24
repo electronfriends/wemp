@@ -96,10 +96,11 @@ class Process {
           return;
         }
 
+        updateMenuStatus(this.id, false);
+
         // Only show error for truly unexpected exits (not normal shutdown codes)
         if (code !== 0 && code !== 1 && signal !== 'SIGTERM') {
           log.warn(`[${this.displayName}] Service stopped unexpectedly with code ${code}, signal ${signal}`);
-          updateMenuStatus(this.id, false);
           onServiceError(this.displayName);
         }
       });
