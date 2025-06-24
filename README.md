@@ -30,11 +30,16 @@ Manage the services conveniently from the menu by clicking the Wemp icon in the 
 - **Error Logging**: Tracks errors in a session-based log file for quick debugging.
 - **Autostart Option**: Start Wemp automatically at system startup.
 
+## System Requirements
+
+- Windows 10 or later (64-bit)
+- Internet connection for downloading services
+
 ## Installation
 
 1. Download and run the latest Wemp installer from the [Releases](https://github.com/electronfriends/wemp/releases/latest) page.
-2. Choose the installation path (default is `C:\Wemp`).
-3. After installation, the services will be downloaded and started automatically.
+2. Choose the installation path where the services will be installed (default is `C:\Wemp`).
+3. Required services will be downloaded and configured automatically.
 4. Access your web server at http://localhost or manage your database at http://localhost/phpmyadmin.
 
 ## FAQs
