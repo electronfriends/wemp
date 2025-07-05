@@ -6,6 +6,7 @@ module.exports = {
     asar: true,
     icon: 'build/icon',
     extraResource: ['./stubs'],
+    arch: 'x64',
   },
   rebuildConfig: {},
   makers: [
