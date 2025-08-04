@@ -38,7 +38,11 @@ export class ServiceManager {
   async init() {
     if (!fs.existsSync(this.servicesPath)) {
       fs.mkdirSync(this.servicesPath, { recursive: true });
-      await this.selectServicesPath();
+      try {
+        await this.selectServicesPath();
+      } catch {
+        throw new Error('User canceled directory selection');
+      }
     }
 
     const isFirstRun = config.services.every(service => !settings.has(`version.${service.id}`));
@@ -359,7 +363,7 @@ export class ServiceManager {
 
   /**
    * Prompt user to select services directory
-   * @returns {Promise<boolean>}
+   * @throws {Error} If user cancels directory selection
    */
   async selectServicesPath() {
     const result = await dialog.showOpenDialog({
@@ -368,12 +372,12 @@ export class ServiceManager {
       properties: ['openDirectory', 'createDirectory'],
     });
 
-    if (result && !result.canceled && result.filePaths?.length > 0) {
-      this.servicesPath = result.filePaths[0];
-      settings.setSync('path', this.servicesPath);
-      return true;
+    if (result.canceled || !result.filePaths?.length) {
+      throw new Error('User canceled directory selection');
     }
-    return false;
+
+    this.servicesPath = result.filePaths[0];
+    settings.setSync('path', this.servicesPath);
   }
 
   /**
