@@ -79,11 +79,6 @@ export class ServiceManager {
       this.startService(id).catch(error => logger.error(`Failed to start service ${id}`, error))
     );
     await Promise.allSettled(promises);
-
-    // Update menu items for all services after starting
-    for (const id of this.services.keys()) {
-      updateServiceMenuItems(id);
-    }
   }
 
   /**
