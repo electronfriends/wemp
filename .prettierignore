@@ -1,0 +1,24 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+.vite/
+out/
+dist/
+build/
+
+# Generated files
+*.min.js
+*.map
+
+# Package files
+package-lock.json
+yarn.lock
+
+# IDE files
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+Thumbs.db

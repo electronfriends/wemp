@@ -1,58 +1,56 @@
-import { app, Menu, dialog } from 'electron';
-import settings from 'electron-settings';
+import { Menu, app, dialog } from 'electron';
 import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
-import { initializeServices, startServices, stopServices } from './core/manager';
-import { createMenu, tray } from './core/menu';
-import { onServicesReady } from './utils/notification';
-import log from './utils/logger';
+import { createMenu, tray } from './lib/menu.js';
+import { serviceManager } from './lib/service-manager.js';
+import logger from './lib/logger.js';
 
-// Ensure single instance and handle squirrel startup
+// Handle single instance and squirrel startup
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
 } else {
-  // Enable automatic updates
+  // Enable auto-updates
   updateElectronApp();
 
-  // Prevent default menu
+  // Remove default menu
   Menu.setApplicationMenu(null);
 
-  // Graceful shutdown handling
-  app.on('before-quit', async (event) => {
-    event.preventDefault();
-    try {
-      await stopServices();
-    } catch (error) {
-      log.error('Error during shutdown', error);
-    }
-    app.exit();
-  });
-
-  // Focus tray and open context menu on second instance
+  // Handle second instance
   app.on('second-instance', () => {
     if (tray) {
       tray.popUpContextMenu();
     }
   });
 
-  // Initialize app when ready
+  // Handle shutdown
+  app.on('before-quit', async event => {
+    event.preventDefault();
+    try {
+      await serviceManager.stopAll();
+    } catch (error) {
+      logger.error('Error during shutdown', error);
+    }
+    app.exit();
+  });
+
+  // Initialize when ready
   app.whenReady().then(async () => {
     try {
-      createMenu();
-      await initializeServices();
-      await startServices();
-
-      // Show notification if enabled
-      if (settings.getSync('showReadyNotification')) {
-        onServicesReady();
-      }
+      await createMenu();
+      await serviceManager.init();
     } catch (error) {
-      log.error('Failed to initialize application', error);
-      dialog.showErrorBox(
-        'Initialization Error',
-        'Failed to start Wemp. Check the error logs for details.'
-      );
+      logger.error('Failed to initialize application', error);
+
+      await dialog.showMessageBox({
+        type: 'error',
+        title: 'Initialization Error',
+        message: 'Failed to initialize the application',
+        detail: error.message,
+        buttons: ['Exit'],
+      });
+
+      app.quit();
     }
   });
 }

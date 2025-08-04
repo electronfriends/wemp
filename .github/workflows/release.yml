@@ -2,11 +2,14 @@ name: Release app
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
+  code-quality:
+    uses: ./.github/workflows/code-quality.yml
+
   build:
+    needs: code-quality
     runs-on: windows-latest
     steps:
       - name: GitHub checkout
@@ -15,7 +18,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 'lts/*'
+          node-version: '22'
           cache: 'yarn'
 
       - name: Get version

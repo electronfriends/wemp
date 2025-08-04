@@ -13,7 +13,7 @@
 
 ## Introduction
 
-Wemp simplifies the process of setting up a web server with [Nginx](https://nginx.org), [MariaDB](https://mariadb.org) and [PHP](https://www.php.net) on Windows. It downloads these services and keeps them up to date with regular updates.
+Wemp is a modern local web development stack that brings [Nginx](https://nginx.org), [MariaDB](https://mariadb.org), and [PHP](https://www.php.net) to Windows with zero configuration.
 
 Manage the services conveniently from the menu by clicking the Wemp icon in the system tray.
 
@@ -50,7 +50,13 @@ No. Uninstalling Wemp only removes the application itself. All services, configu
 
 ### How can I use PHP, MariaDB, and Nginx from the command line?
 
-To use these services from the command line, you'll need to add their paths to your user's PATH environment variable:
+Wemp makes it easy to add these services to your PATH environment variable directly from the application:
+
+1. Right-click the Wemp icon in your system tray
+2. Check "Add Services to PATH" in the menu
+3. That's it! You can now use commands like `php -v`, `mysql`, and `nginx -t` from any terminal
+
+Alternatively, you can manually add the paths to your user's PATH environment variable:
 
 - PHP: `C:\Wemp\php`
 - MariaDB: `C:\Wemp\mariadb\bin`
@@ -58,33 +64,44 @@ To use these services from the command line, you'll need to add their paths to y
 
 Note: If you installed Wemp in a different location, replace `C:\Wemp` with your chosen installation path.
 
-To add these paths:
+### Can I use a specific PHP version?
 
-1. Open Windows Settings (press `Win + I`)
-2. Go to System > About > Advanced system settings
-3. Click Environment Variables
-4. Under "User variables", select Path and click Edit
-5. Click New and add each path separately
-6. Click OK to save
+No, Wemp is designed to provide the latest stable versions of all services for optimal security and performance. The application automatically manages updates to ensure you're always running the most recent supported versions of PHP, MariaDB, and Nginx.
 
-Once added, you can use commands like `php -v`, `mysql`, and `nginx -t` from your terminal. You may need to restart your terminal for the changes to take effect.
+### Why does the tray icon move to the hidden area after updating?
+
+This is a Windows behavior caused by how Squirrel (our updater) works. Each update installs the application in a new versioned folder, which Windows treats as a completely new application even though it's the same program. You can drag the Wemp icon back to the visible tray area, and Windows will remember this preference until the next update.
+
+### How do I move my services folder?
+
+To move your services folder to a different location:
+
+1. Stop Wemp completely (right-click tray icon → Exit)
+2. Manually move your services folder (e.g., from `C:\Wemp` to `D:\Development\Wemp`)
+3. Start Wemp again
+4. When prompted, select your new services folder location
+
+Wemp doesn't handle folder moves automatically to prevent unexpected failures or potential file losses during the transfer process.
 
 ## Development
 
 Want to contribute? Here's how to set up the development environment:
 
 1. Clone the repository:
+
    ```bash
    git clone https://github.com/electronfriends/wemp.git
    cd wemp
    ```
 
 2. Install dependencies:
+
    ```bash
    yarn install
    ```
 
 3. Start the development environment:
+
    ```bash
    yarn start
    ```

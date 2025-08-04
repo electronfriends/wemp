@@ -1,8 +1,9 @@
 {
   "name": "wemp",
   "productName": "Wemp",
-  "version": "0.10.17",
-  "description": "Easily set up a web server with Nginx, MariaDB and PHP on Windows.",
+  "version": "0.11.0",
+  "description": "A modern local web development stack with Nginx, MariaDB, and PHP for Windows.",
+  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/electronfriends/wemp.git"
@@ -11,11 +12,15 @@
   "author": "ElectronFriends",
   "main": ".vite/build/main.js",
   "scripts": {
-    "lint": "echo \"No linting configured\"",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "dev": "electron-forge start",
+    "start": "electron-forge start",
     "make": "electron-forge make",
     "package": "electron-forge package",
-    "publish": "electron-forge publish",
-    "start": "electron-forge start"
+    "publish": "electron-forge publish"
   },
   "dependencies": {
     "electron-settings": "^4.0.4",
@@ -31,7 +36,14 @@
     "@electron-forge/plugin-vite": "^7.8.2",
     "@electron-forge/publisher-github": "^7.8.2",
     "@electron/fuses": "^2.0.0",
+    "@eslint/config-inspector": "^1.1.0",
+    "@eslint/js": "^9.32.0",
     "electron": "^37.2.5",
+    "eslint": "^9.32.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.3",
+    "globals": "^16.3.0",
+    "prettier": "^3.6.2",
     "vite": "^7.0.6"
   },
   "packageManager": "yarn@4.9.2"

@@ -1,0 +1,22 @@
+{
+  "editor.formatOnSave": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  },
+  "eslint.validate": ["javascript"],
+  "files.exclude": {
+    "node_modules": true,
+    ".vite": true,
+    "out": true,
+    "dist": true,
+    "build": true
+  },
+  "search.exclude": {
+    "node_modules": true,
+    ".vite": true,
+    "out": true,
+    "dist": true,
+    "build": true
+  }
+}
