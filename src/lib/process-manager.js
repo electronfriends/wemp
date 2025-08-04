@@ -123,24 +123,4 @@ export class ProcessManager {
   setUnexpectedExitCallback(callback) {
     this.onUnexpectedExit = callback;
   }
-
-  /**
-   * Wait for process to be ready using readiness check
-   * @param {Function} readinessCheck - Function that returns Promise<boolean>
-   * @param {number} timeout - Timeout in milliseconds
-   * @returns {Promise<void>}
-   * @throws {Error} If process doesn't become ready within timeout
-   */
-  async waitForReady(readinessCheck, timeout = config.timeouts.start) {
-    const startTime = Date.now();
-
-    while (Date.now() - startTime < timeout && this.isRunning) {
-      if (await readinessCheck()) {
-        return;
-      }
-      await sleep(config.timeouts.poll / 3);
-    }
-
-    throw new Error(`${this.name} failed to become ready within timeout`);
-  }
 }

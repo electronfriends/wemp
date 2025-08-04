@@ -91,15 +91,7 @@ export class ServiceManager {
       this.stopService(id).catch(error => logger.error(`Failed to stop service ${id}`, error))
     );
 
-    const timeout = new Promise((_, reject) => {
-      setTimeout(() => reject(new Error('Stop timeout')), config.timeouts.stop);
-    });
-
-    try {
-      await Promise.race([Promise.allSettled(promises), timeout]);
-    } catch (error) {
-      logger.error('Services failed to stop within timeout', error);
-    }
+    await Promise.allSettled(promises);
   }
 
   /**

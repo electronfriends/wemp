@@ -31,11 +31,15 @@ export class Service {
       this.process = this.createProcess();
     }
 
-    await this.process.start();
+    const startPromise = this.process.start();
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(
+        () => reject(new Error(`${this.name} failed to start within timeout`)),
+        config.timeouts.start
+      );
+    });
 
-    if (this.checkReady) {
-      await this.process.waitForReady(this.checkReady.bind(this), config.timeouts.start);
-    }
+    await Promise.race([startPromise, timeoutPromise]);
   }
 
   /**
@@ -45,14 +49,27 @@ export class Service {
   async stop() {
     if (this.gracefulStop) {
       try {
-        await this.gracefulStop();
+        const gracefulPromise = this.gracefulStop();
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('Graceful stop timeout')), config.timeouts.stop);
+        });
+
+        await Promise.race([gracefulPromise, timeoutPromise]);
       } catch {
         // Fall back to force stop
       }
     }
 
     if (this.process) {
-      await this.process.stop();
+      const stopPromise = this.process.stop();
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(
+          () => reject(new Error(`${this.name} failed to stop within timeout`)),
+          config.timeouts.stop
+        );
+      });
+
+      await Promise.race([stopPromise, timeoutPromise]);
       this.process = null;
     }
   }
