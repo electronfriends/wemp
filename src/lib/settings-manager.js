@@ -27,9 +27,10 @@ export class SettingsManager {
     const paths = settings.getSync('paths');
     if (paths && typeof paths === 'object') {
       const currentPath = settings.getSync('path');
-      const pathToUse = currentPath || Object.keys(paths)[0];
+      const pathKeys = Object.keys(paths);
+      const pathToUse = currentPath || pathKeys[0];
 
-      if (pathToUse) {
+      if (pathToUse && pathKeys.length > 0) {
         if (!currentPath) {
           settings.setSync('path', pathToUse);
         }
@@ -40,14 +41,13 @@ export class SettingsManager {
             settings.setSync(`version.${serviceId}`, version);
           });
         }
-
-        settings.unset('paths');
       }
+
+      settings.unsetSync('paths');
     }
 
-    // Remove deprecated ready notification setting
     if (settings.has('showReadyNotification')) {
-      settings.unset('showReadyNotification');
+      settings.unsetSync('showReadyNotification');
     }
   }
 
