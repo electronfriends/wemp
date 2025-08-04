@@ -39,6 +39,7 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
     try {
       await createMenu();
       await serviceManager.init();
+      await serviceManager.startAll();
     } catch (error) {
       logger.error('Failed to initialize application', error);
 
