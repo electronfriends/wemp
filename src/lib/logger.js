@@ -14,8 +14,25 @@ class Logger {
    */
   constructor() {
     this.logPath = config.paths.logs;
+    this.cleanupOldLogFile();
     this.ensureLogFile();
     this.cleanupOldLogs();
+  }
+
+  /**
+   * Clean up old error.log file from previous versions
+   */
+  cleanupOldLogFile() {
+    try {
+      const userDataPath = app.getPath('userData');
+      const oldErrorLogPath = path.join(userDataPath, 'error.log');
+
+      if (fs.existsSync(oldErrorLogPath)) {
+        fs.unlinkSync(oldErrorLogPath);
+      }
+    } catch {
+      // Silent fail - not critical if cleanup fails
+    }
   }
 
   /**
