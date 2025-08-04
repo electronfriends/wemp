@@ -100,7 +100,6 @@ export function updateServiceMenuItems(serviceId) {
  */
 export async function createMenu() {
   tray = new Tray(icons.wemp);
-  tray.on('click', () => tray.popUpContextMenu());
 
   const version = app.getVersion();
   const pathSettings = await settingsManager.getPathSettings();
@@ -221,7 +220,8 @@ export async function createMenu() {
 
   menu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(menu);
-  tray.setToolTip('Wemp');
+  tray.setToolTip('Wemp - Click to manage services');
+  tray.on('click', () => tray.popUpContextMenu());
 }
 
 export { menu, tray };
