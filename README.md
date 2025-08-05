@@ -15,7 +15,7 @@
 
 Wemp is a modern local web development stack that brings [Nginx](https://nginx.org), [MariaDB](https://mariadb.org), and [PHP](https://www.php.net) to Windows with zero configuration.
 
-Manage the services conveniently from the menu by clicking the Wemp icon in the system tray.
+Manage everything from the system tray by clicking the Wemp icon.
 
 <p align="center">
   <img src="https://github.com/electronfriends/wemp/assets/69470382/907195df-53c2-48df-9daa-5a97cd00dbc6" alt="Wemp preview">
