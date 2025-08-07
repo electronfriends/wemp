@@ -255,9 +255,9 @@
   optionalDependencies:
     global-agent "^3.0.0"
 
-"@electron/node-gyp@git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2":
+"@electron/node-gyp@https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2":
   version "10.2.0-electron.1"
-  resolved "git+https://github.com/electron/node-gyp.git#06b29aafb7708acef8b3669835c8a7857ebc92d2"
+  resolved "https://github.com/electron/node-gyp#06b29aafb7708acef8b3669835c8a7857ebc92d2"
   dependencies:
     env-paths "^2.2.0"
     exponential-backoff "^3.1.1"
@@ -360,6 +360,13 @@
     fs-extra "^11.1.1"
     minimist "^1.2.8"
     postject "^1.0.0-alpha.6"
+
+"@electronfriends/electron-squirrel-startup@^1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@electronfriends/electron-squirrel-startup/-/electron-squirrel-startup-1.0.0.tgz#6f2360f07eef1e70ee5dc042882cf3fe41439cfa"
+  integrity sha512-afEwcTPRPSJ5LpqFDSFpnyQh7d+ASVYlvO3YLrG2hjTz6uKz4Re8ic8tgQ3Kuc48nRrKNf15tD0AtdfhhN++rw==
+  dependencies:
+    debug "^4.4.1"
 
 "@esbuild/aix-ppc64@0.25.8":
   version "0.25.8"
@@ -1502,13 +1509,6 @@ electron-settings@^4.0.4:
     lodash "^4.17.21"
     mkdirp "^1.0.4"
     write-file-atomic "^3.0.3"
-
-electron-squirrel-startup@^1.0.1:
-  version "1.0.1"
-  resolved "https://registry.yarnpkg.com/electron-squirrel-startup/-/electron-squirrel-startup-1.0.1.tgz#c9171568d724884c7a2b03760bfeedcf921c63ab"
-  integrity sha512-sTfFIHGku+7PsHLJ7v0dRcZNkALrV+YEozINTW8X1nM//e5O3L+rfYuvSW00lmGHnYmUjARZulD8F2V8ISI9RA==
-  dependencies:
-    debug "^2.2.0"
 
 electron-winstaller@^5.3.0:
   version "5.4.0"
