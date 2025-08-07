@@ -27,7 +27,7 @@ Manage everything from the system tray by clicking the Wemp icon.
 - **Regular Updates**: Ensures you have the latest versions of all services.
 - **Database Management**: Utilizes [phpMyAdmin](https://www.phpmyadmin.net) for easy database management.
 - **Configuration Monitoring**: Automatically restarts services upon configuration changes.
-- **Error Logging**: Tracks errors in a session-based log file for quick debugging.
+- **Error Logging**: Tracks errors in `error.log` for debugging.
 - **Autostart Option**: Start Wemp automatically at system startup.
 
 ## System Requirements
@@ -50,17 +50,20 @@ No. Uninstalling Wemp only removes the application itself. All services, configu
 
 ### How can I use PHP, MariaDB, and Nginx from the command line?
 
-Wemp makes it easy to add these services to your PATH environment variable directly from the application:
+To use these services from the command line, you need to add them to your PATH environment variable manually:
 
-1. Right-click the Wemp icon in your system tray
-2. Check "Add Services to PATH" in the menu
-3. That's it! You can now use commands like `php -v`, `mysql`, and `nginx -t` from any terminal
+1. Right-click the **Start button** and select **System**
+2. Click **Advanced system settings** (on the right side)
+3. In the System Properties window, click **Environment Variables**
+4. Under "User variables", find and select **Path**, then click **Edit**
+5. Click **New** and add each of these paths:
+   - `C:\Wemp\php`
+   - `C:\Wemp\mariadb\bin`
+   - `C:\Wemp\nginx`
+6. Click **OK** to close all windows
+7. Restart your terminal/command prompt
 
-Alternatively, you can manually add the paths to your user's PATH environment variable:
-
-- PHP: `C:\Wemp\php`
-- MariaDB: `C:\Wemp\mariadb\bin`
-- Nginx: `C:\Wemp\nginx`
+After this, you can use commands like `php -v`, `mysql -u root`, and `nginx -t` from any terminal.
 
 Note: If you installed Wemp in a different location, replace `C:\Wemp` with your chosen installation path.
 
