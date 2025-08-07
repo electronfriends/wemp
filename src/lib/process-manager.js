@@ -58,6 +58,7 @@ export class ProcessManager {
       this.isRunning = false;
       this.intentionallyKilled = false;
 
+      // Only trigger callback for unexpected exits (crashes, not manual stops)
       if (!wasIntentional && this.onUnexpectedExit) {
         this.onUnexpectedExit(code, signal);
       }

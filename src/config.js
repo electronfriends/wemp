@@ -59,7 +59,7 @@ const config = {
       return path.join(process.resourcesPath, 'stubs');
     },
     get logs() {
-      return path.join(app.getPath('userData'), 'wemp.log');
+      return path.join(app.getPath('userData'), 'error.log');
     },
   },
 

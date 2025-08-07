@@ -14,11 +14,13 @@ import { downloadService } from './downloader.js';
 import logger from './logger.js';
 import { updateServiceMenuItems } from './menu.js';
 import {
+  showReadyNotification,
   showRestartFailedNotification,
   showServiceCrashedNotification,
   showServiceErrorNotification,
   showServiceInstallNotification,
 } from './notifications.js';
+import { settingsManager } from './settings-manager.js';
 
 /**
  * Service manager - handles lifecycle of all services
@@ -55,12 +57,15 @@ export class ServiceManager {
 
     if (!needsPath) return;
 
+    // Create default directory first
     fs.mkdirSync(this.servicesPath, { recursive: true });
 
     try {
+      // Ask user to confirm or change the services directory
       await this.selectServicesPath();
       this.cleanupEmptyDirectory(config.paths.services);
     } catch {
+      // User cancelled - clean up and exit
       this.cleanupEmptyDirectory(config.paths.services);
       throw new Error('User canceled directory selection');
     }
@@ -72,7 +77,7 @@ export class ServiceManager {
    */
   async selectServicesPath() {
     const result = await dialog.showOpenDialog({
-      title: 'Choose Services Directory',
+      title: 'Choose Services Folder',
       defaultPath: this.servicesPath,
       properties: ['openDirectory', 'createDirectory'],
     });
@@ -93,6 +98,7 @@ export class ServiceManager {
       const service = createService(serviceConfig);
       this.services.set(serviceConfig.id, service);
 
+      // Kill any existing processes to ensure clean start
       if (await service.isProcessRunning()) {
         await this.forceKillProcess(serviceConfig.executable);
       }
@@ -100,6 +106,7 @@ export class ServiceManager {
 
     await this.ensureServiceUpToDate(serviceConfig);
 
+    // Set up process monitoring for executable services
     if (serviceConfig.executable) {
       this.setupExitCallback(serviceConfig.id);
     }
@@ -174,6 +181,15 @@ export class ServiceManager {
   }
 
   /**
+   * Show ready notification if enabled
+   */
+  showReadyNotificationIfEnabled() {
+    if (settingsManager.getShowReadyNotification()) {
+      showReadyNotification();
+    }
+  }
+
+  /**
    * Stop all services and cleanup
    */
   async stopAll() {
@@ -231,20 +247,6 @@ export class ServiceManager {
   }
 
   /**
-   * Clean up empty directory safely
-   */
-  cleanupEmptyDirectory(dirPath) {
-    try {
-      const files = fs.readdirSync(dirPath);
-      if (files.length === 0) {
-        fs.rmdirSync(dirPath);
-      }
-    } catch {
-      // Ignore cleanup errors
-    }
-  }
-
-  /**
    * Setup configuration file watcher for a specific service
    */
   setupConfigWatcher(serviceId) {
@@ -299,18 +301,29 @@ export class ServiceManager {
     const now = Date.now();
     const lastRestart = this.restartCooldowns.get(serviceId) || 0;
 
+    // Prevent rapid restarts within cooldown period
     if (now - lastRestart < config.watcher.restartCooldown) return;
 
     const currentHash = this.getFileHash(configPath);
     const previousHash = this.configHashes.get(serviceId);
 
+    // Only restart if file content actually changed (prevents false positives)
     if (!currentHash || currentHash === previousHash) return;
 
     this.configHashes.set(serviceId, currentHash);
     this.restartCooldowns.set(serviceId, now);
 
+    // Only restart if service is currently running
     if (this.isServiceRunning(serviceId)) {
       try {
+        if (serviceId === 'nginx') {
+          const isValid = await this.validateNginxConfig(serviceId);
+          if (!isValid) {
+            logger.error(`Invalid nginx configuration, skipping restart`);
+            return;
+          }
+        }
+
         await this.restartService(serviceId);
       } catch (error) {
         logger.error(`Failed to restart ${serviceId} after config change`, error);
@@ -361,9 +374,29 @@ export class ServiceManager {
     try {
       const execute = promisify(exec);
       await execute(`taskkill /F /IM "${executable}" 2>nul`);
-      logger.info(`Force killed existing ${executable} processes`);
     } catch {
       // Process not found or already stopped - this is fine
+    }
+  }
+
+  /**
+   * Validate nginx configuration
+   * @param {string} serviceId - Service identifier (should be 'nginx')
+   * @returns {Promise<boolean>} True if config is valid
+   */
+  async validateNginxConfig(serviceId) {
+    try {
+      const execute = promisify(exec);
+      const nginxPath = path.join(this.servicesPath, serviceId);
+      await execute('nginx.exe -t', {
+        cwd: nginxPath,
+        windowsHide: true,
+      });
+
+      return true;
+    } catch (error) {
+      logger.error(`Nginx config validation failed: ${error.message}`);
+      return false;
     }
   }
 
@@ -379,6 +412,20 @@ export class ServiceManager {
     } catch (error) {
       logger.error(`Failed to read file for hashing: ${filePath}`, error);
       return null;
+    }
+  }
+
+  /**
+   * Clean up empty directory safely
+   */
+  cleanupEmptyDirectory(dirPath) {
+    try {
+      const files = fs.readdirSync(dirPath);
+      if (files.length === 0) {
+        fs.rmdirSync(dirPath);
+      }
+    } catch {
+      // Ignore cleanup errors
     }
   }
 }

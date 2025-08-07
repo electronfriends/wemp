@@ -1,13 +1,7 @@
-import { exec } from 'node:child_process';
 import path from 'node:path';
-import { promisify } from 'node:util';
 
 import { app } from 'electron';
 import settings from 'electron-settings';
-
-import config from '../config.js';
-
-const execute = promisify(exec);
 
 /**
  * Settings manager for application preferences
@@ -45,10 +39,6 @@ export class SettingsManager {
 
       settings.unsetSync('paths');
     }
-
-    if (settings.has('showReadyNotification')) {
-      settings.unsetSync('showReadyNotification');
-    }
   }
 
   /**
@@ -64,7 +54,7 @@ export class SettingsManager {
    * Set autostart setting
    * @param {boolean} enabled
    */
-  async setAutostart(enabled) {
+  setAutostart(enabled) {
     if (!app.isPackaged) return;
 
     // Use Squirrel updater for proper auto-start support
@@ -88,69 +78,19 @@ export class SettingsManager {
   }
 
   /**
-   * Check if a service is in PATH by trying to find its executable
-   * @param {string} serviceId - Service identifier (nginx, mariadb, php)
-   * @returns {Promise<boolean>}
+   * Get show ready notification setting
+   * @returns {boolean}
    */
-  async isServiceInPath(serviceId) {
-    try {
-      const service = config.services.find(s => s.id === serviceId);
-      if (!service?.executable) return false;
-
-      await execute(`where ${service.executable}`);
-      return true;
-    } catch {
-      return false;
-    }
+  getShowReadyNotification() {
+    return settings.getSync('showReadyNotification') || false;
   }
 
   /**
-   * Get service directory path for PATH management
-   * @param {string} serviceId
-   * @returns {string}
+   * Set show ready notification setting
+   * @param {boolean} enabled
    */
-  getServicePath(serviceId) {
-    const service = config.services.find(s => s.id === serviceId);
-    const executablePath = service?.executablePath || '';
-    return path.join(config.paths.services, serviceId, executablePath);
-  }
-
-  /**
-   * Add or remove a service from PATH using PowerShell
-   * @param {string} serviceId - Service identifier
-   * @param {boolean} enabled - Whether to add or remove from PATH
-   */
-  async setServiceInPath(serviceId, enabled) {
-    try {
-      const servicePath = this.getServicePath(serviceId);
-
-      if (enabled) {
-        const addCommand = `powershell -Command "$env:PATH += ';${servicePath}'; [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::User)"`;
-        await execute(addCommand);
-      } else {
-        const removeCommand = `powershell -Command "$newPath = ($env:PATH -split ';' | Where-Object { $_ -ne '${servicePath}' }) -join ';'; [Environment]::SetEnvironmentVariable('PATH', $newPath, [EnvironmentVariableTarget]::User)"`;
-        await execute(removeCommand);
-      }
-    } catch (error) {
-      throw new Error(
-        `Failed to ${enabled ? 'add' : 'remove'} ${serviceId} ${enabled ? 'to' : 'from'} PATH: ${error.message}`
-      );
-    }
-  }
-
-  /**
-   * Get PATH settings for all services by checking actual PATH
-   * @returns {Promise<Object<string, boolean>>}
-   */
-  async getPathSettings() {
-    const pathSettings = {};
-    const executableServices = config.services.filter(service => service.executable);
-
-    for (const service of executableServices) {
-      pathSettings[service.id] = await this.isServiceInPath(service.id);
-    }
-
-    return pathSettings;
+  setShowReadyNotification(enabled) {
+    settings.setSync('showReadyNotification', enabled);
   }
 }
 

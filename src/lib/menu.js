@@ -21,9 +21,11 @@ import logIcon from '../assets/event-log.png?asset';
 import webIcon from '../assets/web.png?asset';
 import settingsIcon from '../assets/settings.png?asset';
 
+// Global references for the system tray and context menu
 let tray;
 let menu;
 
+// Pre-loaded native images for menu icons to avoid repeated loading
 const icons = {
   wemp: nativeImage.createFromDataURL(wempIcon),
   nginx: nativeImage.createFromDataURL(nginxIcon),
@@ -41,34 +43,28 @@ const icons = {
 
 /**
  * Toggle autostart setting
- * @returns {Promise<void>}
  */
-async function toggleAutostart() {
+function toggleAutostart() {
   try {
     const currentSetting = settingsManager.getAutostart();
-    await settingsManager.setAutostart(!currentSetting);
+    settingsManager.setAutostart(!currentSetting);
   } catch (error) {
     dialog.showErrorBox('Settings Error', `Failed to update autostart setting: ${error.message}`);
   }
 }
 
 /**
- * Toggle PATH management for all services
- * @returns {Promise<void>}
+ * Toggle ready notification setting
  */
-async function toggleAllServicesPath() {
+function toggleReadyNotification() {
   try {
-    const pathSettings = await settingsManager.getPathSettings();
-    const serviceIds = config.services.filter(s => s.executable).map(s => s.id);
-
-    const anyInPath = serviceIds.some(id => pathSettings[id]);
-    const shouldAdd = !anyInPath;
-
-    for (const id of serviceIds) {
-      await settingsManager.setServiceInPath(id, shouldAdd);
-    }
+    const currentSetting = settingsManager.getShowReadyNotification();
+    settingsManager.setShowReadyNotification(!currentSetting);
   } catch (error) {
-    dialog.showErrorBox('Settings Error', `Failed to update PATH settings: ${error.message}`);
+    dialog.showErrorBox(
+      'Settings Error',
+      `Failed to update notification setting: ${error.message}`
+    );
   }
 }
 
@@ -81,11 +77,11 @@ export function updateServiceMenuItems(serviceId) {
 
   const isRunning = serviceManager.isServiceRunning(serviceId);
 
-  // Find the service submenu
+  // Locate the service's submenu in the context menu
   const serviceMenuItem = menu.items.find(item => item.id === serviceId);
   if (!serviceMenuItem || !serviceMenuItem.submenu) return;
 
-  // Update Start/Restart/Stop buttons based on running status
+  // Update control buttons: Start enabled when stopped, Restart/Stop enabled when running
   serviceMenuItem.submenu.items.forEach(item => {
     if (item.label === 'Start') {
       item.enabled = !isRunning;
@@ -102,12 +98,12 @@ export async function createMenu() {
   tray = new Tray(icons.wemp);
 
   const version = app.getVersion();
-  const pathSettings = await settingsManager.getPathSettings();
 
-  // Build individual service menu items
+  // Build dynamic menu items for each configured service
   const serviceMenuItems = config.services.map(service => {
     const isRunning = serviceManager.isServiceRunning(service.id);
 
+    // Start with service info header (disabled for display only)
     const baseItems = [
       {
         label: `${service.name} ${service.version}`,
@@ -117,7 +113,7 @@ export async function createMenu() {
       { type: 'separator' },
     ];
 
-    // Services with executables get start/restart/stop controls
+    // Add service control buttons for executable services
     if (service.executable) {
       baseItems.push(
         {
@@ -141,7 +137,7 @@ export async function createMenu() {
       );
     }
 
-    // Services with URLs get browser link
+    // Add browser link for services with web interfaces
     if (service.url) {
       baseItems.push({
         label: 'Open in Browser',
@@ -150,6 +146,7 @@ export async function createMenu() {
       });
     }
 
+    // Add configuration and folder access options
     baseItems.push(
       { type: 'separator' },
       {
@@ -179,31 +176,28 @@ export async function createMenu() {
       icon: icons.wemp,
       submenu: [
         {
-          label: 'Open Services Directory',
+          label: 'Open Services Folder',
           icon: icons.folder,
           click: () => shell.openPath(serviceManager.servicesPath),
         },
         {
-          label: 'View Application Logs',
+          label: 'View Error Logs',
           icon: icons.log,
           click: () => shell.openPath(logger.logPath),
         },
         { type: 'separator' },
-        {
-          label: 'Add Services to PATH',
-          type: 'checkbox',
-          checked: (() => {
-            const serviceIds = config.services.filter(s => s.executable).map(s => s.id);
-            return serviceIds.every(id => pathSettings[id] || false);
-          })(),
-          click: toggleAllServicesPath,
-        },
         {
           label: 'Start with Windows',
           type: 'checkbox',
           checked: app.isPackaged ? settingsManager.getAutostart() : false,
           enabled: app.isPackaged,
           click: toggleAutostart,
+        },
+        {
+          label: 'Show Ready Notification',
+          type: 'checkbox',
+          checked: settingsManager.getShowReadyNotification(),
+          click: toggleReadyNotification,
         },
         { type: 'separator' },
       ],
@@ -218,6 +212,7 @@ export async function createMenu() {
     },
   ];
 
+  // Create the menu and configure the system tray
   menu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(menu);
   tray.setToolTip('Wemp - Click to manage services');

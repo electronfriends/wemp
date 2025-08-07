@@ -6,24 +6,24 @@ import { createMenu, tray } from './lib/menu.js';
 import { serviceManager } from './lib/service-manager.js';
 import logger from './lib/logger.js';
 
-// Handle single instance and squirrel startup
+// Handle single instance and squirrel startup events
 if (!app.requestSingleInstanceLock() || squirrelStartup) {
   app.quit();
 } else {
-  // Enable auto-updates
+  // Enable automatic updates for the application
   updateElectronApp();
 
-  // Remove default menu
+  // Remove default Electron menu
   Menu.setApplicationMenu(null);
 
-  // Handle second instance
+  // Show tray menu when second instance is launched
   app.on('second-instance', () => {
     if (tray) {
       tray.popUpContextMenu();
     }
   });
 
-  // Handle shutdown
+  // Gracefully stop all services before quit
   app.on('before-quit', async event => {
     event.preventDefault();
     try {
@@ -34,12 +34,13 @@ if (!app.requestSingleInstanceLock() || squirrelStartup) {
     app.exit();
   });
 
-  // Initialize when ready
+  // Initialize application when Electron is ready
   app.whenReady().then(async () => {
     try {
       await createMenu();
       await serviceManager.init();
       await serviceManager.startAll();
+      serviceManager.showReadyNotificationIfEnabled();
     } catch (error) {
       logger.error('Failed to initialize application', error);
 

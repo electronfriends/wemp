@@ -1,8 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
 
-import { app } from 'electron';
-
 import config from '../config.js';
 
 /**
@@ -14,25 +12,8 @@ class Logger {
    */
   constructor() {
     this.logPath = config.paths.logs;
-    this.cleanupOldLogFile();
     this.ensureLogFile();
     this.cleanupOldLogs();
-  }
-
-  /**
-   * Clean up old error.log file from previous versions
-   */
-  cleanupOldLogFile() {
-    try {
-      const userDataPath = app.getPath('userData');
-      const oldErrorLogPath = path.join(userDataPath, 'error.log');
-
-      if (fs.existsSync(oldErrorLogPath)) {
-        fs.unlinkSync(oldErrorLogPath);
-      }
-    } catch {
-      // Silent fail - not critical if cleanup fails
-    }
   }
 
   /**
@@ -87,7 +68,7 @@ class Logger {
 
   /**
    * Log a message with specified level
-   * @param {string} level - Log level (info, warn, error)
+   * @param {string} level - Log level
    * @param {string} message - Message to log
    * @param {Error} [error] - Optional error object
    */
@@ -111,32 +92,6 @@ class Logger {
         // Silent fail
       }
     }
-
-    // Also log to console in development (when app is not packaged)
-    if (!app.isPackaged) {
-      if (level === 'error') {
-        console.error(message, error || '');
-      } else {
-        console.log(`${level.toUpperCase()}: ${message}`);
-      }
-    }
-  }
-
-  /**
-   * Log an info message
-   * @param {string} message - Message to log
-   */
-  info(message) {
-    this.log('info', message);
-  }
-
-  /**
-   * Log a warning message
-   * @param {string} message - Message to log
-   * @param {Error} [error] - Optional error object
-   */
-  warn(message, error) {
-    this.log('warn', message, error);
   }
 
   /**

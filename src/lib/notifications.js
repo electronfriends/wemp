@@ -1,6 +1,18 @@
 import { Notification } from 'electron';
 
 /**
+ * Show notification when all services are ready
+ */
+export function showReadyNotification() {
+  new Notification({
+    title: 'Wemp Ready',
+    body: 'All services started successfully. Right-click the tray icon to manage services.',
+    silent: true,
+    timeoutType: 'never',
+  }).show();
+}
+
+/**
  * Show notification when service starts installing/updating
  * @param {string} serviceName
  * @param {string} version - Version being installed/updated to

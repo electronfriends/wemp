@@ -22,8 +22,6 @@ export async function downloadService(service, isUpdate = false) {
   try {
     fs.mkdirSync(servicePath, { recursive: true });
 
-    logger.info(`${isUpdate ? 'Updating' : 'Installing'} ${service.name}`);
-
     const buffer = await fetchPackage(service);
     const zipFile = await fromBuffer(buffer, { lazyEntries: true });
     await extractFiles(zipFile, servicePath, service, isUpdate);
@@ -32,8 +30,6 @@ export async function downloadService(service, isUpdate = false) {
     if (!isUpdate) {
       await replaceWithStub(service, servicePath);
     }
-
-    logger.info(`Successfully ${isUpdate ? 'updated' : 'installed'} ${service.name}`);
   } catch (error) {
     logger.error(`Failed to ${isUpdate ? 'update' : 'install'} ${service.name}`, error);
     throw error;
@@ -51,7 +47,7 @@ async function fetchPackage(service) {
 
   let response = await fetch(url);
 
-  // PHP fallback
+  // Handle PHP version archive fallback (releases sometimes moved to archives)
   if (!response.ok && service.id === 'php') {
     const fallbackUrl = url.replace('releases/', 'releases/archives/');
     response = await fetch(fallbackUrl);
@@ -79,14 +75,14 @@ async function extractFiles(zipFile, servicePath, service, isUpdate) {
     let isFirstEntry = true;
 
     zipFile.on('entry', entry => {
-      // Detect root folder
+      // Auto-detect and strip root folder from archive (common in downloaded packages)
       if (isFirstEntry) {
         const pathParts = entry.fileName.split('/');
         rootFolder = pathParts.length > 1 ? pathParts[0] + '/' : '';
         isFirstEntry = false;
       }
 
-      // Remove root folder from path
+      // Remove root folder prefix to flatten the extraction
       const fileName =
         rootFolder && entry.fileName.startsWith(rootFolder)
           ? entry.fileName.substring(rootFolder.length)
