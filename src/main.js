@@ -1,5 +1,5 @@
 import { Menu, app, dialog } from 'electron';
-import squirrelStartup from '@electronfriends/electron-squirrel-startup';
+import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
 import { createMenu, tray } from './lib/menu.js';

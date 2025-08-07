@@ -5,8 +5,8 @@ export default defineConfig({
     target: 'node22',
     lib: {
       entry: 'src/main.js',
-      formats: ['es'],
-      fileName: () => 'main.js',
+      formats: ['cjs'],
+      fileName: () => 'main.cjs',
     },
     rollupOptions: {
       external: [
