@@ -98,7 +98,7 @@ export class ProcessManager {
   async forceKill() {
     try {
       this.intentionallyKilled = true;
-      await execute(`taskkill /F /IM "${this.executable}" 2>nul`);
+      await execute(`taskkill /F /T /IM "${this.executable}" 2>nul`);
     } catch {
       // Process not found or already stopped
     }

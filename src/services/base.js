@@ -75,6 +75,16 @@ export class Service {
   }
 
   /**
+   * Restart the service
+   * @returns {Promise<void>}
+   */
+  async restart() {
+    await this.stop();
+    await new Promise(resolve => setTimeout(resolve, config.timeouts.restart));
+    await this.start();
+  }
+
+  /**
    * Check if service process is running
    * @returns {boolean}
    */

@@ -57,16 +57,21 @@ export class ServiceManager {
 
     if (!needsPath) return;
 
-    // Create default directory first
-    fs.mkdirSync(this.servicesPath, { recursive: true });
+    // Create default directory first and remember it for potential cleanup
+    const defaultPath = this.servicesPath;
+    fs.mkdirSync(defaultPath, { recursive: true });
 
     try {
       // Ask user to confirm or change the services directory
       await this.selectServicesPath();
-      this.cleanupEmptyDirectory(config.paths.services);
+
+      // If the user chose a different path, clean up the initially created default folder
+      if (this.servicesPath !== defaultPath) {
+        this.cleanupEmptyDirectory(defaultPath);
+      }
     } catch {
       // User cancelled - clean up and exit
-      this.cleanupEmptyDirectory(config.paths.services);
+      this.cleanupEmptyDirectory(defaultPath);
       throw new Error('User canceled directory selection');
     }
   }
@@ -231,9 +236,16 @@ export class ServiceManager {
    * @param {string} id - Service identifier
    */
   async restartService(id) {
-    await this.stopService(id);
-    await new Promise(resolve => setTimeout(resolve, config.timeouts.restart));
-    await this.startService(id);
+    const service = this.services.get(id);
+    if (!service) return;
+    try {
+      await service.restart();
+    } catch (error) {
+      logger.error(`Failed to restart ${id}`, error);
+      showRestartFailedNotification(service.name, error.message);
+    } finally {
+      updateServiceMenuItems(id);
+    }
   }
 
   /**
@@ -315,23 +327,7 @@ export class ServiceManager {
 
     // Only restart if service is currently running
     if (this.isServiceRunning(serviceId)) {
-      try {
-        if (serviceId === 'nginx') {
-          const isValid = await this.validateNginxConfig(serviceId);
-          if (!isValid) {
-            logger.error(`Invalid nginx configuration, skipping restart`);
-            return;
-          }
-        }
-
-        await this.restartService(serviceId);
-      } catch (error) {
-        logger.error(`Failed to restart ${serviceId} after config change`, error);
-        const service = this.services.get(serviceId);
-        if (service) {
-          showRestartFailedNotification(service.name, error.message);
-        }
-      }
+      await this.restartService(serviceId);
     }
   }
 
@@ -373,30 +369,9 @@ export class ServiceManager {
   async forceKillProcess(executable) {
     try {
       const execute = promisify(exec);
-      await execute(`taskkill /F /IM "${executable}" 2>nul`);
+      await execute(`taskkill /F /T /IM "${executable}" 2>nul`);
     } catch {
       // Process not found or already stopped - this is fine
-    }
-  }
-
-  /**
-   * Validate nginx configuration
-   * @param {string} serviceId - Service identifier (should be 'nginx')
-   * @returns {Promise<boolean>} True if config is valid
-   */
-  async validateNginxConfig(serviceId) {
-    try {
-      const execute = promisify(exec);
-      const nginxPath = path.join(this.servicesPath, serviceId);
-      await execute('nginx.exe -t', {
-        cwd: nginxPath,
-        windowsHide: true,
-      });
-
-      return true;
-    } catch (error) {
-      logger.error(`Nginx config validation failed: ${error.message}`);
-      return false;
     }
   }
 
