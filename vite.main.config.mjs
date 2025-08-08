@@ -6,7 +6,7 @@ export default defineConfig({
     lib: {
       entry: 'src/main.js',
       formats: ['cjs'],
-      fileName: () => 'main.cjs',
+      fileName: () => 'main.js',
     },
     rollupOptions: {
       external: [
