@@ -11,15 +11,14 @@
   "author": "ElectronFriends",
   "main": ".vite/build/main.js",
   "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
     "lint": "eslint . --fix",
     "lint:check": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check .",
-    "dev": "electron-forge start",
-    "start": "electron-forge start",
-    "make": "electron-forge make",
-    "package": "electron-forge package",
-    "publish": "electron-forge publish"
+    "format:check": "prettier --check ."
   },
   "dependencies": {
     "electron-settings": "^4.0.4",
