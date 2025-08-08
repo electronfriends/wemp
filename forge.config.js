@@ -1,5 +1,5 @@
-const { FusesPlugin } = require('@electron-forge/plugin-fuses');
-const { FuseV1Options, FuseVersion } = require('@electron/fuses');
+import { FusesPlugin } from '@electron-forge/plugin-fuses';
+import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
 const config = {
   packagerConfig: {
@@ -40,15 +40,6 @@ const config = {
             entry: 'src/main.js',
             config: 'vite.main.config.mjs',
             target: 'main',
-            vite: {
-              build: {
-                rollupOptions: {
-                  output: {
-                    format: 'es',
-                  },
-                },
-              },
-            },
           },
         ],
         renderer: [],
@@ -68,4 +59,4 @@ const config = {
   ],
 };
 
-module.exports = config;
+export default config;
