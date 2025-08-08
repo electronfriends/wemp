@@ -47,7 +47,15 @@ export class SettingsManager {
    */
   getAutostart() {
     if (!app.isPackaged) return false;
-    return app.getLoginItemSettings().openAtLogin;
+
+    const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
+    const exeName = path.basename(process.execPath);
+
+    const { openAtLogin } = app.getLoginItemSettings({
+      path: updateExe,
+      args: ['--processStart', exeName],
+    });
+    return openAtLogin;
   }
 
   /**
@@ -64,7 +72,6 @@ export class SettingsManager {
     if (enabled) {
       app.setLoginItemSettings({
         openAtLogin: true,
-        openAsHidden: true,
         path: updateExe,
         args: ['--processStart', exeName],
       });
