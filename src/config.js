@@ -20,7 +20,7 @@ const config = {
     {
       id: 'mariadb',
       name: 'MariaDB',
-      version: '11.8.2',
+      version: '12.0.2',
       executable: 'mysqld.exe',
       executablePath: 'bin',
       configFile: 'data/my.ini',
