@@ -173,7 +173,8 @@ async function replaceWithStub(service, servicePath) {
 
       // Read stub content and replace {servicesPath} placeholder
       let stubContent = fs.readFileSync(stubPath, 'utf8');
-      stubContent = stubContent.replace(/{servicesPath}/g, config.paths.services);
+      const servicesPath = config.paths.services.replace(/\//g, '\\');
+      stubContent = stubContent.replace(/{servicesPath}/g, servicesPath);
 
       // Write the customized stub to target
       fs.writeFileSync(targetPath, stubContent);
