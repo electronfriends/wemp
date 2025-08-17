@@ -517,10 +517,10 @@
   resolved "https://registry.yarnpkg.com/@eslint/config-helpers/-/config-helpers-0.3.1.tgz#d316e47905bd0a1a931fa50e669b9af4104d1617"
   integrity sha512-xR93k9WhrDYpXHORXpxVL5oHj3Era7wo6k/Wd8/IsQNnZUTzkGS29lyn3nAT05v6ltUuTFVCCYDEGfy2Or/sPA==
 
-"@eslint/config-inspector@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@eslint/config-inspector/-/config-inspector-1.1.0.tgz#965ce2a9fdad28f11e63077248068bb4c94a9f7d"
-  integrity sha512-DQGzRGV6jKujyxxCPlhwwyzq3HTW/NbFX9A4npPjW0+0A3KemxYJWZdwqJn4rauPsRUpJ8yuh5uOyMCChrnFsg==
+"@eslint/config-inspector@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@eslint/config-inspector/-/config-inspector-1.2.0.tgz#895e4f6b1565eb303241731d022b9dff22b4c444"
+  integrity sha512-PrM+dN45JTsZ7Zv7f2ElMAsf2eyrdNZWwMj2w43c3SBOE2jsl7eJVOTvbSrz1D+JzYF7eBNdx0hhvcCLRwhiCQ==
   dependencies:
     "@nodelib/fs.walk" "^3.0.1"
     ansis "^4.1.0"
@@ -1523,10 +1523,10 @@ electron-winstaller@^5.3.0:
   optionalDependencies:
     "@electron/windows-sign" "^1.1.2"
 
-electron@^37.2.6:
-  version "37.2.6"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-37.2.6.tgz#bc299eb21daf5bd8242f9b3a6119e19b4ef226cd"
-  integrity sha512-Ns6xyxE+hIK5UlujtRlw7w4e2Ju/ImCWXf1Q/PoOhc0N3/6SN6YW7+ujCarsHbxWnolbW+1RlkHtdklUJpjbPA==
+electron@^37.3.0:
+  version "37.3.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-37.3.0.tgz#c407f477ba594e7c3a1b2637e3dfeac20b1e4837"
+  integrity sha512-cPOPUD26DwCh+PZ9q+gMyVBvdBN75SnekI6u5zcOeoLVIXQpzrCm1ewz9BcrkWkVW7oOtfQAEo1G1SffvXrSSw==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^22.7.7"
@@ -3725,10 +3725,10 @@ validate-npm-package-license@^3.0.1:
     spdx-correct "^3.0.0"
     spdx-expression-parse "^3.0.0"
 
-vite@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/vite/-/vite-7.1.1.tgz#a2c25f31742fd9f8b223d809df1ce3026e813fcf"
-  integrity sha512-yJ+Mp7OyV+4S+afWo+QyoL9jFWD11QFH0i5i7JypnfTcA1rmgxCbiA8WwAICDEtZ1Z1hzrVhN8R8rGTqkTY8ZQ==
+vite@^7.1.2:
+  version "7.1.2"
+  resolved "https://registry.yarnpkg.com/vite/-/vite-7.1.2.tgz#62ffd8a915977ff387fbe7a731af1a650ec5006e"
+  integrity sha512-J0SQBPlQiEXAF7tajiH+rUooJPo0l8KQgyg4/aMunNtrOa7bwuZJsJbDWzeljqQpgftxuq5yNJxQ91O9ts29UQ==
   dependencies:
     esbuild "^0.25.0"
     fdir "^6.4.6"
