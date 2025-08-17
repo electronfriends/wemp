@@ -11,7 +11,7 @@ const config = {
     {
       id: 'nginx',
       name: 'Nginx',
-      version: '1.29.0',
+      version: '1.29.1',
       executable: 'nginx.exe',
       configFile: 'conf/nginx.conf',
       preserve: ['conf/', 'html/', 'logs/'],
