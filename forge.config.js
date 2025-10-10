@@ -5,7 +5,7 @@ module.exports = {
   packagerConfig: {
     asar: true,
     icon: 'build/icon',
-    extraResource: ['./stubs'],
+    platform: 'win32',
     arch: 'x64',
   },
   rebuildConfig: {},
