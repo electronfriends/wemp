@@ -3,18 +3,11 @@ import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
 import { createMenu, tray } from './lib/menu.js';
-import { serviceManager } from './lib/service-manager.js';
 import logger from './lib/logger.js';
+import { serviceManager } from './lib/service-manager.js';
 
-// Handle creating/removing shortcuts on Windows when installing/uninstalling.
-if (squirrelStartup) {
-  app.quit();
-}
-
-// Handle single instance lock
-if (!app.requestSingleInstanceLock()) {
-  app.quit();
-}
+// Handle Squirrel events and single instance lock
+if (squirrelStartup || !app.requestSingleInstanceLock()) app.quit();
 
 // Enable automatic updates for the application
 updateElectronApp();
@@ -23,11 +16,7 @@ updateElectronApp();
 Menu.setApplicationMenu(null);
 
 // Show tray menu when second instance is launched
-app.on('second-instance', () => {
-  if (tray) {
-    tray.popUpContextMenu();
-  }
-});
+app.on('second-instance', () => tray?.popUpContextMenu());
 
 // Gracefully stop all services before quit
 app.on('before-quit', async event => {
@@ -43,13 +32,11 @@ app.on('before-quit', async event => {
 // Initialize application when Electron is ready
 app.whenReady().then(async () => {
   try {
-    await createMenu();
     await serviceManager.init();
     await serviceManager.startAll();
-    serviceManager.showReadyNotificationIfEnabled();
+    createMenu();
   } catch (error) {
     logger.error('Failed to initialize application', error);
-
     await dialog.showMessageBox({
       type: 'error',
       title: 'Initialization Error',
@@ -57,7 +44,6 @@ app.whenReady().then(async () => {
       detail: error.message,
       buttons: ['Exit'],
     });
-
     app.quit();
   }
 });

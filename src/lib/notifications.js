@@ -1,72 +1,58 @@
 import { Notification } from 'electron';
 
 /**
- * Show notification when all services are ready
+ * Shows service error notification
+ * @param {string} serviceName - Name of the service
+ * @param {string} error - Error message
  */
-export function showReadyNotification() {
+export function showServiceError(serviceName, error) {
   new Notification({
-    title: 'Wemp Ready',
-    body: 'All services started successfully. Right-click the tray icon to manage services.',
-    silent: true,
-    timeoutType: 'never',
+    title: 'Service Error',
+    body: `${serviceName}: ${error}`,
   }).show();
 }
 
 /**
- * Show notification when service starts installing/updating
- * @param {string} serviceName
- * @param {string} version - Version being installed/updated to
- * @param {boolean} isFirstInstall
- * @returns {Notification} Notification instance to close later
+ * Shows service crashed notification
+ * @param {string} serviceName - Name of the service
  */
-export function showServiceInstallNotification(serviceName, version, isFirstInstall) {
-  const title = isFirstInstall ? 'Installing Service' : 'Updating Service';
-  const body = isFirstInstall
-    ? `${serviceName} is being installed. This may take a few moments...`
-    : `${serviceName} is being updated to ${version}...`;
+export function showServiceCrashed(serviceName) {
+  new Notification({
+    title: 'Service Crashed',
+    body: `${serviceName} has stopped unexpectedly`,
+  }).show();
+}
 
+/**
+ * Shows service installing notification
+ * @param {string} serviceName - Name of the service
+ * @param {string} version - Version being installed
+ * @returns {Notification} Notification object for manual dismissal
+ */
+export function showServiceInstalling(serviceName, version) {
   const notification = new Notification({
-    title,
-    body,
+    title: `Installing ${serviceName} ${version}`,
+    body: 'Downloading, extracting, and configuring. This may take a moment...',
     silent: true,
     timeoutType: 'never',
   });
-
   notification.show();
   return notification;
 }
 
 /**
- * Show notification when service installation/update fails
- * @param {string} serviceName
- * @param {boolean} isFirstInstall
+ * Shows service updating notification
+ * @param {string} serviceName - Name of the service
+ * @param {string} version - Version being updated to
+ * @returns {Notification} Notification object for manual dismissal
  */
-export function showServiceErrorNotification(serviceName, isFirstInstall) {
-  new Notification({
-    title: 'Service Error',
-    body: `Failed to ${isFirstInstall ? 'install' : 'update'} ${serviceName}`,
-  }).show();
-}
-
-/**
- * Show notification when a service crashes unexpectedly
- * @param {string} serviceName
- */
-export function showServiceCrashedNotification(serviceName) {
-  new Notification({
-    title: 'Service Crashed',
-    body: `${serviceName} has stopped unexpectedly. Check logs for details.`,
-  }).show();
-}
-
-/**
- * Show notification when service restart fails
- * @param {string} serviceName
- * @param {string} errorMessage
- */
-export function showRestartFailedNotification(serviceName, errorMessage) {
-  new Notification({
-    title: 'Restart Failed',
-    body: `Failed to restart ${serviceName}: ${errorMessage}`,
-  }).show();
+export function showServiceUpdating(serviceName, version) {
+  const notification = new Notification({
+    title: `Updating ${serviceName} ${version}`,
+    body: 'Downloading and extracting. This may take a moment...',
+    silent: true,
+    timeoutType: 'never',
+  });
+  notification.show();
+  return notification;
 }

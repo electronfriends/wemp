@@ -4,75 +4,86 @@ import { app } from 'electron';
 import settings from 'electron-settings';
 
 /**
- * Application configuration
+ * Application configuration and service definitions
  */
 const config = {
-  services: [
-    {
-      id: 'nginx',
+  /**
+   * Service configurations
+   * Each service defines its executable, config files, and runtime settings
+   */
+  services: {
+    nginx: {
       name: 'Nginx',
-      version: '1.29.1',
       executable: 'nginx.exe',
       configFile: 'conf/nginx.conf',
       preserve: ['conf/', 'html/', 'logs/'],
-      downloadUrl: 'https://nginx.org/download/nginx-{version}.zip',
     },
-    {
-      id: 'mariadb',
+    mariadb: {
       name: 'MariaDB',
-      version: '12.0.2',
       executable: 'mysqld.exe',
       executablePath: 'bin',
       configFile: 'data/my.ini',
       preserve: ['data/'],
-      downloadUrl:
-        'https://archive.mariadb.org/mariadb-{version}/winx64-packages/mariadb-{version}-winx64.zip',
     },
-    {
-      id: 'php',
+    php: {
       name: 'PHP',
-      version: '8.3.24',
       executable: 'php-cgi.exe',
       configFile: 'php.ini',
-      downloadUrl:
-        'https://windows.php.net/downloads/releases/php-{version}-nts-Win32-vs16-x64.zip',
+      processArgs: ['-b', '127.0.0.1:9000'],
+      env: {
+        PHP_FCGI_MAX_REQUESTS: '0', // No request limit
+      },
     },
-    {
-      id: 'phpmyadmin',
+    phpmyadmin: {
       name: 'phpMyAdmin',
-      version: '5.2.2',
       url: 'http://localhost/phpmyadmin',
       configFile: 'config.inc.php',
-      downloadUrl:
-        'https://files.phpmyadmin.net/phpMyAdmin/{version}/phpMyAdmin-{version}-all-languages.zip',
     },
-  ],
+  },
 
+  /**
+   * API configuration for version checking and downloads
+   */
+  api: {
+    baseUrl: process.env.WEMP_API_BASE_URL || 'https://electronfriends.org/api/wemp',
+    endpoints: {
+      versions: '/versions.json',
+    },
+    timeout: 10000, // 10 seconds
+  },
+
+  /**
+   * Dynamic paths that depend on runtime configuration
+   */
   paths: {
     get services() {
       return settings.getSync('path')?.toString() || path.join('C:', 'Wemp');
-    },
-    get stubs() {
-      if (!app.isPackaged) {
-        return path.resolve('stubs');
-      }
-      return path.join(process.resourcesPath, 'stubs');
     },
     get logs() {
       return path.join(app.getPath('userData'), 'error.log');
     },
   },
 
-  timeouts: {
-    start: 30000,
-    restart: 1000,
-    stop: 5000,
-    poll: 1000,
+  /**
+   * Timeout configuration (ms)
+   */
+  timeout: {
+    stop: 3000,
   },
 
+  /**
+   * File watcher configuration (ms)
+   */
   watcher: {
-    debounce: 100,
-    restartCooldown: 5000,
+    pollInterval: 1000,
+  },
+
+  /**
+   * Logger configuration
+   */
+  logger: {
+    maxLogSize: 5 * 1024 * 1024, // 5 MB
+    maxLogFiles: 3,
   },
 };
 

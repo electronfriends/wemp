@@ -1,18 +1,13 @@
 import path from 'node:path';
 
-import { Menu, Tray, app, shell, nativeImage, dialog } from 'electron';
+import { Menu, Tray, app, dialog, nativeImage, shell } from 'electron';
 
 import config from '../config.js';
 import logger from './logger.js';
+import * as pathManager from './path-manager.js';
 import { serviceManager } from './service-manager.js';
-import { settingsManager } from './settings-manager.js';
 
-// Load icons
 import wempIcon from '../assets/wemp.png?asset';
-import nginxIcon from '../assets/nginx.png?asset';
-import mariadbIcon from '../assets/mariadb.png?asset';
-import phpIcon from '../assets/php.png?asset';
-import phpmyadminIcon from '../assets/phpmyadmin.png?asset';
 import playIcon from '../assets/circled-play.png?asset';
 import shutdownIcon from '../assets/shutdown.png?asset';
 import restartIcon from '../assets/restart.png?asset';
@@ -20,18 +15,19 @@ import folderIcon from '../assets/folder.png?asset';
 import logIcon from '../assets/event-log.png?asset';
 import webIcon from '../assets/web.png?asset';
 import settingsIcon from '../assets/settings.png?asset';
+import nginxIcon from '../assets/nginx.png?asset';
+import mariadbIcon from '../assets/mariadb.png?asset';
+import phpIcon from '../assets/php.png?asset';
+import phpmyadminIcon from '../assets/phpmyadmin.png?asset';
 
-// Global references for the system tray and context menu
+/** @type {Tray|null} System tray instance */
 let tray;
+/** @type {Menu|null} Context menu instance */
 let menu;
 
-// Pre-loaded native images for menu icons to avoid repeated loading
+/** @type {Object.<string, NativeImage>} Preloaded menu icons */
 const icons = {
   wemp: nativeImage.createFromDataURL(wempIcon),
-  nginx: nativeImage.createFromDataURL(nginxIcon),
-  mariadb: nativeImage.createFromDataURL(mariadbIcon),
-  php: nativeImage.createFromDataURL(phpIcon),
-  phpmyadmin: nativeImage.createFromDataURL(phpmyadminIcon),
   play: nativeImage.createFromDataURL(playIcon),
   shutdown: nativeImage.createFromDataURL(shutdownIcon),
   restart: nativeImage.createFromDataURL(restartIcon),
@@ -39,171 +35,180 @@ const icons = {
   log: nativeImage.createFromDataURL(logIcon),
   web: nativeImage.createFromDataURL(webIcon),
   settings: nativeImage.createFromDataURL(settingsIcon),
+  nginx: nativeImage.createFromDataURL(nginxIcon),
+  mariadb: nativeImage.createFromDataURL(mariadbIcon),
+  php: nativeImage.createFromDataURL(phpIcon),
+  phpmyadmin: nativeImage.createFromDataURL(phpmyadminIcon),
 };
 
 /**
- * Toggle autostart setting
+ * Initializes system tray menu interface
  */
-function toggleAutostart() {
-  try {
-    const currentSetting = settingsManager.getAutostart();
-    settingsManager.setAutostart(!currentSetting);
-  } catch (error) {
-    dialog.showErrorBox('Settings Error', `Failed to update autostart setting: ${error.message}`);
-  }
-}
-
-/**
- * Toggle ready notification setting
- */
-function toggleReadyNotification() {
-  try {
-    const currentSetting = settingsManager.getShowReadyNotification();
-    settingsManager.setShowReadyNotification(!currentSetting);
-  } catch (error) {
-    dialog.showErrorBox(
-      'Settings Error',
-      `Failed to update notification setting: ${error.message}`
-    );
-  }
-}
-
-/**
- * Update service menu items based on running status
- * @param {string} serviceId - The service ID to update
- */
-export function updateServiceMenuItems(serviceId) {
-  if (!menu) return;
-
-  const isRunning = serviceManager.isServiceRunning(serviceId);
-
-  // Locate the service's submenu in the context menu
-  const serviceMenuItem = menu.items.find(item => item.id === serviceId);
-  if (!serviceMenuItem || !serviceMenuItem.submenu) return;
-
-  // Update control buttons: Start enabled when stopped, Restart/Stop enabled when running
-  serviceMenuItem.submenu.items.forEach(item => {
-    if (item.label === 'Start') {
-      item.enabled = !isRunning;
-    } else if (item.label === 'Restart' || item.label === 'Stop') {
-      item.enabled = isRunning;
-    }
-  });
-}
-
-/**
- * Create and initialize the system tray menu
- */
-export async function createMenu() {
+export function createMenu() {
   tray = new Tray(icons.wemp);
+  tray.setToolTip(app.getName());
 
+  tray.on('click', () => {
+    tray.popUpContextMenu();
+  });
+
+  // Listen for service state changes to update menu
+  serviceManager.on('service-started', updateServiceMenuItems);
+  serviceManager.on('service-stopped', updateServiceMenuItems);
+
+  buildMenu();
+}
+
+/**
+ * Constructs system tray context menu with current service status
+ * @private
+ */
+async function buildMenu() {
+  const status = serviceManager.getStatus();
   const version = app.getVersion();
 
-  // Build dynamic menu items for each configured service
-  const serviceMenuItems = config.services.map(service => {
-    const isRunning = serviceManager.isServiceRunning(service.id);
+  // Auto-start functionality
+  const getAutoStartSettings = () => {
+    if (!app.isPackaged) return { openAtLogin: false, canToggle: false };
 
-    // Start with service info header (disabled for display only)
-    const baseItems = [
-      {
-        label: `${service.name} ${service.version}`,
-        icon: icons[service.id],
-        enabled: false,
-      },
-      { type: 'separator' },
-    ];
+    const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
+    const exeName = path.basename(process.execPath);
 
-    // Add service control buttons for executable services
-    if (service.executable) {
-      baseItems.push(
-        {
-          label: 'Start',
-          icon: icons.play,
-          enabled: !isRunning,
-          click: () => serviceManager.startService(service.id),
-        },
-        {
-          label: 'Restart',
-          icon: icons.restart,
-          enabled: isRunning,
-          click: () => serviceManager.restartService(service.id),
-        },
-        {
-          label: 'Stop',
-          icon: icons.shutdown,
-          enabled: isRunning,
-          click: () => serviceManager.stopService(service.id),
-        }
-      );
-    }
+    const { openAtLogin } = app.getLoginItemSettings({
+      path: updateExe,
+      args: ['--processStart', exeName],
+    });
 
-    // Add browser link for services with web interfaces
-    if (service.url) {
-      baseItems.push({
-        label: 'Open in Browser',
-        icon: icons.web,
-        click: () => shell.openExternal(service.url),
-      });
-    }
+    return { openAtLogin, canToggle: true };
+  };
 
-    // Add configuration and folder access options
-    baseItems.push(
-      { type: 'separator' },
-      {
-        label: 'Open Configuration',
-        icon: icons.settings,
-        click: () =>
-          shell.openPath(path.join(serviceManager.servicesPath, service.id, service.configFile)),
-      },
-      {
-        label: 'Open Folder',
-        icon: icons.folder,
-        click: () => shell.openPath(path.join(serviceManager.servicesPath, service.id)),
-      }
-    );
-
-    return {
-      id: service.id,
-      label: service.name,
-      icon: icons[service.id],
-      submenu: baseItems,
-    };
-  });
+  const autoStart = getAutoStartSettings();
+  const pathIncludesServices = await pathManager.areServicePathsInPath();
 
   const menuTemplate = [
     {
-      label: `Wemp ${version}`,
+      label: `${app.getName()} ${version}`,
       icon: icons.wemp,
       submenu: [
         {
           label: 'Open Services Folder',
           icon: icons.folder,
-          click: () => shell.openPath(serviceManager.servicesPath),
+          click: () => {
+            shell.openPath(config.paths.services);
+          },
         },
         {
           label: 'View Error Logs',
           icon: icons.log,
-          click: () => shell.openPath(logger.logPath),
+          click: () => {
+            shell.openPath(config.paths.logs);
+          },
         },
         { type: 'separator' },
         {
           label: 'Start with Windows',
           type: 'checkbox',
-          checked: app.isPackaged ? settingsManager.getAutostart() : false,
-          enabled: app.isPackaged,
-          click: toggleAutostart,
+          checked: autoStart.openAtLogin,
+          enabled: autoStart.canToggle,
+          click: () => {
+            const updateExe = path.resolve(path.dirname(process.execPath), '..', 'Update.exe');
+            const exeName = path.basename(process.execPath);
+
+            app.setLoginItemSettings({
+              openAtLogin: !autoStart.openAtLogin,
+              path: updateExe,
+              args: ['--processStart', exeName],
+            });
+          },
         },
         {
-          label: 'Show Ready Notification',
+          label: 'Add Services to PATH',
           type: 'checkbox',
-          checked: settingsManager.getShowReadyNotification(),
-          click: toggleReadyNotification,
+          checked: pathIncludesServices,
+          click: async () => {
+            try {
+              await pathManager.toggleServicePathsInPath();
+            } catch (error) {
+              logger.error('Failed to toggle PATH:', error);
+              dialog.showErrorBox('PATH Update Failed', error.message);
+            }
+          },
         },
-        { type: 'separator' },
       ],
     },
     { type: 'separator' },
-    ...serviceMenuItems,
+
+    // Dynamic service controls
+    ...Object.keys(config.services).map(serviceId => {
+      const service = config.services[serviceId];
+      const isRunning = status[serviceId];
+      const serviceIcon = icons[serviceId];
+      const version = serviceManager.versionManager?.getDisplayVersion(serviceId) || '';
+
+      const headerItems = [
+        { label: `${service.name} ${version}`, icon: serviceIcon, enabled: false },
+        { type: 'separator' },
+      ];
+
+      const configItems = [
+        {
+          label: 'Edit Configuration',
+          icon: icons.settings,
+          click: () =>
+            shell.openPath(path.join(config.paths.services, serviceId, service.configFile)),
+        },
+        {
+          label: 'Open Folder',
+          icon: icons.folder,
+          click: () => shell.openPath(path.join(config.paths.services, serviceId)),
+        },
+      ];
+
+      if (serviceId === 'phpmyadmin') {
+        return {
+          label: service.name,
+          icon: serviceIcon,
+          submenu: [
+            ...headerItems,
+            {
+              label: 'Open in Browser',
+              icon: icons.web,
+              enabled: status.nginx && status.php,
+              click: () => shell.openExternal(service.url),
+            },
+            { type: 'separator' },
+            ...configItems,
+          ],
+        };
+      }
+
+      const createServiceAction = (label, action, iconKey, enabledCondition) => ({
+        label,
+        icon: icons[iconKey],
+        enabled: enabledCondition,
+        click: async () => {
+          try {
+            await serviceManager[`${action}Service`](serviceId);
+          } catch (error) {
+            logger.error(`Failed to ${action} ${service.name}:`, error);
+            dialog.showErrorBox(`${label} Error`, error.message);
+          }
+        },
+      });
+
+      return {
+        label: service.name,
+        icon: serviceIcon,
+        submenu: [
+          ...headerItems,
+          createServiceAction('Start', 'start', 'play', !isRunning),
+          createServiceAction('Restart', 'restart', 'restart', isRunning),
+          createServiceAction('Stop', 'stop', 'shutdown', isRunning),
+          { type: 'separator' },
+          ...configItems,
+        ],
+      };
+    }),
     { type: 'separator' },
     {
       label: 'Quit Wemp',
@@ -212,11 +217,41 @@ export async function createMenu() {
     },
   ];
 
-  // Create the menu and configure the system tray
   menu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(menu);
-  tray.setToolTip('Wemp - Click to manage services');
-  tray.on('click', () => tray.popUpContextMenu());
 }
 
-export { menu, tray };
+/**
+ * Updates service menu item states based on current service status
+ * Called when services start or stop to reflect current state
+ */
+function updateServiceMenuItems() {
+  if (!menu) return;
+
+  const status = serviceManager.getStatus();
+  let serviceIndex = 2; // Skip main menu and separator
+
+  // Update enabled state for each service's actions
+  Object.keys(config.services).forEach(serviceId => {
+    const menuItem = menu.items[serviceIndex++];
+    if (!menuItem?.submenu) return;
+
+    const isRunning = status[serviceId];
+    const submenuItems = menuItem.submenu.items;
+
+    submenuItems.forEach(item => {
+      if (serviceId === 'phpmyadmin') {
+        // phpMyAdmin requires nginx and PHP to be running
+        if (item.label === 'Open in Browser') {
+          item.enabled = status.nginx && status.php;
+        }
+      } else {
+        // Standard services can be started/stopped/restarted
+        if (item.label === 'Start') item.enabled = !isRunning;
+        else if (item.label === 'Stop' || item.label === 'Restart') item.enabled = isRunning;
+      }
+    });
+  });
+}
+
+export { tray };

@@ -1,407 +1,223 @@
-import { createHash } from 'node:crypto';
-import { exec } from 'node:child_process';
-import fs from 'node:fs';
+import { EventEmitter } from 'node:events';
 import path from 'node:path';
-import { promisify } from 'node:util';
 
 import { dialog } from 'electron';
-import settings from 'electron-settings';
-import semverGt from 'semver/functions/gt';
 
+import { ConfigWatcher } from './config-watcher.js';
+import { ProcessManager } from './process-manager.js';
+import { ServiceInstaller } from './service-installer.js';
+import { VersionManager } from './version-manager.js';
 import config from '../config.js';
-import { createService } from '../services/index.js';
-import { downloadService } from './downloader.js';
 import logger from './logger.js';
-import { updateServiceMenuItems } from './menu.js';
-import {
-  showReadyNotification,
-  showRestartFailedNotification,
-  showServiceCrashedNotification,
-  showServiceErrorNotification,
-  showServiceInstallNotification,
-} from './notifications.js';
-import { settingsManager } from './settings-manager.js';
 
 /**
- * Service manager - handles lifecycle of all services
+ * Orchestrates service management through dedicated modules
+ *
+ * Coordinates version checking, installation, process management, and configuration monitoring.
+ * Extends EventEmitter to notify about service state changes.
+ *
+ * @fires ServiceManager#service-started
+ * @fires ServiceManager#service-stopped
  */
-export class ServiceManager {
-  /**
-   * Create a new ServiceManager instance
-   */
+class ServiceManager extends EventEmitter {
   constructor() {
-    this.services = new Map();
-    this.configWatchers = new Map();
-    this.configHashes = new Map();
-    this.restartCooldowns = new Map();
-    this.debounceTimeouts = new Map();
-    this.servicesPath = config.paths.services;
+    super();
+
+    /** @type {VersionManager} Manages service versions and updates */
+    this.versionManager = new VersionManager();
+    /** @type {ProcessManager} Manages service processes */
+    this.processManager = new ProcessManager();
+    /** @type {ConfigWatcher} Monitors configuration file changes */
+    this.configWatcher = new ConfigWatcher();
+    /** @type {ServiceInstaller} Handles service installation */
+    this.serviceInstaller = new ServiceInstaller(this.versionManager);
+    /** @type {Set<string>} Track services currently being restarted */
+    this.restartingServices = new Set();
+
+    this.processManager.on('process-started', serviceId => {
+      this.emit('service-started', serviceId);
+    });
+
+    this.processManager.on('process-stopped', serviceId => {
+      this.emit('service-stopped', serviceId);
+    });
+
+    this.configWatcher.on('config-changed', async serviceId => {
+      // Avoid race conditions with manual restart operations
+      if (this.restartingServices.has(serviceId)) {
+        logger.warn(`${serviceId} is already being restarted, skipping config change restart`);
+        return;
+      }
+
+      const serviceName = config.services[serviceId]?.name || serviceId;
+      logger.info(`${serviceName} configuration changed, restarting service`);
+
+      try {
+        await this.restartService(serviceId);
+      } catch (error) {
+        // Provide context-specific error messages
+        const errorType = error.message.includes('configuration is invalid')
+          ? 'configuration validation failed, keeping current configuration'
+          : `failed to restart: ${error.message}`;
+        logger.error(`${serviceName} ${errorType}`);
+      }
+    });
   }
 
   /**
-   * Initialize service manager
+   * Initializes service manager and prepares services for startup
+   * @returns {Promise<void>}
    */
   async init() {
-    await this.ensureServicesPath();
+    await this.serviceInstaller.ensureServicesPath();
 
-    for (const serviceConfig of config.services) {
-      await this.initializeService(serviceConfig);
-    }
-  }
-
-  /**
-   * Ensure services path exists and is selected
-   */
-  async ensureServicesPath() {
-    const needsPath = !settings.hasSync('path') || !fs.existsSync(this.servicesPath);
-
-    if (!needsPath) return;
-
-    // Create default directory first and remember it for potential cleanup
-    const defaultPath = this.servicesPath;
-    fs.mkdirSync(defaultPath, { recursive: true });
+    // Clean up any leftover temp directory before starting
+    this.serviceInstaller.cleanupTempDirectory();
 
     try {
-      // Ask user to confirm or change the services directory
-      await this.selectServicesPath();
+      // Check for available updates first (fast, just API call)
+      try {
+        await this.versionManager.checkForUpdates();
 
-      // If the user chose a different path, clean up the initially created default folder
-      if (this.servicesPath !== defaultPath) {
-        this.cleanupEmptyDirectory(defaultPath);
-      }
-    } catch {
-      // User cancelled - clean up and exit
-      this.cleanupEmptyDirectory(defaultPath);
-      throw new Error('User canceled directory selection');
-    }
-  }
-
-  /**
-   * Prompt user to select services directory
-   * @throws {Error} If user cancels directory selection
-   */
-  async selectServicesPath() {
-    const result = await dialog.showOpenDialog({
-      title: 'Choose Services Folder',
-      defaultPath: this.servicesPath,
-      properties: ['openDirectory', 'createDirectory'],
-    });
-
-    if (result.canceled || !result.filePaths?.length) {
-      throw new Error('User canceled directory selection');
-    }
-
-    this.servicesPath = result.filePaths[0];
-    settings.setSync('path', this.servicesPath);
-  }
-
-  /**
-   * Initialize a single service
-   */
-  async initializeService(serviceConfig) {
-    if (serviceConfig.executable) {
-      const service = createService(serviceConfig);
-      this.services.set(serviceConfig.id, service);
-
-      // Kill any existing processes to ensure clean start
-      if (await service.isProcessRunning()) {
-        await this.forceKillProcess(serviceConfig.executable);
-      }
-    }
-
-    await this.ensureServiceUpToDate(serviceConfig);
-
-    // Set up process monitoring for executable services
-    if (serviceConfig.executable) {
-      this.setupExitCallback(serviceConfig.id);
-    }
-  }
-
-  /**
-   * Ensure service is up to date, install if missing or outdated
-   * @param {Object} serviceConfig - Service configuration object from config.services
-   */
-  async ensureServiceUpToDate(serviceConfig) {
-    const installedVersion = settings.getSync(`version.${serviceConfig.id}`);
-    const servicePath = path.join(this.servicesPath, serviceConfig.id);
-    const serviceExists = fs.existsSync(servicePath);
-
-    const needsUpdate =
-      !installedVersion || !serviceExists || semverGt(serviceConfig.version, installedVersion);
-
-    if (needsUpdate) {
-      await this.updateService(serviceConfig, !serviceExists);
-    }
-  }
-
-  /**
-   * Update or install a service
-   * @param {Object} serviceConfig - Service configuration object
-   * @param {boolean} isFirstInstall - Whether this is a fresh install or update
-   * @throws {Error} If download, installation, or upgrade fails
-   */
-  async updateService(serviceConfig, isFirstInstall) {
-    let notification;
-    try {
-      const service = this.services.get(serviceConfig.id);
-
-      notification = showServiceInstallNotification(
-        serviceConfig.name,
-        serviceConfig.version,
-        isFirstInstall
-      );
-
-      if (service && !isFirstInstall) {
-        await service.stop();
+        if (this.versionManager.hasAvailableUpdates()) {
+          logger.info('Service updates available, installing before startup');
+          await this.installPendingUpdates();
+        }
+      } catch (error) {
+        logger.warn('Failed to check for updates on startup', error);
       }
 
-      await downloadService(serviceConfig, !isFirstInstall);
-
-      if (isFirstInstall && service?.install) {
-        await service.install();
-      } else if (!isFirstInstall && serviceConfig.id === 'mariadb') {
-        service.needsUpgrade = true;
-      }
-
-      settings.setSync(`version.${serviceConfig.id}`, serviceConfig.version);
-    } catch (error) {
-      logger.error(`Failed to update ${serviceConfig.name}`, error);
-      showServiceErrorNotification(serviceConfig.name, isFirstInstall);
-      throw error;
+      // Ensure services are installed
+      await this.serviceInstaller.ensureServicesInstalled();
     } finally {
-      if (notification) {
-        notification.close();
+      // Clean up temp directory after all operations
+      this.serviceInstaller.cleanupTempDirectory();
+    }
+  }
+
+  /**
+   * Installs all pending service updates with retry on file locking
+   * @returns {Promise<void>}
+   * @private
+   */
+  async installPendingUpdates() {
+    const servicesToUpdate = this.versionManager.getServicesNeedingUpdate();
+
+    for (const serviceId of servicesToUpdate) {
+      const serviceName = config.services[serviceId]?.name || serviceId;
+      let success = false;
+
+      // Retry loop for file locking issues
+      while (!success) {
+        try {
+          // Stop the service before updating
+          await this.stopService(serviceId);
+
+          await this.versionManager.updateService(serviceId);
+          success = true;
+        } catch (error) {
+          logger.warn(`Failed to install update for ${serviceName}`, error);
+
+          // Show dialog asking user what to do
+          const response = await dialog.showMessageBox({
+            type: 'warning',
+            title: `Cannot Update ${serviceName}`,
+            message: `Failed to update ${serviceName}.`,
+            detail: `This may be because the service or related files are still in use.\n\nTry closing any applications or processes using ${serviceName} and then retry.\n\nError: ${error.message}`,
+            buttons: ['Retry', 'Skip This Update'],
+            defaultId: 0,
+            cancelId: 1,
+          });
+
+          // User chose to skip
+          if (response.response === 1) {
+            logger.info(`Skipped update for ${serviceName}`);
+            success = true;
+          }
+        }
       }
     }
   }
 
   /**
-   * Start all services
+   * Starts all configured services
+   * @returns {Promise<void>}
    */
   async startAll() {
-    const promises = [...this.services.keys()].map(id =>
-      this.startService(id).catch(error => logger.error(`Failed to start service ${id}`, error))
-    );
-    await Promise.allSettled(promises);
-  }
+    // Skip phpMyAdmin as it's not a process - it runs via nginx/php
+    const services = Object.keys(config.services).filter(id => id !== 'phpmyadmin');
 
-  /**
-   * Show ready notification if enabled
-   */
-  showReadyNotificationIfEnabled() {
-    if (settingsManager.getShowReadyNotification()) {
-      showReadyNotification();
+    for (const serviceId of services) {
+      try {
+        await this.startService(serviceId);
+      } catch (error) {
+        logger.error(`Failed to start ${serviceId}`, error);
+      }
     }
   }
 
   /**
-   * Stop all services and cleanup
+   * Stops all running services
+   * @returns {Promise<void>}
    */
   async stopAll() {
-    const promises = [...this.services.keys()].map(id =>
-      this.stopService(id).catch(error => logger.error(`Failed to stop service ${id}`, error))
-    );
-    await Promise.allSettled(promises);
+    this.configWatcher.removeAllWatchers();
+    return this.processManager.stopAll();
   }
 
   /**
-   * Start a specific service by ID
-   * @param {string} id - Service identifier
+   * Starts a specific service and sets up config monitoring
+   * @param {string} serviceId - Service identifier
+   * @returns {Promise<void>}
    */
-  async startService(id) {
-    const service = this.services.get(id);
-    if (!service) return;
+  async startService(serviceId) {
+    // Ensure MariaDB is initialized before starting
+    if (serviceId === 'mariadb') {
+      await this.serviceInstaller.initializeMariaDB();
+    }
 
-    await service.start();
-    this.setupExitCallback(id);
-    this.setupConfigWatcher(id);
-    updateServiceMenuItems(id);
+    const result = await this.processManager.startService(serviceId);
+    const servicePath = path.join(this.serviceInstaller.getServicesPath(), serviceId);
+    this.configWatcher.setupWatcher(serviceId, servicePath);
+    return result;
   }
 
   /**
-   * Stop a specific service by ID
-   * @param {string} id - Service identifier
+   * Stops a specific service and removes config monitoring
+   * @param {string} serviceId - Service identifier
+   * @returns {Promise<void>}
    */
-  async stopService(id) {
-    const service = this.services.get(id);
-    if (!service) return;
-
-    await service.stop();
-    this.cleanupConfigWatcher(id);
-    updateServiceMenuItems(id);
+  async stopService(serviceId) {
+    this.configWatcher.removeWatcher(serviceId);
+    return this.processManager.stopService(serviceId);
   }
 
   /**
-   * Restart a specific service by ID
-   * @param {string} id - Service identifier
+   * Restarts a specific service
+   * @param {string} serviceId - Service identifier
+   * @returns {Promise<void>}
    */
-  async restartService(id) {
-    const service = this.services.get(id);
-    if (!service) return;
+  async restartService(serviceId) {
+    // Prevent concurrent restart operations
+    if (this.restartingServices.has(serviceId)) {
+      throw new Error(`${serviceId} is already being restarted`);
+    }
+
+    this.restartingServices.add(serviceId);
     try {
-      await service.restart();
-    } catch (error) {
-      logger.error(`Failed to restart ${id}`, error);
-      showRestartFailedNotification(service.name, error.message);
+      await this.stopService(serviceId);
+      await this.startService(serviceId);
     } finally {
-      updateServiceMenuItems(id);
+      this.restartingServices.delete(serviceId);
     }
   }
 
   /**
-   * Get the running status of a service
-   * @param {string} id - Service identifier
-   * @returns {boolean}
+   * Gets current status of all services
+   * @returns {Object} Service status map
    */
-  isServiceRunning(id) {
-    const service = this.services.get(id);
-    return service ? service.isRunning() : false;
-  }
-
-  /**
-   * Setup configuration file watcher for a specific service
-   */
-  setupConfigWatcher(serviceId) {
-    const serviceConfig = config.services.find(s => s.id === serviceId);
-    if (!serviceConfig?.configFile) return;
-
-    const configPath = path.join(this.servicesPath, serviceId, serviceConfig.configFile);
-    if (!fs.existsSync(configPath)) return;
-
-    const initialHash = this.getFileHash(configPath);
-    if (initialHash) {
-      this.configHashes.set(serviceId, initialHash);
-    }
-
-    const watcher = fs.watch(configPath, () => {
-      clearTimeout(this.debounceTimeouts.get(serviceId));
-      this.debounceTimeouts.set(
-        serviceId,
-        setTimeout(() => this.handleConfigChange(serviceId, configPath), config.watcher.debounce)
-      );
-    });
-
-    this.configWatchers.set(serviceId, watcher);
-  }
-
-  /**
-   * Clean up config watcher for a specific service
-   */
-  cleanupConfigWatcher(serviceId) {
-    const watcher = this.configWatchers.get(serviceId);
-    if (watcher) {
-      watcher.close();
-      this.configWatchers.delete(serviceId);
-    }
-
-    const timeout = this.debounceTimeouts.get(serviceId);
-    if (timeout) {
-      clearTimeout(timeout);
-      this.debounceTimeouts.delete(serviceId);
-    }
-
-    this.configHashes.delete(serviceId);
-    this.restartCooldowns.delete(serviceId);
-  }
-
-  /**
-   * Handle configuration file changes with cooldown and content verification
-   * @param {string} serviceId - Service identifier whose config changed
-   * @param {string} configPath - Full path to the changed configuration file
-   */
-  async handleConfigChange(serviceId, configPath) {
-    const now = Date.now();
-    const lastRestart = this.restartCooldowns.get(serviceId) || 0;
-
-    // Prevent rapid restarts within cooldown period
-    if (now - lastRestart < config.watcher.restartCooldown) return;
-
-    const currentHash = this.getFileHash(configPath);
-    const previousHash = this.configHashes.get(serviceId);
-
-    // Only restart if file content actually changed (prevents false positives)
-    if (!currentHash || currentHash === previousHash) return;
-
-    this.configHashes.set(serviceId, currentHash);
-    this.restartCooldowns.set(serviceId, now);
-
-    // Only restart if service is currently running
-    if (this.isServiceRunning(serviceId)) {
-      await this.restartService(serviceId);
-    }
-  }
-
-  /**
-   * Set up exit callback for a service process
-   * @param {string} id - Service identifier
-   */
-  setupExitCallback(id) {
-    const service = this.services.get(id);
-    if (service?.process) {
-      service.process.setUnexpectedExitCallback((code, signal) => {
-        this.handleUnexpectedExit(id, code, signal);
-      });
-    }
-  }
-
-  /**
-   * Handle unexpected service exit - log and notify user
-   * @param {string} serviceId - Service identifier that crashed
-   * @param {number} code - Exit code from the process
-   * @param {string} signal - Signal that terminated the process
-   */
-  handleUnexpectedExit(serviceId, code, signal) {
-    logger.error(
-      `Service ${serviceId} crashed unexpectedly (exit code: ${code}, signal: ${signal})`
-    );
-    updateServiceMenuItems(serviceId);
-
-    const service = this.services.get(serviceId);
-    if (service) {
-      showServiceCrashedNotification(service.name);
-    }
-  }
-
-  /**
-   * Force kill a process by executable name
-   * @param {string} executable - Executable name to kill
-   */
-  async forceKillProcess(executable) {
-    try {
-      const execute = promisify(exec);
-      await execute(`taskkill /F /T /IM "${executable}" 2>nul`);
-    } catch {
-      // Process not found or already stopped - this is fine
-    }
-  }
-
-  /**
-   * Calculate hash of file content
-   * @param {string} filePath
-   * @returns {string|null}
-   */
-  getFileHash(filePath) {
-    try {
-      const content = fs.readFileSync(filePath, 'utf8');
-      return createHash('md5').update(content).digest('hex');
-    } catch (error) {
-      logger.error(`Failed to read file for hashing: ${filePath}`, error);
-      return null;
-    }
-  }
-
-  /**
-   * Clean up empty directory safely
-   */
-  cleanupEmptyDirectory(dirPath) {
-    try {
-      const files = fs.readdirSync(dirPath);
-      if (files.length === 0) {
-        fs.rmdirSync(dirPath);
-      }
-    } catch {
-      // Ignore cleanup errors
-    }
+  getStatus() {
+    return this.processManager.getProcessStatus();
   }
 }
 
