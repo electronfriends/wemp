@@ -40,5 +40,6 @@
     "globals": "^16.4.0",
     "prettier": "^3.6.2",
     "vite": "^7.1.11"
-  }
+  },
+  "packageManager": "yarn@4.10.3"
 }
