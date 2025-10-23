@@ -44,32 +44,30 @@ Manage everything from the system tray by clicking the Wemp icon.
 
 ## FAQs
 
-### Will uninstalling Wemp delete the services?
+### Will uninstalling Wemp delete my services and data?
 
-No. Uninstalling Wemp only removes the application itself. All services, configurations, and your web files remain completely intact and in their original location.
+No. Uninstalling Wemp only removes the application itself. Your services, all configurations, databases, and web files remain completely intact in their installation folder. This allows you to:
+
+- Reinstall Wemp without losing any data
+- Manually manage your services if needed
+- Keep your development environment even without Wemp
+
+If you want to completely remove everything, you'll need to manually delete the services folder (default: `C:\Wemp`) after uninstalling the application.
 
 ### How can I use PHP, MariaDB, and Nginx from the command line?
 
-To use these services from the command line, you need to add them to your PATH environment variable manually:
+To use these services from the command line, you can easily add them to your PATH:
 
-1. Right-click the **Start button** and select **System**
-2. Click **Advanced system settings** (on the right side)
-3. In the System Properties window, click **Environment Variables**
-4. Under "User variables", find and select **Path**, then click **Edit**
-5. Click **New** and add each of these paths:
-   - `C:\Wemp\php`
-   - `C:\Wemp\mariadb\bin`
-   - `C:\Wemp\nginx`
-6. Click **OK** to close all windows
-7. Restart your terminal/command prompt
+1. Click the **Wemp** icon in the system tray
+2. Hover over **Wemp** in the menu
+3. Click **Add Services to PATH**
+4. Restart your terminal for the changes to take effect
 
 After this, you can use commands like `php -v`, `mysql -u root`, and `nginx -t` from any terminal.
 
-Note: If you installed Wemp in a different location, replace `C:\Wemp` with your chosen installation path.
-
 ### Can I use a specific PHP version?
 
-No, Wemp is designed to provide the latest stable versions of all services for optimal security and performance. The application automatically manages updates to ensure you're always running the most recent supported versions of PHP, MariaDB, and Nginx.
+No, Wemp is designed to work as a complete, tested stack with the latest stable versions of all services. Using different PHP versions would break compatibility with phpMyAdmin and other integrated components. The application automatically manages updates to ensure you're always running secure, compatible versions of PHP, MariaDB, and Nginx that work together seamlessly.
 
 ### Why does the tray icon move to the hidden area after updating?
 
