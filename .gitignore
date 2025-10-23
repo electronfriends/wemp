@@ -19,6 +19,3 @@ node_modules/
 # Build outputs
 .vite/
 out/
-
-# Yarn
-.yarn/
