@@ -28,13 +28,23 @@ jobs:
       - name: Check if tag exists
         id: check_tag
         run: |
-          echo "exists=$(git ls-remote --tags origin "v${{ steps.package_version.outputs.version }}" | wc -l)" >> $GITHUB_OUTPUT
+          if git ls-remote --tags origin | findstr /C:"refs/tags/v${{ steps.package_version.outputs.version }}" >nul; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+        shell: bash
+
+      - name: Skip release
+        if: steps.check_tag.outputs.exists == 'true'
+        run: echo "::notice::Release v${{ steps.package_version.outputs.version }} already exists, skipping build and publish"
 
       - name: Install dependencies
+        if: steps.check_tag.outputs.exists == 'false'
         run: yarn install
 
       - name: Publish app
-        if: steps.check_tag.outputs.exists == '0'
+        if: steps.check_tag.outputs.exists == 'false'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: yarn run publish
