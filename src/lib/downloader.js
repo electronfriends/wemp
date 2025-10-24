@@ -235,6 +235,9 @@ function modifyNginxConfig(tempPath) {
     );
   }
 
+  // Enable directory listing
+  configContent = configContent.replace(/(sendfile\s+on;)/, '$1\n    autoindex       on;');
+
   // Add index.php to the index directive in the main location / block
   configContent = configContent.replace(
     /(location\s+\/\s+\{[^}]*index\s+)(index\.html\s+index\.htm;)/s,
