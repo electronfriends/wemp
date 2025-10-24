@@ -162,7 +162,7 @@ class ServiceManager extends EventEmitter {
    */
   async stopAll() {
     this.configWatcher.removeAllWatchers();
-    return this.processManager.stopAll();
+    return this.processManager.stopAllProcesses();
   }
 
   /**

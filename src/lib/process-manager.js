@@ -495,12 +495,4 @@ export class ProcessManager extends EventEmitter {
       }
     }
   }
-
-  /**
-   * Stops all running processes
-   * @returns {Promise<void>}
-   */
-  stopAll() {
-    return this.stopAllProcesses();
-  }
 }
