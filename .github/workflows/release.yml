@@ -2,7 +2,8 @@ name: Release app
 
 on:
   push:
-    branches: [main]
+    branches:
+      - main
 
 jobs:
   code-quality:
@@ -13,13 +14,13 @@ jobs:
     runs-on: windows-latest
     steps:
       - name: GitHub checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22'
-          cache: 'yarn'
+          node-version: 24
+          cache: yarn
 
       - name: Get version
         id: package_version

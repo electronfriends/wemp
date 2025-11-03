@@ -2,7 +2,8 @@ name: Code Quality
 
 on:
   pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_call:
 
 jobs:
@@ -11,13 +12,13 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
-          node-version: '22'
-          cache: 'yarn'
+          node-version: 24
+          cache: yarn
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
