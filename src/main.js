@@ -6,6 +6,9 @@ import { createMenu, tray } from './lib/menu.js';
 import logger from './lib/logger.js';
 import { serviceManager } from './lib/service-manager.js';
 
+// Set the application user model ID
+app.setAppUserModelId('com.squirrel.wemp.Wemp');
+
 // Handle Squirrel events and single instance lock
 if (squirrelStartup || !app.requestSingleInstanceLock()) app.quit();
 
