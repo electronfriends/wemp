@@ -31,8 +31,6 @@ class ServiceManager extends EventEmitter {
     this.configWatcher = new ConfigWatcher();
     /** @type {ServiceInstaller} Handles service installation */
     this.serviceInstaller = new ServiceInstaller(this.versionManager);
-    /** @type {Set<string>} Track services currently being restarted */
-    this.restartingServices = new Set();
 
     this.processManager.on('process-started', serviceId => {
       this.emit('service-started', serviceId);
@@ -43,12 +41,6 @@ class ServiceManager extends EventEmitter {
     });
 
     this.configWatcher.on('config-changed', async serviceId => {
-      // Avoid race conditions with manual restart operations
-      if (this.restartingServices.has(serviceId)) {
-        logger.warn(`${serviceId} is already being restarted, skipping config change restart`);
-        return;
-      }
-
       const serviceName = config.services[serviceId]?.name || serviceId;
       logger.info(`${serviceName} configuration changed, restarting service`);
 
@@ -198,18 +190,8 @@ class ServiceManager extends EventEmitter {
    * @returns {Promise<void>}
    */
   async restartService(serviceId) {
-    // Prevent concurrent restart operations
-    if (this.restartingServices.has(serviceId)) {
-      throw new Error(`${serviceId} is already being restarted`);
-    }
-
-    this.restartingServices.add(serviceId);
-    try {
-      await this.stopService(serviceId);
-      await this.startService(serviceId);
-    } finally {
-      this.restartingServices.delete(serviceId);
-    }
+    const servicePath = path.join(this.serviceInstaller.getServicesPath(), serviceId);
+    await this.processManager.restartProcess(serviceId, servicePath);
   }
 
   /**
