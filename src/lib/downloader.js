@@ -23,8 +23,11 @@ export async function downloadService(service) {
   try {
     fs.mkdirSync(tempPath, { recursive: true });
 
-    // Download and extract package
+    // Download and validate package
     const buffer = await fetchPackage(service);
+    validateZipBuffer(buffer, service);
+
+    // Extract to temp directory
     await extractZipBuffer(buffer, tempPath);
 
     // Apply config modifications only on first install to preserve user customizations
@@ -32,6 +35,7 @@ export async function downloadService(service) {
       await modifyServiceConfigs(service, tempPath, servicePath);
     }
 
+    // Atomically replace service directory after successful extraction
     installExtractedFiles(tempPath, servicePath, service);
 
     logger.info(`Downloaded and extracted ${service.name} ${service.version}`);
@@ -65,7 +69,64 @@ async function fetchPackage(service) {
     throw new Error(`HTTP ${response.status}: ${response.statusText}`);
   }
 
+  const contentLength = response.headers.get('content-length');
+  if (contentLength) {
+    logger.info(
+      `Downloading ${service.name}: ${(parseInt(contentLength) / 1024 / 1024).toFixed(2)} MB`
+    );
+  }
+
   return Buffer.from(await response.arrayBuffer());
+}
+
+/**
+ * Validates ZIP buffer integrity before extraction
+ * @param {Buffer} buffer - ZIP file data
+ * @param {Object} service - Service configuration
+ * @throws {Error} If validation fails
+ * @private
+ */
+function validateZipBuffer(buffer, service) {
+  // Check buffer is not empty
+  if (!buffer || buffer.length === 0) {
+    throw new Error('Downloaded file is empty');
+  }
+
+  // Check minimum size (ZIP files have minimum structure overhead)
+  if (buffer.length < 22) {
+    throw new Error('Downloaded file is too small to be a valid ZIP archive');
+  }
+
+  // Validate ZIP magic number (PK\x03\x04 at start)
+  const zipMagic = buffer.subarray(0, 4);
+  if (
+    zipMagic[0] !== 0x50 ||
+    zipMagic[1] !== 0x4b ||
+    zipMagic[2] !== 0x03 ||
+    zipMagic[3] !== 0x04
+  ) {
+    throw new Error('Downloaded file is not a valid ZIP archive (invalid magic number)');
+  }
+
+  // Validate End of Central Directory signature (PK\x05\x06) exists near end
+  const endSignature = Buffer.from([0x50, 0x4b, 0x05, 0x06]);
+  let foundEndSignature = false;
+  // Search last 64KB for EOCD signature (ZIP spec allows comment up to 64KB)
+  const searchStart = Math.max(0, buffer.length - 65536);
+  for (let i = buffer.length - 22; i >= searchStart; i--) {
+    if (buffer.subarray(i, i + 4).equals(endSignature)) {
+      foundEndSignature = true;
+      break;
+    }
+  }
+
+  if (!foundEndSignature) {
+    throw new Error('Downloaded file appears to be corrupted (missing end signature)');
+  }
+
+  logger.info(
+    `Validated ${service.name} ZIP archive (${(buffer.length / 1024 / 1024).toFixed(2)} MB)`
+  );
 }
 
 /**
@@ -82,7 +143,7 @@ async function extractZipBuffer(buffer, servicePath) {
   try {
     fs.writeFileSync(tempZipPath, buffer);
 
-    // Use PowerShell to extract ZIP
+    // Use PowerShell to extract ZIP with error capture
     await new Promise((resolve, reject) => {
       const powershell = spawn(
         'powershell',
@@ -94,13 +155,43 @@ async function extractZipBuffer(buffer, servicePath) {
         { stdio: 'pipe', windowsHide: true }
       );
 
-      powershell.on('exit', code =>
-        code === 0 ? resolve() : reject(new Error(`PowerShell extraction failed with code ${code}`))
-      );
+      let stderr = '';
+      let stdout = '';
+      powershell.stderr?.on('data', data => {
+        stderr += data.toString();
+      });
+      powershell.stdout?.on('data', data => {
+        stdout += data.toString();
+      });
+
+      powershell.on('exit', code => {
+        if (code === 0) {
+          resolve();
+        } else {
+          const errorMsg = stderr || stdout || `PowerShell extraction failed with code ${code}`;
+          reject(new Error(errorMsg));
+        }
+      });
       powershell.on('error', reject);
     });
 
-    flattenIfNeeded(servicePath);
+    // Verify extraction completed successfully
+    const extractedSize = calculateDirectorySize(servicePath);
+    const expectedMinSize = buffer.length * 0.8; // Extracted should be at least 80% of compressed size
+
+    if (extractedSize === 0) {
+      throw new Error('Extraction failed - no files were extracted');
+    }
+
+    if (extractedSize < expectedMinSize) {
+      const extractedMB = (extractedSize / 1024 / 1024).toFixed(2);
+      const compressedMB = (buffer.length / 1024 / 1024).toFixed(2);
+      throw new Error(
+        `Extraction appears incomplete: only ${extractedMB} MB extracted from ${compressedMB} MB archive`
+      );
+    }
+
+    logger.info(`Successfully extracted ${(extractedSize / 1024 / 1024).toFixed(2)} MB`);
   } finally {
     // Clean up temp ZIP file
     if (fs.existsSync(tempZipPath)) fs.unlinkSync(tempZipPath);
@@ -108,24 +199,34 @@ async function extractZipBuffer(buffer, servicePath) {
 }
 
 /**
- * Flattens extracted directory structure when single top-level folder exists
- * @param {string} servicePath - Path to extracted service
+ * Recursively calculates total size of all files in a directory
+ * @param {string} dirPath - Directory path to measure
+ * @returns {number} Total size in bytes
  * @private
  */
-function flattenIfNeeded(servicePath) {
-  const items = fs.readdirSync(servicePath).filter(item => item !== 'temp.zip');
-  if (items.length !== 1) return;
+function calculateDirectorySize(dirPath) {
+  let totalSize = 0;
 
-  const singleItem = path.join(servicePath, items[0]);
-  if (!fs.statSync(singleItem).isDirectory()) return;
+  try {
+    const items = fs.readdirSync(dirPath);
 
-  // Move nested folder contents up one level to avoid unnecessary nesting
-  for (const item of fs.readdirSync(singleItem)) {
-    fs.renameSync(path.join(singleItem, item), path.join(servicePath, item));
+    for (const item of items) {
+      if (item === 'temp.zip') continue; // Skip temp ZIP file
+
+      const itemPath = path.join(dirPath, item);
+      const stats = fs.statSync(itemPath);
+
+      if (stats.isDirectory()) {
+        totalSize += calculateDirectorySize(itemPath);
+      } else {
+        totalSize += stats.size;
+      }
+    }
+  } catch (error) {
+    logger.warn(`Failed to calculate size for ${dirPath}:`, error.message);
   }
 
-  // Remove the now-empty nested folder
-  fs.rmSync(singleItem, { recursive: true });
+  return totalSize;
 }
 
 /**
@@ -324,7 +425,6 @@ async function modifyPhpConfig(tempPath, finalPath) {
 
   // Configure OPcache
   const opcacheSettings = [
-    [/^;(zend_extension=opcache)$/gm, '$1'],
     [/^;(opcache\.enable\s*=\s*1)$/gm, '$1'],
     [/^;(opcache\.enable_cli\s*=\s*[01])$/gm, 'opcache.enable_cli=0'],
     [/^;(opcache\.validate_timestamps\s*=\s*1)$/gm, '$1'],
