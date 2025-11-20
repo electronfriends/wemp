@@ -48,7 +48,7 @@ export function showServiceInstalling(serviceName, version) {
  */
 export function showServiceUpdating(serviceName, version) {
   const notification = new Notification({
-    title: `Updating ${serviceName} ${version}`,
+    title: `Updating ${serviceName} to ${version}`,
     body: 'Downloading and extracting. This may take a moment...',
     silent: true,
     timeoutType: 'never',
