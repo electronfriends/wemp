@@ -88,6 +88,8 @@ Wemp doesn't handle folder moves automatically to prevent unexpected failures or
 
 Want to contribute? Here's how to set up the development environment:
 
+**Note**: The codebase is continuously updated to reference the latest service versions available at [https://electronfriends.org/api/wemp/versions.json](https://electronfriends.org/api/wemp/versions.json).
+
 1. Clone the repository:
 
    ```bash
