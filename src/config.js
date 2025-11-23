@@ -9,7 +9,6 @@ import settings from 'electron-settings';
 const config = {
   /**
    * Service configurations
-   * Each service defines its executable, config files, and runtime settings
    */
   services: {
     nginx: {
@@ -31,7 +30,7 @@ const config = {
       configFile: 'php.ini',
       processArgs: ['-b', '127.0.0.1:9000'],
       env: {
-        PHP_FCGI_MAX_REQUESTS: '0', // No request limit
+        PHP_FCGI_MAX_REQUESTS: '0',
       },
     },
     phpmyadmin: {
@@ -49,7 +48,7 @@ const config = {
     endpoints: {
       versions: '/versions.json',
     },
-    timeout: 10000, // 10 seconds
+    timeout: 10000,
   },
 
   /**
@@ -82,7 +81,7 @@ const config = {
    * Logger configuration
    */
   logger: {
-    maxLogSize: 5 * 1024 * 1024, // 5 MB
+    maxLogSize: 5 * 1024 * 1024,
     maxLogFiles: 3,
   },
 };
