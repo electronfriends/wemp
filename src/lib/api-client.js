@@ -3,7 +3,7 @@ import logger from './logger.js';
 
 /**
  * Retrieves latest service versions from remote API endpoint
- * @returns {Promise<Object|null>} Service versions object or null on failure
+ * @returns {Promise<Record<string, {version: string, downloadUrl: string}>|null>} Service versions object or null on failure
  */
 export async function fetchServiceVersions() {
   const apiUrl = `${config.api.baseUrl}${config.api.endpoints.versions}`;

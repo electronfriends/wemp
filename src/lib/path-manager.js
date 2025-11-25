@@ -5,11 +5,6 @@ import config from '../config.js';
 import logger from './logger.js';
 
 /**
- * Manages Windows PATH environment variable for service executables
- * Allows adding/removing service directories to user PATH for CLI access
- */
-
-/**
  * Executes a PowerShell command to modify user PATH
  * @param {string} command - PowerShell command to execute
  * @returns {Promise<string>} Command output
@@ -93,10 +88,9 @@ export function getServicePaths() {
   const servicesPath = config.paths.services;
   const paths = [];
 
-  // Add service executable directories
-  paths.push(path.join(servicesPath, 'nginx')); // nginx.exe
-  paths.push(path.join(servicesPath, 'mariadb', 'bin')); // mysqld.exe, mysql.exe, etc.
-  paths.push(path.join(servicesPath, 'php')); // php.exe, php-cgi.exe
+  paths.push(path.join(servicesPath, 'nginx'));
+  paths.push(path.join(servicesPath, 'mariadb', 'bin'));
+  paths.push(path.join(servicesPath, 'php'));
 
   return paths;
 }
@@ -133,7 +127,6 @@ export async function addServicePathsToPath() {
     servicePaths.forEach(servicePath => {
       if (!newPaths.some(p => p.toLowerCase() === servicePath.toLowerCase())) {
         newPaths.push(servicePath);
-        logger.info(`Adding to PATH: ${servicePath}`);
       }
     });
 

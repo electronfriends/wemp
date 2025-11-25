@@ -12,7 +12,8 @@ import logger from './logger.js';
  * Uses file watching and MD5 hashing to detect actual content changes in configuration files.
  * Emits events when configuration changes are detected to trigger service restarts.
  *
- * @fires ConfigWatcher#config-changed
+ * @fires ConfigWatcher#config-changed - Emitted when a service configuration file changes
+ * @extends EventEmitter
  */
 export class ConfigWatcher extends EventEmitter {
   constructor() {
@@ -38,7 +39,7 @@ export class ConfigWatcher extends EventEmitter {
       return;
     }
 
-    // Baseline for detecting actual content changes
+    // Store initial hash to detect actual content changes later
     const initialHash = this.getFileHash(configPath);
     this.hashes.set(serviceId, initialHash);
 
@@ -73,25 +74,26 @@ export class ConfigWatcher extends EventEmitter {
   }
 
   /**
-   * Handles configuration file changes
+   * Handles configuration file changes by comparing content hashes
    * @param {string} serviceId - Service identifier
    * @param {string} configPath - Path to configuration file
    * @private
    */
   handleConfigFileChange(serviceId, configPath) {
+    const previousHash = this.hashes.get(serviceId);
     const currentHash = this.getFileHash(configPath);
-    if (currentHash === this.hashes.get(serviceId)) return;
+
+    // Ignore filesystem events that didn't actually change content
+    if (currentHash === previousHash) return;
 
     this.hashes.set(serviceId, currentHash);
-
-    // Notify service manager to reload or restart
     this.emit('config-changed', serviceId);
   }
 
   /**
-   * Gets the MD5 hash of a file for change detection
+   * Computes MD5 hash of file contents for change detection
    * @param {string} filePath - Path to file
-   * @returns {string} MD5 hash
+   * @returns {string} MD5 hash or empty string on error
    * @private
    */
   getFileHash(filePath) {

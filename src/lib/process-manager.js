@@ -13,8 +13,9 @@ import * as notifications from './notifications.js';
  * Handles Windows-specific process management with proper cleanup and monitoring.
  * Extends EventEmitter to notify about process state changes.
  *
- * @fires ProcessManager#process-started
- * @fires ProcessManager#process-stopped
+ * @extends EventEmitter
+ * @fires ProcessManager#process-started - Emitted when a service process starts
+ * @fires ProcessManager#process-stopped - Emitted when a service process stops
  */
 export class ProcessManager extends EventEmitter {
   constructor() {
@@ -46,16 +47,16 @@ export class ProcessManager extends EventEmitter {
     const executablePath = this.getExecutablePath(serviceConfig, servicePath);
 
     if (!fs.existsSync(executablePath)) {
-      throw new Error(`${serviceConfig.name} is not installed. Please install services first.`);
+      const message = 'Not installed. Please select a version or install it.';
+      notifications.showServiceError(serviceConfig.name, message);
+      throw new Error(`${serviceConfig.name} is not installed`);
     }
 
-    // Prevent starting duplicate instances (e.g., from previous crashes or manual starts)
+    // Prevent duplicate processes (can happen after crash or manual start outside app)
     const isRunning = await this.isExecutableRunning(serviceConfig.executable);
     if (isRunning) {
-      const message = `is already running (possibly from a previous session or another instance)`;
-      logger.warn(`${serviceConfig.name} ${message}`);
-      notifications.showServiceError(serviceConfig.name, message);
-      throw new Error(`${serviceConfig.name} ${message}`);
+      logger.warn(`${serviceConfig.name} is already running (possibly from a previous session)`);
+      throw new Error(`${serviceConfig.name} is already running`);
     }
 
     const childProcess = spawn(executablePath, serviceConfig.processArgs || [], {
@@ -88,7 +89,7 @@ export class ProcessManager extends EventEmitter {
     this.stoppingServices.add(serviceId);
 
     try {
-      // MariaDB requires special shutdown via mysqladmin
+      // MariaDB requires graceful shutdown via mysqladmin, others use taskkill
       await (serviceId === 'mariadb'
         ? this.stopMariaDB(servicePath)
         : this.terminateProcess(serviceId));
@@ -120,7 +121,7 @@ export class ProcessManager extends EventEmitter {
 
     this.stoppingServices.add(restartKey);
     try {
-      // Validate nginx config before restarting
+      // Prevent breaking server with invalid nginx config
       if (serviceId === 'nginx') {
         await this.validateNginxConfig(servicePath);
       }
@@ -152,20 +153,20 @@ export class ProcessManager extends EventEmitter {
       let stderr = '';
       test.stderr.on('data', data => (stderr += data.toString()));
 
-      test.on('exit', code =>
-        code === 0
-          ? resolve()
-          : (logger.error(`Nginx configuration test failed:\n${stderr}`),
-            reject(
-              new Error(
-                'Nginx configuration is invalid, not restarting to prevent breaking the server'
-              )
-            ))
-      );
-
-      test.on('error', err => {
-        reject(err);
+      test.on('exit', code => {
+        if (code === 0) {
+          resolve();
+        } else {
+          logger.error(`Nginx configuration test failed:\n${stderr}`);
+          reject(
+            new Error(
+              'Nginx configuration is invalid, not restarting to prevent breaking the server'
+            )
+          );
+        }
       });
+
+      test.on('error', reject);
     });
   }
 
@@ -177,7 +178,7 @@ export class ProcessManager extends EventEmitter {
     this.isShuttingDown = true;
     const runningServices = Array.from(this.processes.keys());
 
-    // Stop services in reverse order with parallel execution
+    // Stop all services in parallel (no dependencies during shutdown)
     const stopPromises = runningServices.reverse().map(async serviceId => {
       try {
         const servicePath = path.join(config.paths.services, serviceId);
@@ -243,7 +244,7 @@ export class ProcessManager extends EventEmitter {
    */
   setupProcessHandlers(serviceId, childProcess) {
     const MAX_BUFFER = 10000;
-    const BUFFER_THRESHOLD = 9000; // Start trimming at 90% capacity
+    const BUFFER_THRESHOLD = 9000;
     const buffers = { stdout: '', stderr: '' };
 
     // Helper to handle stream output with buffer limits to prevent memory leaks
@@ -443,7 +444,6 @@ export class ProcessManager extends EventEmitter {
         const isRunning = lines.some(line =>
           line.toLowerCase().trim().startsWith(executableName.toLowerCase())
         );
-        logger.debug(`Checking if ${executableName} is running: ${isRunning}`);
         resolve(isRunning);
       });
 
@@ -479,20 +479,5 @@ export class ProcessManager extends EventEmitter {
    */
   restartService(serviceId) {
     return this.restartProcess(serviceId, path.join(config.paths.services, serviceId));
-  }
-
-  /**
-   * Starts all services
-   * @returns {Promise<void>}
-   */
-  async startAll() {
-    for (const serviceId of Object.keys(config.services)) {
-      if (serviceId === 'phpmyadmin') continue;
-      try {
-        await this.startService(serviceId);
-      } catch (error) {
-        logger.error(`Failed to start ${serviceId}:`, error);
-      }
-    }
   }
 }

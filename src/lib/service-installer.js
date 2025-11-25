@@ -7,7 +7,6 @@ import settings from 'electron-settings';
 
 import config from '../config.js';
 import logger from './logger.js';
-import * as notifications from './notifications.js';
 
 /**
  * Manages service installation and directory setup
@@ -16,37 +15,41 @@ import * as notifications from './notifications.js';
  * of missing services. Coordinates with version manager to determine what needs installation.
  */
 export class ServiceInstaller {
+  /**
+   * Creates a new ServiceInstaller instance
+   * @param {VersionManager} versionManager - Version manager for checking installation status
+   */
   constructor(versionManager) {
     /** @type {VersionManager} Version manager for checking installation status */
     this.versionManager = versionManager;
-    /** @type {string} Path to services directory */
-    this.servicesPath = config.paths.services;
   }
 
   /**
-   * Ensures the services directory exists and is properly configured
+   * Ensures the services directory exists and is properly configured.
+   * Prompts user to select a directory if not already configured.
    * @returns {Promise<void>}
    * @throws {Error} If user cancels directory selection
    */
   async ensureServicesPath() {
     // Skip dialog if path already configured and valid
-    if (settings.hasSync('path') && fs.existsSync(this.servicesPath)) {
+    if (settings.hasSync('path') && fs.existsSync(config.paths.services)) {
       return;
     }
 
-    // Create default path as starting point
-    const defaultPath = this.servicesPath;
+    // Create default path as starting point for folder picker
+    const defaultPath = config.paths.services;
     fs.mkdirSync(defaultPath, { recursive: true });
 
     try {
       await this.selectServicesPath();
       // Clean up default path if user chose a different location
-      if (this.servicesPath !== defaultPath) {
+      if (config.paths.services !== defaultPath) {
         await this.cleanupEmptyDirectory(defaultPath);
       }
-    } catch {
+    } catch (error) {
+      // User canceled directory selection
       await this.cleanupEmptyDirectory(defaultPath);
-      throw new Error('User canceled directory selection');
+      throw error;
     }
   }
 
@@ -67,7 +70,6 @@ export class ServiceInstaller {
       } catch (error) {
         const serviceName = config.services[serviceId]?.name || serviceId;
         logger.error(`Failed to install ${serviceName}:`, error);
-        notifications.showServiceError(serviceName, `Installation failed: ${error.message}`);
       }
     }
   }
@@ -91,7 +93,7 @@ export class ServiceInstaller {
    * @throws {Error} If initialization fails
    */
   async initializeMariaDB() {
-    const servicePath = path.join(this.servicesPath, 'mariadb');
+    const servicePath = path.join(config.paths.services, 'mariadb');
     const dataPath = path.join(servicePath, 'data');
     const installDbPath = path.join(servicePath, 'bin', 'mysql_install_db.exe');
 
@@ -127,7 +129,7 @@ export class ServiceInstaller {
   async selectServicesPath() {
     const result = await dialog.showOpenDialog({
       title: 'Choose Services Folder',
-      defaultPath: this.servicesPath,
+      defaultPath: config.paths.services,
       properties: ['openDirectory', 'createDirectory'],
     });
 
@@ -135,8 +137,7 @@ export class ServiceInstaller {
       throw new Error('User canceled directory selection');
     }
 
-    this.servicesPath = result.filePaths[0];
-    settings.setSync('path', this.servicesPath);
+    settings.setSync('path', result.filePaths[0]);
   }
 
   /**
@@ -178,22 +179,6 @@ export class ServiceInstaller {
   }
 
   /**
-   * Cleans up temporary download directory
-   * @private
-   */
-  cleanupTempDirectory() {
-    const tempPath = path.join(this.servicesPath, '.temp');
-    if (fs.existsSync(tempPath)) {
-      try {
-        fs.rmSync(tempPath, { recursive: true, force: true });
-        logger.info('Cleaned up temporary download directory');
-      } catch (error) {
-        logger.warn('Failed to cleanup temp directory:', error);
-      }
-    }
-  }
-
-  /**
    * Cleans up empty directories
    * @param {string} dirPath - Directory path to clean
    * @returns {Promise<void>}
@@ -208,13 +193,5 @@ export class ServiceInstaller {
     } catch (error) {
       logger.warn(`Failed to cleanup directory ${dirPath}:`, error);
     }
-  }
-
-  /**
-   * Gets the current services path
-   * @returns {string}
-   */
-  getServicesPath() {
-    return this.servicesPath;
   }
 }

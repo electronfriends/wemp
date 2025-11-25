@@ -3,12 +3,12 @@ import path from 'node:path';
 
 import { dialog } from 'electron';
 
+import config from '../config.js';
 import { ConfigWatcher } from './config-watcher.js';
+import logger from './logger.js';
 import { ProcessManager } from './process-manager.js';
 import { ServiceInstaller } from './service-installer.js';
 import { VersionManager } from './version-manager.js';
-import config from '../config.js';
-import logger from './logger.js';
 
 /**
  * Orchestrates service management through dedicated modules
@@ -16,8 +16,9 @@ import logger from './logger.js';
  * Coordinates version checking, installation, process management, and configuration monitoring.
  * Extends EventEmitter to notify about service state changes.
  *
- * @fires ServiceManager#service-started
- * @fires ServiceManager#service-stopped
+ * @extends EventEmitter
+ * @fires ServiceManager#service-started - Emitted when a service starts successfully
+ * @fires ServiceManager#service-stopped - Emitted when a service stops
  */
 class ServiceManager extends EventEmitter {
   constructor() {
@@ -63,28 +64,21 @@ class ServiceManager extends EventEmitter {
   async init() {
     await this.serviceInstaller.ensureServicesPath();
 
-    // Clean up any leftover temp directory before starting
-    this.serviceInstaller.cleanupTempDirectory();
-
     try {
-      // Check for available updates first (fast, just API call)
-      try {
-        await this.versionManager.checkForUpdates();
+      // Check for updates (quick API call only)
+      await this.versionManager.checkForUpdates();
 
-        if (this.versionManager.hasAvailableUpdates()) {
-          logger.info('Service updates available, installing before startup');
-          await this.installPendingUpdates();
-        }
-      } catch (error) {
-        logger.warn('Failed to check for updates on startup', error);
+      if (this.versionManager.hasAvailableUpdates()) {
+        logger.info('Service updates available, installing before startup');
+        await this.installPendingUpdates();
       }
-
-      // Ensure services are installed
-      await this.serviceInstaller.ensureServicesInstalled();
-    } finally {
-      // Clean up temp directory after all operations
-      this.serviceInstaller.cleanupTempDirectory();
+    } catch (error) {
+      // Non-fatal: continue with installed versions if update check fails
+      logger.warn('Failed to check for updates on startup', error);
     }
+
+    // Ensure all required services are installed
+    await this.serviceInstaller.ensureServicesInstalled();
   }
 
   /**
@@ -168,10 +162,46 @@ class ServiceManager extends EventEmitter {
       await this.serviceInstaller.initializeMariaDB();
     }
 
+    // Auto-fallback for multi-version services with no version selected
+    await this.ensureServiceVersionSelected(serviceId);
+
+    // Ensure junction is valid for multi-version services
+    this.versionManager.ensureJunction(serviceId);
+
     const result = await this.processManager.startService(serviceId);
-    const servicePath = path.join(this.serviceInstaller.getServicesPath(), serviceId);
+    const servicePath = path.join(config.paths.services, serviceId);
     this.configWatcher.setupWatcher(serviceId, servicePath);
     return result;
+  }
+
+  /**
+   * Ensures a version is selected for multi-version services, auto-selecting if needed
+   * @param {string} serviceId - Service identifier
+   * @returns {Promise<void>}
+   * @private
+   */
+  async ensureServiceVersionSelected(serviceId) {
+    const currentVersion = this.versionManager.getCurrentVersion(serviceId);
+    const serviceState = this.versionManager.serviceStates.get(serviceId);
+
+    // Only handle multi-version services with no version selected
+    if (currentVersion !== '0.0.0' || !serviceState?.multiVersion) {
+      return;
+    }
+
+    const availableVersions = serviceState.availableVersions || [];
+    if (availableVersions.length === 0) {
+      throw new Error(`${config.services[serviceId].name} has no available versions`);
+    }
+
+    // Select first non-deprecated version, or first version if all deprecated
+    const targetVersion =
+      availableVersions.find(v => !v.deprecated)?.version || availableVersions[0].version;
+
+    const serviceName = config.services[serviceId].name;
+    logger.info(`${serviceName}: No version selected, auto-selecting ${targetVersion}`);
+
+    await this.versionManager.switchServiceVersion(serviceId, targetVersion);
   }
 
   /**
@@ -190,7 +220,7 @@ class ServiceManager extends EventEmitter {
    * @returns {Promise<void>}
    */
   async restartService(serviceId) {
-    const servicePath = path.join(this.serviceInstaller.getServicesPath(), serviceId);
+    const servicePath = path.join(config.paths.services, serviceId);
     await this.processManager.restartProcess(serviceId, servicePath);
   }
 

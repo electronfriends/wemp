@@ -1,29 +1,29 @@
 import path from 'node:path';
 
 import { Menu, Tray, app, dialog, nativeImage, shell } from 'electron';
+import settings from 'electron-settings';
 
 import config from '../config.js';
 import logger from './logger.js';
+import * as notifications from './notifications.js';
 import * as pathManager from './path-manager.js';
 import { serviceManager } from './service-manager.js';
 
-import wempIcon from '../assets/wemp.png?asset';
-import playIcon from '../assets/circled-play.png?asset';
-import shutdownIcon from '../assets/shutdown.png?asset';
-import restartIcon from '../assets/restart.png?asset';
 import folderIcon from '../assets/folder.png?asset';
 import logIcon from '../assets/event-log.png?asset';
-import webIcon from '../assets/web.png?asset';
-import settingsIcon from '../assets/settings.png?asset';
-import nginxIcon from '../assets/nginx.png?asset';
 import mariadbIcon from '../assets/mariadb.png?asset';
-import phpIcon from '../assets/php.png?asset';
+import nginxIcon from '../assets/nginx.png?asset';
 import phpmyadminIcon from '../assets/phpmyadmin.png?asset';
+import phpIcon from '../assets/php.png?asset';
+import playIcon from '../assets/circled-play.png?asset';
+import restartIcon from '../assets/restart.png?asset';
+import settingsIcon from '../assets/settings.png?asset';
+import shutdownIcon from '../assets/shutdown.png?asset';
+import webIcon from '../assets/web.png?asset';
+import wempIcon from '../assets/wemp.png?asset';
 
 /** @type {Tray|null} System tray instance */
 let tray;
-/** @type {Menu|null} Context menu instance */
-let menu;
 
 /** @type {Object.<string, NativeImage>} Preloaded menu icons */
 const icons = {
@@ -46,15 +46,16 @@ const icons = {
  */
 export function createMenu() {
   tray = new Tray(icons.wemp);
-  tray.setToolTip(app.getName());
+  tray.setToolTip('Wemp - Click to manage services');
 
   tray.on('click', () => {
     tray.popUpContextMenu();
   });
 
-  // Listen for service state changes to update menu
-  serviceManager.on('service-started', updateServiceMenuItems);
-  serviceManager.on('service-stopped', updateServiceMenuItems);
+  // Listen for service state changes to rebuild menu
+  serviceManager.on('service-started', buildMenu);
+  serviceManager.on('service-stopped', buildMenu);
+  serviceManager.versionManager.on('version-changed', buildMenu);
 
   buildMenu();
 }
@@ -104,6 +105,13 @@ async function buildMenu() {
             shell.openPath(config.paths.logs);
           },
         },
+        {
+          label: 'Edit Settings',
+          icon: icons.settings,
+          click: () => {
+            shell.openPath(settings.file());
+          },
+        },
         { type: 'separator' },
         {
           label: 'Start with Windows',
@@ -145,11 +153,6 @@ async function buildMenu() {
       const serviceIcon = icons[serviceId];
       const version = serviceManager.versionManager?.getDisplayVersion(serviceId) || '';
 
-      const headerItems = [
-        { label: `${service.name} ${version}`, icon: serviceIcon, enabled: false },
-        { type: 'separator' },
-      ];
-
       const configItems = [
         {
           label: 'Edit Configuration',
@@ -169,7 +172,8 @@ async function buildMenu() {
           label: service.name,
           icon: serviceIcon,
           submenu: [
-            ...headerItems,
+            { label: `${service.name} ${version}`, icon: serviceIcon, enabled: false },
+            { type: 'separator' },
             {
               label: 'Open in Browser',
               icon: icons.web,
@@ -191,22 +195,72 @@ async function buildMenu() {
             await serviceManager[`${action}Service`](serviceId);
           } catch (error) {
             logger.error(`Failed to ${action} ${service.name}:`, error);
-            dialog.showErrorBox(`${label} Error`, error.message);
+            notifications.showServiceError(service.name, error.message);
           }
         },
       });
 
+      // Build submenu items
+      const submenuItems = [];
+      const serviceState = serviceManager.versionManager.serviceStates.get(serviceId);
+      const currentVersion = serviceManager.versionManager.getCurrentVersion(serviceId);
+      const availableVersions = serviceState?.availableVersions || [];
+
+      if (serviceState?.multiVersion && availableVersions.length > 0) {
+        submenuItems.push(
+          {
+            label: `${service.name} ${currentVersion || version}`,
+            icon: serviceIcon,
+            submenu: availableVersions.map(versionData => ({
+              label: versionData.deprecated ? `⚠️ ${versionData.version}` : versionData.version,
+              type: 'radio',
+              checked: currentVersion === versionData.version,
+              click: async () => {
+                // No-op if already selected
+                if (currentVersion === versionData.version) return;
+
+                try {
+                  if (isRunning) {
+                    await serviceManager.stopService(serviceId);
+                  }
+                  await serviceManager.versionManager.switchServiceVersion(
+                    serviceId,
+                    versionData.version
+                  );
+                  if (isRunning) {
+                    await serviceManager.startService(serviceId);
+                  }
+                } catch (error) {
+                  logger.error(`Failed to switch ${service.name} version:`, error);
+                  notifications.showServiceError(
+                    service.name,
+                    `Failed to switch version: ${error.message}`
+                  );
+                }
+              },
+            })),
+          },
+          { type: 'separator' }
+        );
+      } else {
+        submenuItems.push(
+          { label: `${service.name} ${version}`, icon: serviceIcon, enabled: false },
+          { type: 'separator' }
+        );
+      }
+
+      submenuItems.push(
+        createServiceAction('Start', 'start', 'play', !isRunning),
+        createServiceAction('Restart', 'restart', 'restart', isRunning),
+        createServiceAction('Stop', 'stop', 'shutdown', isRunning),
+        { type: 'separator' },
+        ...configItems
+      );
+
       return {
         label: service.name,
         icon: serviceIcon,
-        submenu: [
-          ...headerItems,
-          createServiceAction('Start', 'start', 'play', !isRunning),
-          createServiceAction('Restart', 'restart', 'restart', isRunning),
-          createServiceAction('Stop', 'stop', 'shutdown', isRunning),
-          { type: 'separator' },
-          ...configItems,
-        ],
+        submenu: submenuItems,
       };
     }),
     { type: 'separator' },
@@ -217,41 +271,8 @@ async function buildMenu() {
     },
   ];
 
-  menu = Menu.buildFromTemplate(menuTemplate);
+  const menu = Menu.buildFromTemplate(menuTemplate);
   tray.setContextMenu(menu);
-}
-
-/**
- * Updates service menu item states based on current service status
- * Called when services start or stop to reflect current state
- */
-function updateServiceMenuItems() {
-  if (!menu) return;
-
-  const status = serviceManager.getStatus();
-  let serviceIndex = 2; // Skip main menu and separator
-
-  // Update enabled state for each service's actions
-  Object.keys(config.services).forEach(serviceId => {
-    const menuItem = menu.items[serviceIndex++];
-    if (!menuItem?.submenu) return;
-
-    const isRunning = status[serviceId];
-    const submenuItems = menuItem.submenu.items;
-
-    submenuItems.forEach(item => {
-      if (serviceId === 'phpmyadmin') {
-        // phpMyAdmin requires nginx and PHP to be running
-        if (item.label === 'Open in Browser') {
-          item.enabled = status.nginx && status.php;
-        }
-      } else {
-        // Standard services can be started/stopped/restarted
-        if (item.label === 'Start') item.enabled = !isRunning;
-        else if (item.label === 'Stop' || item.label === 'Restart') item.enabled = isRunning;
-      }
-    });
-  });
 }
 
 export { tray };

@@ -1,5 +1,7 @@
 import { spawn } from 'node:child_process';
+import crypto from 'node:crypto';
 import fs from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
 
 import config from '../config.js';
@@ -17,8 +19,11 @@ import logger from './logger.js';
  */
 export async function downloadService(service) {
   const servicePath = path.join(config.paths.services, service.id);
-  const tempPath = path.join(config.paths.services, '.temp', service.id);
   const isFirstInstall = !fs.existsSync(servicePath);
+  const tempPath = path.join(
+    os.tmpdir(),
+    `wemp-${service.id}-${crypto.randomBytes(8).toString('hex')}`
+  );
 
   try {
     fs.mkdirSync(tempPath, { recursive: true });
@@ -35,12 +40,12 @@ export async function downloadService(service) {
     // Verify critical service files exist after extraction
     verifyServiceFiles(tempPath, service);
 
-    // Apply config modifications only on first install to preserve user customizations
+    // Only modify configs on first install to preserve user changes
     if (isFirstInstall) {
       await modifyServiceConfigs(service, tempPath, servicePath);
     }
 
-    // Atomically replace service directory after successful extraction
+    // Move verified files to final location (atomic update)
     installExtractedFiles(tempPath, servicePath, service);
 
     logger.info(`Downloaded and extracted ${service.name} ${service.version}`);
@@ -48,7 +53,6 @@ export async function downloadService(service) {
     logger.error(`Failed to download ${service.name}`, error);
     throw error;
   } finally {
-    // Always clean up temp directory
     if (fs.existsSync(tempPath)) fs.rmSync(tempPath, { recursive: true, force: true });
   }
 }
@@ -174,7 +178,8 @@ function flattenExtraction(tempPath) {
  * @private
  */
 function verifyServiceFiles(tempPath, service) {
-  const serviceConfig = config.services[service.id];
+  const baseServiceId = service.id.split('-')[0];
+  const serviceConfig = config.services[baseServiceId];
   if (!serviceConfig) return;
 
   // Skip verification for services without executables (e.g., phpMyAdmin)
@@ -224,9 +229,11 @@ function installExtractedFiles(tempPath, servicePath, service) {
 }
 
 /**
- * Determines if file should be preserved during service updates
+ * Determines if a file should be preserved during service updates
  * @param {string} fileName - Name of file or directory
- * @param {Object} service - Service configuration with preserve patterns
+ * @param {Object} service - Service configuration
+ * @param {string} [service.configFile] - Configuration file path
+ * @param {string[]} [service.preserve] - Patterns for files/dirs to preserve
  * @returns {boolean} True if file should be preserved
  * @private
  */
@@ -356,14 +363,14 @@ async function modifyPhpConfig(tempPath, finalPath) {
   // Download SSL certificate bundle to temp directory
   await downloadCaCertificate(tempPath);
 
-  let config = fs.readFileSync(configPath, 'utf8');
+  let phpConfig = fs.readFileSync(configPath, 'utf8');
 
   // Set extension directory (required for Windows)
-  if (!config.match(/^extension_dir\s*=\s*"ext"/m)) {
-    config = config.replace(/^;?\s*extension_dir\s*=\s*"ext"/m, 'extension_dir = "ext"');
+  if (!phpConfig.match(/^extension_dir\s*=\s*"ext"/m)) {
+    phpConfig = phpConfig.replace(/^;?\s*extension_dir\s*=\s*"ext"/m, 'extension_dir = "ext"');
   }
 
-  // Enable common extensions
+  // Enable common extensions (uncomment extension=<name> lines)
   const extensions = [
     'curl',
     'fileinfo',
@@ -376,20 +383,16 @@ async function modifyPhpConfig(tempPath, finalPath) {
     'zip',
   ];
 
-  extensions.forEach(ext => {
-    const pattern = new RegExp(
-      `^;(extension=${ext.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})$`,
-      'gm'
-    );
-    config = config.replace(pattern, '$1');
-  });
+  for (const ext of extensions) {
+    phpConfig = phpConfig.replace(new RegExp(`^;(extension=${ext})$`, 'gm'), '$1');
+  }
 
   // Point SSL libraries to the CA bundle for HTTPS verification
   const certPath = path.join(finalPath, 'extras', 'ssl', 'cacert.pem').replace(/\\/g, '/');
-  config = config.replace(/^;?\s*curl\.cainfo\s*=.*/m, `curl.cainfo = "${certPath}"`);
-  config = config.replace(/^;?\s*openssl\.cafile\s*=.*/m, `openssl.cafile = "${certPath}"`);
+  phpConfig = phpConfig.replace(/^;?\s*curl\.cainfo\s*=.*/m, `curl.cainfo = "${certPath}"`);
+  phpConfig = phpConfig.replace(/^;?\s*openssl\.cafile\s*=.*/m, `openssl.cafile = "${certPath}"`);
 
-  // Configure OPcache
+  // Configure OPcache settings
   const opcacheSettings = [
     [/^;(zend_extension=opcache)$/gm, '$1'],
     [/^;(opcache\.enable\s*=\s*1)$/gm, '$1'],
@@ -398,16 +401,16 @@ async function modifyPhpConfig(tempPath, finalPath) {
     [/^;(opcache\.revalidate_freq\s*=\s*\d+)$/gm, 'opcache.revalidate_freq=0'],
   ];
 
-  opcacheSettings.forEach(([pattern, replacement]) => {
-    config = config.replace(pattern, replacement);
-  });
+  for (const [pattern, replacement] of opcacheSettings) {
+    phpConfig = phpConfig.replace(pattern, replacement);
+  }
 
   // Configure resource limits
-  config = config.replace(/^memory_limit\s*=\s*\d+M/m, 'memory_limit = 256M');
-  config = config.replace(/^post_max_size\s*=\s*\d+M/m, 'post_max_size = 64M');
-  config = config.replace(/^upload_max_filesize\s*=\s*\d+M/m, 'upload_max_filesize = 64M');
+  phpConfig = phpConfig.replace(/^memory_limit\s*=\s*\d+M/m, 'memory_limit = 256M');
+  phpConfig = phpConfig.replace(/^post_max_size\s*=\s*\d+M/m, 'post_max_size = 64M');
+  phpConfig = phpConfig.replace(/^upload_max_filesize\s*=\s*\d+M/m, 'upload_max_filesize = 64M');
 
-  fs.writeFileSync(configPath, config);
+  fs.writeFileSync(configPath, phpConfig);
 }
 
 /**
