@@ -24,6 +24,7 @@ Manage everything from the system tray by clicking the Wemp icon.
 ## Features
 
 - **User-friendly Interface**: Designed for both beginners and experienced users.
+- **Multi-Version PHP Support**: Switch between different PHP versions easily from the menu.
 - **Regular Updates**: Ensures you have the latest versions of all services.
 - **Database Management**: Utilizes [phpMyAdmin](https://www.phpmyadmin.net) for easy database management.
 - **Configuration Monitoring**: Automatically restarts services upon configuration changes.
@@ -67,7 +68,20 @@ After this, you can use commands like `php -v`, `mysql -u root`, and `nginx -t` 
 
 ### Can I use a specific PHP version?
 
-No, Wemp is designed to work as a complete, tested stack with the latest stable versions of all services. Using different PHP versions would break compatibility with phpMyAdmin and other integrated components. The application automatically manages updates to ensure you're always running secure, compatible versions of PHP, MariaDB, and Nginx that work together seamlessly.
+Yes! Wemp supports multiple PHP versions. To change your PHP version:
+
+1. Click the **Wemp** icon in the system tray
+2. Hover over **PHP** in the menu
+3. Select from the available PHP versions
+
+Wemp only shows officially supported PHP versions. If you need to add a custom PHP version:
+
+1. Hover over **Wemp** in the menu and click **Edit Settings**
+2. Create a folder for your PHP version in the PHP directory (e.g., `C:\Wemp\php\php-8.x`)
+3. Add the version to the `installedVersions` array in the settings
+4. Restart Wemp to see your custom version in the menu
+
+**Note**: Custom PHP versions will show as deprecated in the menu since they are not officially supported by the PHP project.
 
 ### Why does the tray icon move to the hidden area after updating?
 
