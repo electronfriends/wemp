@@ -1,5 +1,4 @@
 import { Menu, app, dialog } from 'electron';
-import squirrelStartup from 'electron-squirrel-startup';
 import { updateElectronApp } from 'update-electron-app';
 
 import { createMenu, tray } from './lib/menu.js';
@@ -9,8 +8,16 @@ import { serviceManager } from './lib/service-manager.js';
 // Set application user model ID
 app.setAppUserModelId('com.squirrel.wemp.Wemp');
 
-// Handle Squirrel installer events and enforce single instance
-if (squirrelStartup || !app.requestSingleInstanceLock()) app.quit();
+// Handle Squirrel events
+const squirrelEvent = process.argv[1];
+if (squirrelEvent && squirrelEvent.startsWith('--squirrel-')) {
+  app.quit();
+}
+
+// Enforce single instance of the application
+if (!app.requestSingleInstanceLock()) {
+  app.quit();
+}
 
 // Enable automatic updates for the application
 updateElectronApp();
