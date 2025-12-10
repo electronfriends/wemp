@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "electron-settings": "^4.0.4",
-    "update-electron-app": "^3.1.1"
+    "update-electron-app": "^3.1.2"
   },
   "devDependencies": {
     "@electron-forge/cli": "^7.10.2",
@@ -32,11 +32,11 @@
     "@electron-forge/publisher-github": "^7.10.2",
     "@electron/fuses": "^1.0.0",
     "@eslint/js": "^9.39.1",
-    "electron": "^39.2.4",
+    "electron": "^39.2.6",
     "eslint": "^9.39.1",
     "eslint-plugin-prettier": "^5.5.4",
     "globals": "^16.5.0",
-    "prettier": "^3.6.2",
-    "vite": "^7.2.4"
+    "prettier": "^3.7.4",
+    "vite": "^7.2.7"
   }
 }
