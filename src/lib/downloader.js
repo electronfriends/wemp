@@ -140,6 +140,32 @@ async function extractZipBuffer(buffer, servicePath) {
 }
 
 /**
+ * Safely renames or moves a file, falling back to copy+unlink on cross-device errors
+ * @param {string} oldPath - Current path
+ * @param {string} newPath - New path
+ * @private
+ */
+function safeRename(oldPath, newPath) {
+  try {
+    fs.renameSync(oldPath, newPath);
+  } catch (error) {
+    // EXDEV (cross-device link): can't rename across filesystems, so copy instead
+    if (error.code === 'EXDEV') {
+      const stats = fs.statSync(oldPath);
+      if (stats.isDirectory()) {
+        fs.cpSync(oldPath, newPath, { recursive: true });
+      } else {
+        fs.copyFileSync(oldPath, newPath);
+      }
+      // Remove original after successful copy
+      fs.rmSync(oldPath, { recursive: true, force: true });
+    } else {
+      throw error;
+    }
+  }
+}
+
+/**
  * Flattens extraction by moving contents of single root folder up one level
  * @param {string} tempPath - Temporary extraction path
  * @private
@@ -157,11 +183,11 @@ function flattenExtraction(tempPath) {
       const tempRoot = path.join(tempPath, `_${rootFolderName}_temp`);
 
       // Rename root folder to temp name to avoid conflicts
-      fs.renameSync(rootFolder, tempRoot);
+      safeRename(rootFolder, tempRoot);
 
       // Move all contents from temp folder to parent
       for (const item of fs.readdirSync(tempRoot)) {
-        fs.renameSync(path.join(tempRoot, item), path.join(tempPath, item));
+        safeRename(path.join(tempRoot, item), path.join(tempPath, item));
       }
 
       // Remove now-empty temp folder
@@ -224,7 +250,7 @@ function installExtractedFiles(tempPath, servicePath, service) {
       fs.rmSync(destPath, { recursive: true, force: true });
     }
 
-    fs.renameSync(path.join(tempPath, item), destPath);
+    safeRename(path.join(tempPath, item), destPath);
   }
 }
 
