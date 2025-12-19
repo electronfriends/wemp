@@ -348,7 +348,7 @@ function modifyNginxConfig(tempPath) {
   const phpMyAdminConfig = `
         # phpMyAdmin - makes http://localhost/phpmyadmin available
         location /phpmyadmin {
-            alias ${config.paths.services.replace(/\\/g, '/')}/phpmyadmin;
+            alias "${config.paths.services.replace(/\\/g, '/')}/phpmyadmin";
             index index.php;
 
             location ~ \\.php$ {
