@@ -613,7 +613,7 @@ export class VersionManager extends EventEmitter {
     if (!serviceState?.multiVersion) return;
 
     const installedVersions = this.getInstalledVersions(serviceId);
-    
+
     // Rebuild availableVersions with updated installed status
     const updatedVersions = serviceState.availableVersions.map(v => ({
       ...v,

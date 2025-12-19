@@ -210,7 +210,7 @@ async function buildMenu() {
       if (serviceState?.multiVersion && availableVersions.length > 0) {
         // Group versions by major.minor and show installed version for each if available
         const versionMap = new Map();
-        
+
         // First, add all available versions grouped by major.minor
         availableVersions.forEach(v => {
           const majorMinor = v.version.split('.').slice(0, 2).join('.');
@@ -222,12 +222,12 @@ async function buildMenu() {
             });
           }
         });
-        
+
         // Replace with installed versions and check for updates
         installedVersions.forEach(installedVer => {
           const majorMinor = installedVer.split('.').slice(0, 2).join('.');
           const apiVersion = availableVersions.find(av => av.version === installedVer);
-          
+
           // Find latest version in same major.minor series
           const sameSeriesVersions = availableVersions
             .filter(av => {
@@ -240,17 +240,17 @@ async function buildMenu() {
               const [bMajor, bMinor, bPatch] = b.split('.').map(Number);
               return bMajor - aMajor || bMinor - aMinor || bPatch - aPatch;
             });
-          
+
           const latestInSeries = sameSeriesVersions[0];
           const hasUpdate = latestInSeries && latestInSeries !== installedVer;
-          
+
           versionMap.set(majorMinor, {
             version: installedVer,
             deprecated: apiVersion ? apiVersion.deprecated : false,
             hasUpdate,
           });
         });
-        
+
         // Sort by version (newest first)
         const sortedVersions = Array.from(versionMap.values()).sort((a, b) => {
           const [aMajor, aMinor, aPatch] = a.version.split('.').map(Number);
