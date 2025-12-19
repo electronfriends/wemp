@@ -205,14 +205,69 @@ async function buildMenu() {
       const serviceState = serviceManager.versionManager.serviceStates.get(serviceId);
       const currentVersion = serviceManager.versionManager.getCurrentVersion(serviceId);
       const availableVersions = serviceState?.availableVersions || [];
+      const installedVersions = serviceManager.versionManager.getInstalledVersions(serviceId);
 
       if (serviceState?.multiVersion && availableVersions.length > 0) {
+        // Group versions by major.minor and show installed version for each if available
+        const versionMap = new Map();
+        
+        // First, add all available versions grouped by major.minor
+        availableVersions.forEach(v => {
+          const majorMinor = v.version.split('.').slice(0, 2).join('.');
+          if (!versionMap.has(majorMinor)) {
+            versionMap.set(majorMinor, {
+              version: v.version,
+              deprecated: v.deprecated,
+              hasUpdate: false,
+            });
+          }
+        });
+        
+        // Replace with installed versions and check for updates
+        installedVersions.forEach(installedVer => {
+          const majorMinor = installedVer.split('.').slice(0, 2).join('.');
+          const apiVersion = availableVersions.find(av => av.version === installedVer);
+          
+          // Find latest version in same major.minor series
+          const sameSeriesVersions = availableVersions
+            .filter(av => {
+              const avMajorMinor = av.version.split('.').slice(0, 2).join('.');
+              return avMajorMinor === majorMinor && !av.deprecated;
+            })
+            .map(av => av.version)
+            .sort((a, b) => {
+              const [aMajor, aMinor, aPatch] = a.split('.').map(Number);
+              const [bMajor, bMinor, bPatch] = b.split('.').map(Number);
+              return bMajor - aMajor || bMinor - aMinor || bPatch - aPatch;
+            });
+          
+          const latestInSeries = sameSeriesVersions[0];
+          const hasUpdate = latestInSeries && latestInSeries !== installedVer;
+          
+          versionMap.set(majorMinor, {
+            version: installedVer,
+            deprecated: apiVersion ? apiVersion.deprecated : false,
+            hasUpdate,
+          });
+        });
+        
+        // Sort by version (newest first)
+        const sortedVersions = Array.from(versionMap.values()).sort((a, b) => {
+          const [aMajor, aMinor, aPatch] = a.version.split('.').map(Number);
+          const [bMajor, bMinor, bPatch] = b.version.split('.').map(Number);
+          return bMajor - aMajor || bMinor - aMinor || bPatch - aPatch;
+        });
+
         submenuItems.push(
           {
             label: `${service.name} ${currentVersion || version}`,
             icon: serviceIcon,
-            submenu: availableVersions.map(versionData => ({
-              label: versionData.deprecated ? `⚠️ ${versionData.version}` : versionData.version,
+            submenu: sortedVersions.map(versionData => ({
+              label: versionData.hasUpdate
+                ? `🔄 ${versionData.version}`
+                : versionData.deprecated
+                  ? `⚠️ ${versionData.version}`
+                  : versionData.version,
               type: 'radio',
               checked: currentVersion === versionData.version,
               click: async () => {
@@ -225,7 +280,8 @@ async function buildMenu() {
                   }
                   await serviceManager.versionManager.switchServiceVersion(
                     serviceId,
-                    versionData.version
+                    versionData.version,
+                    true // Check for patch updates when switching
                   );
                   if (isRunning) {
                     await serviceManager.startService(serviceId);

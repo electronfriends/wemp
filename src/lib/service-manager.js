@@ -72,6 +72,9 @@ class ServiceManager extends EventEmitter {
         logger.info('Service updates available, installing before startup');
         await this.installPendingUpdates();
       }
+
+      // Check for patch updates on multi-version services (e.g., PHP)
+      await this.checkAndUpdateMultiVersionServices();
     } catch (error) {
       // Non-fatal: continue with installed versions if update check fails
       logger.warn('Failed to check for updates on startup', error);
@@ -79,6 +82,41 @@ class ServiceManager extends EventEmitter {
 
     // Ensure all required services are installed
     await this.serviceInstaller.ensureServicesInstalled();
+  }
+
+  /**
+   * Checks for and installs patch updates for multi-version services
+   * @returns {Promise<void>}
+   * @private
+   */
+  async checkAndUpdateMultiVersionServices() {
+    const multiVersionServices = Object.entries(config.services).filter(([serviceId]) => {
+      const serviceState = this.versionManager.serviceStates.get(serviceId);
+      return serviceState?.multiVersion;
+    });
+
+    // Process updates sequentially to avoid conflicts
+    for (const [serviceId, serviceConfig] of multiVersionServices) {
+      try {
+        const updateInfo = await this.versionManager.checkForPatchUpdate(serviceId);
+
+        if (updateInfo.hasUpdate) {
+          logger.info(
+            `${serviceConfig.name} patch update available: ${updateInfo.currentVersion} -> ${updateInfo.latestVersion}`
+          );
+
+          // Update to the latest patch version
+          await this.versionManager.switchServiceVersion(
+            serviceId,
+            updateInfo.latestVersion,
+            false // Already checked for update
+          );
+          logger.info(`Updated ${serviceConfig.name} to ${updateInfo.latestVersion}`);
+        }
+      } catch (error) {
+        logger.warn(`Failed to update ${serviceConfig.name}:`, error);
+      }
+    }
   }
 
   /**

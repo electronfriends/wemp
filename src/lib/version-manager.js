@@ -37,6 +37,17 @@ function isVersionGreater(version1, version2) {
 }
 
 /**
+ * Extracts major.minor from a version string
+ * @param {string} version - Version string (e.g., "8.3.28")
+ * @returns {string} Major.minor version (e.g., "8.3")
+ * @private
+ */
+function getMajorMinor(version) {
+  const [major, minor] = version.split('.');
+  return `${major}.${minor}`;
+}
+
+/**
  * Manages service version tracking and updates
  *
  * Tracks installed versions, checks for updates from API, and coordinates downloads.
@@ -367,6 +378,23 @@ export class VersionManager extends EventEmitter {
   }
 
   /**
+   * Replaces an old version with a new version in installed versions array
+   * @param {string} serviceId - Service identifier
+   * @param {string} oldVersion - Version to remove
+   * @param {string} newVersion - Version to add
+   * @private
+   */
+  replaceInstalledVersion(serviceId, oldVersion, newVersion) {
+    const installed = settings.getSync(`installedVersions.${serviceId}`) || [];
+    const filtered = installed.filter(v => v !== oldVersion);
+    if (!filtered.includes(newVersion)) {
+      filtered.push(newVersion);
+    }
+    settings.setSync(`installedVersions.${serviceId}`, filtered);
+    logger.info(`Replaced ${serviceId} version ${oldVersion} with ${newVersion} in settings`);
+  }
+
+  /**
    * Gets display version (shows available version for uninstalled/needs-update)
    * @param {string} serviceId - Service identifier
    * @returns {string} Version to display in UI
@@ -421,30 +449,102 @@ export class VersionManager extends EventEmitter {
   }
 
   /**
+   * Checks if there's a newer patch version available for a specific version
+   * @param {string} serviceId - Service identifier
+   * @param {string} targetVersion - Version to check for updates (optional, defaults to current version)
+   * @returns {Promise<{hasUpdate: boolean, currentVersion: string, latestVersion: string, downloadUrl: string}>}
+   */
+  async checkForPatchUpdate(serviceId, targetVersion = null) {
+    const noUpdate = (version = '0.0.0') => ({
+      hasUpdate: false,
+      currentVersion: version,
+      latestVersion: version,
+      downloadUrl: '',
+    });
+
+    const serviceState = this.serviceStates.get(serviceId);
+    if (!serviceState?.multiVersion) return noUpdate();
+
+    const versionToCheck = targetVersion || this.getCurrentVersion(serviceId);
+    if (versionToCheck === '0.0.0') return noUpdate();
+
+    const currentMajorMinor = getMajorMinor(versionToCheck);
+
+    // Find the latest version in the same major.minor series
+    const sameSeriesVersions = (serviceState.availableVersions || [])
+      .filter(v => getMajorMinor(v.version) === currentMajorMinor && !v.deprecated)
+      .map(v => v.version)
+      .sort((a, b) => {
+        const [aMajor, aMinor, aPatch] = a.split('.').map(Number);
+        const [bMajor, bMinor, bPatch] = b.split('.').map(Number);
+        return bMajor - aMajor || bMinor - aMinor || bPatch - aPatch;
+      });
+
+    if (sameSeriesVersions.length === 0) return noUpdate(versionToCheck);
+
+    const latestVersion = sameSeriesVersions[0];
+    if (!isVersionGreater(latestVersion, versionToCheck)) return noUpdate(versionToCheck);
+
+    const versionData = serviceState.availableVersions.find(v => v.version === latestVersion);
+    return {
+      hasUpdate: true,
+      currentVersion: versionToCheck,
+      latestVersion,
+      downloadUrl: versionData?.downloadUrl || '',
+    };
+  }
+
+  /**
    * Switches service to a different version (generic method for any multi-version service)
    * @param {string} serviceId - Service identifier
    * @param {string} targetVersion - Version to switch to
+   * @param {boolean} checkForUpdate - Whether to check for patch updates before switching (default: false)
    * @returns {Promise<void>}
    */
-  async switchServiceVersion(serviceId, targetVersion) {
-    const serviceState = this.serviceStates.get(serviceId);
+  async switchServiceVersion(serviceId, targetVersion, checkForUpdate = false) {
+    // Validate serviceId is a known service (security: prevent path traversal)
     const serviceConfig = config.services[serviceId];
+    if (!serviceConfig) {
+      throw new Error(`Unknown service: ${serviceId}`);
+    }
 
-    if (!serviceState || !serviceState.multiVersion) {
+    const serviceState = this.serviceStates.get(serviceId);
+    if (!serviceState?.multiVersion) {
       throw new Error(`${serviceConfig.name} does not support multiple versions`);
     }
 
-    const [major, minor] = targetVersion.split('.');
-    const versionId = `${serviceId}-${major}.${minor}`;
+    // Check for patch update if requested
+    if (checkForUpdate) {
+      const updateInfo = await this.checkForPatchUpdate(serviceId, targetVersion);
+
+      if (updateInfo.hasUpdate) {
+        logger.info(
+          `Updating ${serviceConfig.name} from ${targetVersion} to ${updateInfo.latestVersion}`
+        );
+        targetVersion = updateInfo.latestVersion;
+      }
+    }
+
+    const versionId = `${serviceId}-${getMajorMinor(targetVersion)}`;
     const versionPath = path.join(config.paths.services, versionId);
 
     logger.info(`Switching ${serviceConfig.name} to ${targetVersion}`);
 
     const isInstalled = fs.existsSync(versionPath);
     const installedVersions = this.getInstalledVersions(serviceId);
+    const targetMajorMinor = getMajorMinor(targetVersion);
+
+    // Find if there's an existing version in the same major.minor series
+    const existingVersionInSeries = installedVersions.find(
+      v => getMajorMinor(v) === targetMajorMinor
+    );
+
+    // Determine if this is an update or new installation
+    const isUpdate = existingVersionInSeries && existingVersionInSeries !== targetVersion;
+    const isAlreadyInstalled = installedVersions.includes(targetVersion);
 
     // Check if switching to an already installed version
-    if (installedVersions.includes(targetVersion)) {
+    if (isAlreadyInstalled) {
       if (!isInstalled) {
         throw new Error(
           `${serviceConfig.name} ${targetVersion} is tracked but directory not found`
@@ -460,9 +560,14 @@ export class VersionManager extends EventEmitter {
         );
       }
 
-      logger.info(`Version ${targetVersion} not found, downloading...`);
+      const action = isUpdate ? 'Updating' : 'Installing';
+      logger.info(
+        `${action} ${serviceConfig.name} ${isUpdate ? `from ${existingVersionInSeries} ` : ''}to ${targetVersion}`
+      );
 
-      const notification = notifications.showServiceInstalling(serviceConfig.name, targetVersion);
+      const notification = isUpdate
+        ? notifications.showServiceUpdating(serviceConfig.name, targetVersion)
+        : notifications.showServiceInstalling(serviceConfig.name, targetVersion);
 
       try {
         await downloadService({
@@ -478,17 +583,57 @@ export class VersionManager extends EventEmitter {
 
     await this.updateServiceJunction(serviceId, versionId);
 
-    // Track this version as installed
-    this.addInstalledVersion(serviceId, targetVersion);
+    // Remove old version from same major.minor series and add new version
+    if (isUpdate) {
+      this.replaceInstalledVersion(serviceId, existingVersionInSeries, targetVersion);
+    } else {
+      this.addInstalledVersion(serviceId, targetVersion);
+    }
 
     settings.setSync(`version.${serviceId}`, targetVersion);
 
     serviceState.currentVersion = targetVersion;
     this.serviceStates.set(serviceId, serviceState);
 
+    // Refresh the availableVersions to reflect updated installedVersions
+    this.refreshServiceState(serviceId);
+
     logger.info(`Successfully switched to ${serviceConfig.name} ${targetVersion}`);
 
     this.emit('version-changed', serviceId, targetVersion);
+  }
+
+  /**
+   * Refreshes service state to reflect current installed versions
+   * @param {string} serviceId - Service identifier
+   * @private
+   */
+  refreshServiceState(serviceId) {
+    const serviceState = this.serviceStates.get(serviceId);
+    if (!serviceState?.multiVersion) return;
+
+    const installedVersions = this.getInstalledVersions(serviceId);
+    
+    // Rebuild availableVersions with updated installed status
+    const updatedVersions = serviceState.availableVersions.map(v => ({
+      ...v,
+      installed: installedVersions.includes(v.version),
+    }));
+
+    // Add any installed-only versions that aren't in the API list
+    installedVersions.forEach(v => {
+      if (!updatedVersions.find(av => av.version === v)) {
+        updatedVersions.push({
+          version: v,
+          downloadUrl: '',
+          installed: true,
+          deprecated: true,
+        });
+      }
+    });
+
+    serviceState.availableVersions = updatedVersions;
+    this.serviceStates.set(serviceId, serviceState);
   }
 
   /**
