@@ -28,7 +28,7 @@ const config = {
       name: 'PHP',
       executable: 'php-cgi.exe',
       configFile: 'php.ini',
-      preserve: ['ext/'],
+      preserve: ['extras/'],
       processArgs: ['-b', '127.0.0.1:9000'],
       env: {
         PHP_FCGI_MAX_REQUESTS: '0',
