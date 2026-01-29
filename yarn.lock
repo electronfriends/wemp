@@ -1832,6 +1832,13 @@ electron-settings@^4.0.4:
     mkdirp "^1.0.4"
     write-file-atomic "^3.0.3"
 
+electron-squirrel-startup@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/electron-squirrel-startup/-/electron-squirrel-startup-1.0.1.tgz#c9171568d724884c7a2b03760bfeedcf921c63ab"
+  integrity sha512-sTfFIHGku+7PsHLJ7v0dRcZNkALrV+YEozINTW8X1nM//e5O3L+rfYuvSW00lmGHnYmUjARZulD8F2V8ISI9RA==
+  dependencies:
+    debug "^2.2.0"
+
 electron-to-chromium@^1.5.238:
   version "1.5.239"
   resolved "https://registry.yarnpkg.com/electron-to-chromium/-/electron-to-chromium-1.5.239.tgz#46b24e9f5f22ba6bdfa015aa5d2690700aadeb1f"
