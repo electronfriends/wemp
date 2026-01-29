@@ -1850,10 +1850,10 @@ electron-winstaller@^5.3.0:
   optionalDependencies:
     "@electron/windows-sign" "^1.1.2"
 
-electron@^40.0.0:
-  version "40.0.0"
-  resolved "https://registry.yarnpkg.com/electron/-/electron-40.0.0.tgz#01b1589ce2619dc7e792b1ca78d3ff1ae2ce05e7"
-  integrity sha512-UyBy5yJ0/wm4gNugCtNPjvddjAknMTuXR2aCHioXicH7aKRKGDBPp4xqTEi/doVcB3R+MN3wfU9o8d/9pwgK2A==
+electron@^40.1.0:
+  version "40.1.0"
+  resolved "https://registry.yarnpkg.com/electron/-/electron-40.1.0.tgz#e5c45ecd90bfbaa9dd14db2f7fb5ab730e458a9e"
+  integrity sha512-2j/kvw7uF0H1PnzYBzw2k2Q6q16J8ToKrtQzZfsAoXbbMY0l5gQi2DLOauIZLzwp4O01n8Wt/74JhSRwG0yj9A==
   dependencies:
     "@electron/get" "^2.0.0"
     "@types/node" "^24.9.0"
@@ -2433,10 +2433,10 @@ globals@^14.0.0:
   resolved "https://registry.yarnpkg.com/globals/-/globals-14.0.0.tgz#898d7413c29babcf6bafe56fcadded858ada724e"
   integrity sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==
 
-globals@^17.0.0:
-  version "17.0.0"
-  resolved "https://registry.yarnpkg.com/globals/-/globals-17.0.0.tgz#a4196d9cfeb4d627ba165b4647b1f5853bf90a30"
-  integrity sha512-gv5BeD2EssA793rlFWVPMMCqefTlpusw6/2TbAVMy0FzcG8wKJn4O+NqJ4+XWmmwrayJgw5TzrmWjFgmz1XPqw==
+globals@^17.2.0:
+  version "17.2.0"
+  resolved "https://registry.yarnpkg.com/globals/-/globals-17.2.0.tgz#41d29408d6f5408457d2ef965d29215e3026779f"
+  integrity sha512-tovnCz/fEq+Ripoq+p/gN1u7l6A7wwkoBT9pRCzTHzsD/LvADIzXZdjmRymh5Ztf0DYC3Rwg5cZRYjxzBmzbWg==
 
 globalthis@^1.0.1:
   version "1.0.4"
@@ -3384,10 +3384,10 @@ prettier@^3.4.2:
   resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.6.2.tgz#ccda02a1003ebbb2bfda6f83a074978f608b9393"
   integrity sha512-I7AIg5boAr5R0FFtJ6rCfD+LFsWHp81dolrFD8S79U9tb8Az2nGrJncnMSnys+bpQJfRUzqs9hnA81OAA3hCuQ==
 
-prettier@^3.8.0:
-  version "3.8.0"
-  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.0.tgz#f72cf71505133f40cfa2ef77a2668cdc558fcd69"
-  integrity sha512-yEPsovQfpxYfgWNhCfECjG5AQaO+K3dp6XERmOepyPDVqcJm+bjyCVO3pmU+nAPe0N5dDvekfGezt/EIiRe1TA==
+prettier@^3.8.1:
+  version "3.8.1"
+  resolved "https://registry.yarnpkg.com/prettier/-/prettier-3.8.1.tgz#edf48977cf991558f4fcbd8a3ba6015ba2a3a173"
+  integrity sha512-UOnG6LftzbdaHZcKoPFtOcCKztrQ57WkHDeRD9t/PTQtmT0NHSeWWepj6pS0z/N7+08BHFDQVUrfmfMRcZwbMg==
 
 proc-log@^2.0.1:
   version "2.0.1"
