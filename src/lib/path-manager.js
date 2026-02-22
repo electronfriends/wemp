@@ -12,7 +12,7 @@ import logger from './logger.js';
  */
 function executePathCommand(command) {
   return new Promise((resolve, reject) => {
-    const powershell = spawn('powershell.exe', ['-Command', command], {
+    const powershell = spawn('powershell.exe', ['-NoProfile', '-Command', command], {
       windowsHide: true,
       stdio: 'pipe',
     });
@@ -86,13 +86,12 @@ async function setUserPath(paths) {
  */
 export function getServicePaths() {
   const servicesPath = config.paths.services;
-  const paths = [];
 
-  paths.push(path.join(servicesPath, 'nginx'));
-  paths.push(path.join(servicesPath, 'mariadb', 'bin'));
-  paths.push(path.join(servicesPath, 'php'));
-
-  return paths;
+  return Object.entries(config.services).map(([serviceId, svc]) =>
+    svc.executablePath
+      ? path.join(servicesPath, serviceId, svc.executablePath)
+      : path.join(servicesPath, serviceId)
+  );
 }
 
 /**

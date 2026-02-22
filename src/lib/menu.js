@@ -53,9 +53,10 @@ export function createMenu() {
   });
 
   // Listen for service state changes to rebuild menu
-  serviceManager.on('service-started', buildMenu);
-  serviceManager.on('service-stopped', buildMenu);
-  serviceManager.versionManager.on('version-changed', buildMenu);
+  const safeBuildMenu = () => buildMenu().catch(err => logger.error('Failed to build menu', err));
+  serviceManager.on('service-started', safeBuildMenu);
+  serviceManager.on('service-stopped', safeBuildMenu);
+  serviceManager.versionManager.on('version-changed', safeBuildMenu);
 
   buildMenu();
 }
@@ -151,7 +152,7 @@ async function buildMenu() {
       const service = config.services[serviceId];
       const isRunning = status[serviceId];
       const serviceIcon = icons[serviceId];
-      const version = serviceManager.versionManager?.getDisplayVersion(serviceId) || '';
+      const serviceVersion = serviceManager.versionManager?.getDisplayVersion(serviceId) || '';
 
       const configItems = [
         {
@@ -260,7 +261,7 @@ async function buildMenu() {
 
         submenuItems.push(
           {
-            label: `${service.name} ${currentVersion || version}`,
+            label: `${service.name} ${currentVersion || serviceVersion}`,
             icon: serviceIcon,
             submenu: sortedVersions.map(versionData => ({
               label: versionData.hasUpdate
@@ -300,7 +301,7 @@ async function buildMenu() {
         );
       } else {
         submenuItems.push(
-          { label: `${service.name} ${version}`, icon: serviceIcon, enabled: false },
+          { label: `${service.name} ${serviceVersion}`, icon: serviceIcon, enabled: false },
           { type: 'separator' }
         );
       }

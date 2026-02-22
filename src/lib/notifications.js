@@ -41,6 +41,30 @@ export function showServiceInstalling(serviceName, version) {
 }
 
 /**
+ * Shows service installation failed notification
+ * @param {string} serviceName - Name of the service
+ * @param {string} error - Error message
+ */
+export function showInstallFailed(serviceName, error) {
+  new Notification({
+    title: `Failed to Install ${serviceName}`,
+    body: error,
+  }).show();
+}
+
+/**
+ * Shows service update failed notification
+ * @param {string} serviceName - Name of the service
+ * @param {string} error - Error message
+ */
+export function showUpdateFailed(serviceName, error) {
+  new Notification({
+    title: `Failed to Update ${serviceName}`,
+    body: error,
+  }).show();
+}
+
+/**
  * Shows service updating notification
  * @param {string} serviceName - Name of the service
  * @param {string} version - Version being updated to

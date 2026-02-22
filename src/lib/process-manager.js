@@ -258,7 +258,12 @@ export class ProcessManager extends EventEmitter {
           buffers[type] = buffers[type].slice(-MAX_BUFFER);
         }
 
-        logger[type === 'stdout' ? 'info' : 'error'](`${serviceId} ${stream}:`, chunk);
+        // Use info for stdout; log stderr as a warning
+        if (type === 'stdout') {
+          logger.info(`${serviceId} ${stream}: ${chunk.trimEnd()}`);
+        } else {
+          logger.warn(`${serviceId} ${stream}: ${chunk.trimEnd()}`);
+        }
       });
     };
 

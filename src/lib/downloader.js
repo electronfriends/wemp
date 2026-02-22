@@ -65,13 +65,17 @@ export async function downloadService(service) {
  * @private
  */
 async function fetchPackage(service) {
-  let response = await fetch(service.downloadUrl);
+  let response = await fetch(service.downloadUrl, {
+    signal: AbortSignal.timeout(config.api.timeout * 18), // allow ~3 min for large packages
+  });
 
   // PHP fallback: if download fails, try archives folder
   if (!response.ok && service.id.startsWith('php')) {
     const archiveUrl = service.downloadUrl.replace('releases/', 'releases/archives/');
     logger.warn(`PHP download failed, trying archive: ${archiveUrl}`);
-    response = await fetch(archiveUrl);
+    response = await fetch(archiveUrl, {
+      signal: AbortSignal.timeout(config.api.timeout * 18),
+    });
   }
 
   if (!response.ok) {
@@ -455,7 +459,9 @@ async function downloadCaCertificate(servicePath) {
 
   try {
     logger.info('Downloading CA certificate bundle for PHP SSL support');
-    const response = await fetch('https://curl.se/ca/cacert.pem');
+    const response = await fetch('https://curl.se/ca/cacert.pem', {
+      signal: AbortSignal.timeout(config.api.timeout * 3),
+    });
 
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -487,12 +493,13 @@ function modifyPhpMyAdminConfig(tempPath) {
 
   let config = fs.readFileSync(configPath, 'utf8');
 
-  // Generate blowfish secret
+  // Generate blowfish secret using a cryptographically secure PRNG
   const chars =
     'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+-=[]{}|;:,.<>?';
-  const blowfishSecret = Array.from({ length: 32 }, () =>
-    chars.charAt(Math.floor(Math.random() * chars.length))
-  ).join('');
+  const randomBytes = crypto.randomBytes(32);
+  const blowfishSecret = Array.from(randomBytes, byte => chars.charAt(byte % chars.length)).join(
+    ''
+  );
 
   // Configure for local development
   config = config.replace(

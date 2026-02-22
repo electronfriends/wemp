@@ -7,6 +7,7 @@ import settings from 'electron-settings';
 
 import config from '../config.js';
 import logger from './logger.js';
+import * as notifications from './notifications.js';
 
 /**
  * Manages service installation and directory setup
@@ -70,6 +71,7 @@ export class ServiceInstaller {
       } catch (error) {
         const serviceName = config.services[serviceId]?.name || serviceId;
         logger.error(`Failed to install ${serviceName}:`, error);
+        notifications.showInstallFailed(serviceName, error.message);
       }
     }
   }

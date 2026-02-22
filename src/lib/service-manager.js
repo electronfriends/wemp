@@ -6,6 +6,7 @@ import { dialog } from 'electron';
 import config from '../config.js';
 import { ConfigWatcher } from './config-watcher.js';
 import logger from './logger.js';
+import * as notifications from './notifications.js';
 import { ProcessManager } from './process-manager.js';
 import { ServiceInstaller } from './service-installer.js';
 import { VersionManager } from './version-manager.js';
@@ -115,6 +116,7 @@ class ServiceManager extends EventEmitter {
         }
       } catch (error) {
         logger.warn(`Failed to update ${serviceConfig.name}:`, error);
+        notifications.showUpdateFailed(serviceConfig.name, error.message);
       }
     }
   }
